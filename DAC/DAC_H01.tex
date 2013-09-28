@@ -11,6 +11,7 @@
 \usepackage{fancyhdr}
 \usepackage{multicol}
 \usepackage{listings}
+\usepackage{xcolor}
 
 \oddsidemargin 0mm
 \evensidemargin 0mm
@@ -23,7 +24,11 @@
 \fancyhead[CE,CO]{DAC Homework \#1}
 \fancyfoot[CE,CO]{\thepage}
 
-\lstset{basicstyle=\ttfamily, mathescape=true, escapeinside=||}
+\lstset{basicstyle=\ttfamily,
+  mathescape=true,
+  escapeinside=||,
+  emph={Task, Operation, for, each, if, else, endif, endfor, while, then, When, do, repeat, until, endrepeat},
+  emphstyle={\color{gray}\bfseries\itshape}}
 
 \def\CC {{\mathbb C}}        % комплексни числа
 \def\RR {{\mathbb R}}        % реални числа
@@ -78,117 +83,121 @@
 \section*{\textbf{Part 1: Reliable channels with ordering properties}
 }
 
-\subsection*{
   Firstly, we will suggest an algorithm that implements a communication channel 
   on which messages with type \emph{ordinary, marker, ct\_future} or 
   \emph{ct\_past} can be sent and received, and secondly we will show that the
   algorithm is genuine.
-}
 
 \subsection*{1. The algorithm}
 
-\subsection*{
-  Let a process $p_i$ sends a message to a process $p_j$. Each protocol message
-  carries four values: \emph{m, type, sn, barrier}. The idea of the algorithm
-  is that process $p_i$ keeps in \emph{barrier\_sn} the sequence number of the
-  last message with type either \emph{cp\_future} or \emph{marker}. We do this
-  to define the barrier of the messages. For example, when a message of type 
-  \emph{cp\_past} or a message of type \emph{ordinary} has to be sent, it does
-  not have any influence on the barrier of the messages which will be sent
-  after it or of the already sent messages. But the algorithm is able to
-  correctly define the barrier of \emph{ct\_future} and \emph{marker} messages
-  only if it knows if there were messages sent before them which have to be
-  delivered first.
-}
+Let a process $p_i$ sends a message to a process $p_j$. Each protocol message
+carries four values: \emph{m, type, sn, barrier}. The idea of the algorithm
+is that process $p_i$ keeps in a local variable \emph{barrier\_sn} the
+sequence number of the last message with type either \emph{cp\_future} or
+\emph{marker}. We use this information to define the barrier of the messages
+that will be sent. When a message of type \emph{cp\_past} or a message of
+type \emph{ordinary} has to be sent, it does not have any influence on the
+barrier of the messages which will be sent after it or of the already sent
+messages. In order to handle \emph{ct\_future} and \emph{marker} messages,
+our algorithm uses the \emph{barrier\_sn} variable to correctly define the
+barrier so that the each message has information about other messages
+sent before it which have to be delivered first.
 
-\subsection*{
-  When the process $p_j$ receives the message it has to decide whether to
-  deliver it (in this case the message will be kept in the set of the delivered
-  messages) or to wait for its barrier to be received (these messages are also
-  kept in a set). When a message that has to be immediatelly delivered is
-  received, all the message in the "waiting" set whose barrier is the received
-  message will be delivered as well.
-}
+When the process $p_j$ receives the message it has to decide whether to
+deliver it directly (in this case the message will be kept in the set of the
+delivered messages) or to wait for its barrier to be received and delivered
+first (these messages are also kept in a set). When a message that has to be
+immediately delivered is received, all the message in the "waiting" set
+whose barrier is the received message will be delivered as well.
+
+\clearpage
 
 \begin{lstlisting}[frame=single]
-    operation: $p_i$.SENDS(m, type, sn, barrier) to $p_j$:
-               sn := sn++
+    Operation: $p_i$.SEND(m, type) to $p_j$:
+      sn := sn++
       if type(m) is ct_future:
         barrier := barrier_sn;
         barrier_sn := sn;
+      endif
       if type(m) is ct_past:
         barrier := sn - 1;
+      endif
       if type(m) is marker:
         barrier := sn - 1;
         barrier_sn := sn;
+      endif
       if type(m) is ordinary:
         barrier := barrier_sn;
+      endif
+      send MSG(m, type, sn, barrier) to $p_j$
 
-    when $p_j$.RECEIVES(m, type, sn, barrier) from $p_i$:
-      let delivered_msgs be the set of the delivered
-      msgs sent by $p_i$ before reveiving m;
+    When MSG(m, type, sn, barrier) is received from $p_i$ by $p_j$:
+      let delivered_msgs be the set of the delivered 
+        msgs sent by $p_i$ before reveiving m;
       let waiting_msgs be the set of the msgs sent by
-      $p_i$ whose barrier has not been received before
-      receiving m;
+        $p_i$ whose barrier has not been delivered before
+        receiving m;
 
       if m.barrier is in delivered_msgs:
         deliver(m);
+        add m to delivered_msgs
+
         let to_be_delivered_msgs be that subset of the
-        set waiting_msgs whose msgs has a barrier that is m;
+          set waiting_msgs whose msgs has a barrier that is m;
         for each msg in to_be_delivered_msgs:
           deliver(msg);
+          add msg to delivered_msgs
+          to_be_delivered_msgs := to_be_delivered_msgs $\cup$
+            $\{m' | m' \in waiting\_msgs \text{ and has msg as barrier}\}$
       else:
-        next msg in waiting_msgs set := m;
+        add m to waiting_msgs
+      endif
 
       return(ok)
-
  
 \end{lstlisting}
 
-\subsection*{
-  In order to be able to use the barrier, we need some information about the 
-  sequence numbers of the messages - which have already been delivered and which
-  are still to be delivered. Note that any sequence number (i.e. value that is a
-  correct sequence number) is expected to be delivered at some point. To be able
-  to do that, we can do a variety of things. The first thing that comes to mind 
-  is to put every sequence number that is delivered in a set. This however is not
-  an efficient solution, as over time this set will continually grow in size.
-  A better approach would be to have a number that marks the sequence number n
-  for which messages 1, $\dots$, n are delivered, and this is not true for n + 1.
-  We would also need a set of messages that have sequence number grater than 
-  n + 1. When we want to add a message to this structure, we check if its number
-  is n + 1. If that is the case, we increment the value of n and we also check
-  for the numbers in the set if they are n + 1 (the new n). We do this until
-  this set is empty or the number n + 1 is not in the set. 
-  If the number that we receive is not n + 1, then we just add it to the set.
-  When we have to check if a given number m is already in our data structure,
-  we check if m $\le$ n. In this case we know that m has been delivered. Otherwise
-  we check if m belongs to the set. If it is not in the set, we haven't delivered
-  it yet.
-  The idea of the proposed algorithm is to handle the problem with the growing
-  size of the set of the delivered messages. We make the assumption that the
-  messages are delivered approximately within some time boundaries, i.e. it is
-  impossible that almost all the messages with sequence numbers up to 100000
-  have been delivered, except for 1.
-}
+\clearpage
 
-\subsection*{
-  The messages that wait to be delivered can be stored either in a set (this
-  might lead to slower use later), or an association array that for each possible
-  barrier associates a set (possibly empty) of all the messages that are waiting
-  for it. This way it is quite easy when a new message that can be delivered,
-  arrives, to deliver it and then check if it blocks other messages and 
-  deliver them as well.
-}
- \subsection*{2. Theorem}
+In order to be able to use the barrier, we need some information about the 
+sequence numbers of the messages - which have already been delivered and which
+are still to be delivered. Note that any sequence number (i.e. value that is a
+correct sequence number) is expected to be delivered at some point. To be able
+to do that, we can do a variety of things. The first thing that comes to mind 
+is to put every sequence number that is delivered in a set. This however is not
+an efficient solution, as over time this set will continually grow in size.
+A better approach would be to have a number that marks the sequence number n
+for which messages 1, $\dots$, n are delivered, and this is not true for n + 1.
+We would also need a set of messages that have sequence number grater than 
+n + 1. When we want to add a message to this structure, we check if its number
+is n + 1. If that is the case, we increment the value of n and we also check
+for the numbers in the set if they are n + 1 (the new n). We do this until
+this set is empty or the number n + 1 is not in the set. 
+If the number that we receive is not n + 1, then we just add it to the set.
+When we have to check if a given number m is already in our data structure,
+we check if m $\le$ n. In this case we know that m has been delivered. Otherwise
+we check if m belongs to the set. If it is not in the set, we haven't delivered
+it yet.
+The idea of the proposed algorithm is to handle the problem with the growing
+size of the set of the delivered messages. We make the assumption that the
+messages are delivered approximately within some time boundaries, i.e. it is
+impossible that almost all the messages with sequence numbers up to 100000
+have been delivered, except for 1.
 
- \subsection*{The algorithm is genuine and it works correctly.
- }
+The messages that wait to be delivered can be stored either in a set (this
+might lead to slower use later), or an association array that for each possible
+barrier associates a set (possibly empty) of all the messages that are waiting
+for it. This way it is quite easy when a new message that can be delivered,
+arrives, to deliver it and then check if it blocks other messages and 
+deliver them as well.
 
- \subsection*{Explanation:}
+\newtheorem*{th1}{2.  Theorem}
+\begin{th1}
+  The algorithm is genuine and it works correctly.
+\end{th1}
+\begin{proof}[Proof:]
+  
+\end{proof}
 
- \subsection*{
- }
-             
   
 \end{document}
