@@ -196,7 +196,36 @@ deliver them as well.
   The algorithm is genuine and it works correctly.
 \end{th1}
 \begin{proof}[Proof:]
-  
+  To prove the theorem we will show that the algorithm holds for both the
+  liveness property and safety property.
+  \begin{enumerate}
+    \item We will prove the liveness property first. Since we have a reliable
+      channel, messages are not lost and the processes do not fail. So a sent 
+      message from a process $p_i$ will be eventually received  from a process 
+      $p_j$. In our algorithm $p_i$ sends a message \emph{m} only once. It
+      cannot be lost and furthermore, it will be received by $p_j$ exactly once
+      because the channel cannot duplicate the sent messages.
+    \item Now we will show that the safety property is correct too. Let us
+      assume a message \emph{m} with type \emph{ct\_future} that has been
+      received from $p_j$. For every next message, whatever its type, it will
+      always have a barrier \emph{m} (because we set the \emph{barrier\_sn} to
+      \emph{m}) or its barrier will be some message sent after \emph{m}. By this
+      we conclude that each message sent after \emph{m} will be delivered after
+      \emph{m}.
+      Now if \emph{m} is of type \emph{ct\_past} we know that it will be
+      delivered after the previous message sent (the barrier of \emph{m} will
+      that message). So it is impossible \emph{m} to be delivered before any of
+      the messages sent before it.
+      If the type of \emph{m} is \emph{marker}, \emph{m} will behave like a
+      message of type \emph{ct\_past} for the messages sent before it. But we
+      also make \emph{barrier\_sn} to be equal to \emph{m} and this way every
+      next message will have a barrier which is bigger or equal to the sequence
+      number of \emph{m}.
+      Finally, if the type of \emph{m} is \emph{ordinary} its barrier will be
+      the last message of type either \emph{ct\_future} or \emph{marker} sent
+      before \emph{m}. This means that \emph{m} cannot bypass either one of
+      these two types of messages.
+  \end{enumerate}
 \end{proof}
 
   
