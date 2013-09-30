@@ -113,47 +113,58 @@ whose barrier is the received message will be delivered as well.
 \clearpage
 
 \begin{lstlisting}[frame=single]
-    Operation: $p_i$.SEND(m, type) to $p_j$:
-      sn := sn++
-      if type(m) is ct_future:
-        barrier := barrier_sn;
-        barrier_sn := sn;
-      endif
-      if type(m) is ct_past:
-        barrier := sn - 1;
-      endif
-      if type(m) is marker:
-        barrier := sn - 1;
-        barrier_sn := sn;
-      endif
-      if type(m) is ordinary:
-        barrier := barrier_sn;
-      endif
-      send MSG(m, type, sn, barrier) to $p_j$
+Operation: $p_i$.SEND(m, type) to $p_j$:
+  sn := sn++
+  if type(m) is ct_future:
+    barrier := barrier_sn;
+    barrier_sn := sn;
+  endif
+  if type(m) is ct_past:
+    barrier := sn - 1;
+  endif
+  if type(m) is marker:
+    barrier := sn - 1;
+    barrier_sn := sn;
+  endif
+  if type(m) is ordinary:
+    barrier := barrier_sn;
+  endif
+  send MSG(m, type, sn, barrier) to $p_j$
 
-    When MSG(m, type, sn, barrier) is received from $p_i$ by $p_j$:
-      let delivered_msgs be the set of the delivered 
-        msgs sent by $p_i$ before reveiving m;
-      let waiting_msgs be the set of the msgs sent by
-        $p_i$ whose barrier has not been delivered before
-        receiving m;
+When MSG(m, type, sn, barrier) is received from $p_i$ by $p_j$:
+  let delivered_msgs be the set of the delivered 
+    msgs sent by $p_i$ before reveiving m;
+  let waiting_msgs be the set of the msgs sent by
+    $p_i$ whose barrier has not been delivered before
+    receiving m;
+    
+    are_all_past_messages_delivered = $\nexists m'$ with sequence number $\in$ 
+        {0, $\dots$, sn - 1} that is not delivered
+    if [m.barrier is in delivered_msgs and
+          type(m) $\notin$ {ct_past, ct_marker}] or
+       [type(m) $\in$ {ct_past, ct_marker} and
+          are_all_past_messages_delivered]
+      deliver(m);
+      add m to delivered_msgs
 
-      if m.barrier is in delivered_msgs:
-        deliver(m);
-        add m to delivered_msgs
+    let to_be_delivered_msgs be that subset of the
+      set waiting_msgs that waited only for m in order
+      to be delivered (what we mean here is that either m
+      was their barrier, or if they are of type ct_past or
+      marker, m was the only message that currently prevents
+      such messages from delivering because they had to wait
+      for m in order not to bypass it.)
 
-        let to_be_delivered_msgs be that subset of the
-          set waiting_msgs whose msgs has a barrier that is m;
-        for each msg in to_be_delivered_msgs:
-          deliver(msg);
-          add msg to delivered_msgs
-          to_be_delivered_msgs := to_be_delivered_msgs $\cup$
-            $\{m' | m' \in waiting\_msgs \text{ and has msg as barrier}\}$
-      else:
-        add m to waiting_msgs
-      endif
+    for each msg in to_be_delivered_msgs:
+      deliver(msg);
+      add msg to delivered_msgs
+      to_be_delivered_msgs := to_be_delivered_msgs $\cup$
+        $\{m' | m' \in waiting\_msgs \text{ and msg is preventing m' from being delivered}\}$
+  else:
+    add m to waiting_msgs
+  endif
 
-      return(ok)
+  return(ok)
  
 \end{lstlisting}
 
@@ -204,23 +215,28 @@ deliver them as well.
       message from a process $p_i$ will be eventually received  from a process 
       $p_j$. In our algorithm $p_i$ sends a message \emph{m} only once. It
       cannot be lost and furthermore, it will be received by $p_j$ exactly once
-      because the channel cannot duplicate the sent messages.
+      because the channel cannot duplicate the sent messages. \\
     \item Now we will show that the safety property is correct too. Let us
       assume a message \emph{m} with type \emph{ct\_future} that has been
       received from $p_j$. For every next message, whatever its type, it will
       always have a barrier \emph{m} (because we set the \emph{barrier\_sn} to
       \emph{m}) or its barrier will be some message sent after \emph{m}. By this
       we conclude that each message sent after \emph{m} will be delivered after
-      \emph{m}.
+      \emph{m}. \\
       Now if \emph{m} is of type \emph{ct\_past} we know that it will be
       delivered after the previous message sent (the barrier of \emph{m} will
-      that message). So it is impossible \emph{m} to be delivered before any of
-      the messages sent before it.
+      that message). The algorithm also forces a message of type \emph{ct\_past}
+      to wait before being delivered if there are messages with a sequence
+      number less than the sequence number of \emph{m} which are not even
+      received from $p_j$ yet. So when every single of these messages is
+      received and deliver, the process $p_j$ delivers \emph{m} as well. So it
+      is impossible \emph{m} to be delivered before any of the messages sent
+      before it. \\
       If the type of \emph{m} is \emph{marker}, \emph{m} will behave like a
       message of type \emph{ct\_past} for the messages sent before it. But we
       also make \emph{barrier\_sn} to be equal to \emph{m} and this way every
       next message will have a barrier which is bigger or equal to the sequence
-      number of \emph{m}.
+      number of \emph{m}. \\
       Finally, if the type of \emph{m} is \emph{ordinary} its barrier will be
       the last message of type either \emph{ct\_future} or \emph{marker} sent
       before \emph{m}. This means that \emph{m} cannot bypass either one of
@@ -245,7 +261,7 @@ process is not faulty, then it will execute this infinitely):
 \begin{itemize}
   \item Each process sends I\_AM\_ALIVE message to all its neighbors.
   \item Each process sends information about the state of all the processes 
-    from its perspective. Namely, it sends an array \emph{sns} that contains
+    from its perspective. Namely, it sends an array \emph{statuses} that contains
     some counter value for each of the other processes. For every process in
     this array we have how much times this process has sent I\_AM\_ALIVE and
     this has been received by some other process (this is not completely
@@ -293,6 +309,31 @@ process is not faulty, then it will execute this infinitely):
     
 \end{itemize}
 
+\begin{lstlisting}[frame=single]
+Operation: $p_i$ SEND_STATUSES() to $neighbours_i$:
+  for each neighbour in $neighbours_i$:
+    let statuses be a dictionary of the status msgs $p_i$ will send to each its
+    neighbour (the initial value for each element in statuses will be 0)
+    for each neighbour in statuses:
+      repeat (send MSG(neighbour) to $neighbours_i$);
+      until recieve(ACK(neighbour)) from neighbour;
+
+  let latest_statuses be the most recent statuses
+  we have received;
+
+  when $p_i$ receives(ACK(statuses)) from some neighbour in $neighbours_i$:
+    statuses[neighbour] = latest_statuses
+
+When $p_j$ RECEIVE_STATUSES(statuses) from $p_i$:
+  send ACK(statuses) to $p_i$;
+
+  for each process in statuses:
+    if $HB_j$[process] $\le$ $HB_i$[process]:
+      $HB_j$[process] := $HB_i$[process];
+
+  $HB_j$[i] := $HB_j$[i] + 1;
+  
+\end{lstlisting}
 % subsection The algorithm (end)
   
   
