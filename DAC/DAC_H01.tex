@@ -259,7 +259,7 @@ process is not faulty, then it will execute this infinitely):
 
     So basically each process sends to its neighbors some state of the status
     of all the other processes. It might not be the most recent that the process
-    has, but it is newer then the last one that they have confirmed to have
+    has, but it is newer than the last one that they have confirmed to have
     received from that processor. The confirmation is individual and so it is
     possible to send to different neighbors different states (if some of them 
     have not confirmed an old status, we will still send them an old status,
@@ -267,7 +267,7 @@ process is not faulty, then it will execute this infinitely):
     every process will receive a newer status of all the other processes and
     thus will know that they are not faulty. 
 
-    If there is a faulty process (let it be $p_i$, it will stop sending
+    If there is a faulty process (let it be $p_i$), it will stop sending
     I\_AM\_ALIVE message at some finite point and by that time it will have
     generated a finite number of messages. When all those messages are either
     received or lost, the counter for $p_i$ will stop increasing and after 
@@ -276,20 +276,20 @@ process is not faulty, then it will execute this infinitely):
     counter. That way the requirement of the heart-beat algorithm will not be
     violated.
 
-    Now lets describe what happens when \textbf{an update is received}. If the
-    value for some of the processes in the update is greater then the one that
+    Now let us describe what happens when \textbf{an update is received}. If the
+    value for some of the processes in the update is greater than the one that
     we have for that process, we update our counter. Otherwise we do nothing.
 
     When an \textbf{I\_AM\_ALIVE} is received from $p_i$, we just increase the
     counter for that process. Note that if the process $p_i$ is correct, 
     it will send an infinite number of times this message. If we are connected
-    with fair channel with it, we will receive an infinite number of
+    by a fair channel with it, we will receive an infinite number of
     \textbf{I\_AM\_ALIVE} messages from it for an infinite amount of time.
     And as a consequence we will increase its counter infinitely. Also note that
-    at least one correct process should be connected to $p_i$ with fair channel,
-    so it will increase infinitely its counter for $p_i$ and will send this 
-    information to all other correct process (maybe indirectly) with its
-    updates.
+    at least one correct process should be connected to $p_i$ with a fair
+    channel (this comes from the requirements of the task), so it will increase
+    infinitely its counter for $p_i$ and will send this information to all other
+    correct processes (maybe indirectly) with its updates.
     
 \end{itemize}
 
