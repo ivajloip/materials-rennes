@@ -133,10 +133,16 @@ Operation: $p_i$.SEND(m, type) to $p_j$:
 
 When MSG(m, type, sn, barrier) is received from $p_i$ by $p_j$:
   let delivered_msgs be the set of the delivered 
-    msgs sent by $p_i$ before reveiving m;
-  let waiting_msgs be the set of the msgs sent by
-    $p_i$ whose barrier has not been delivered before
-    receiving m;
+    msgs to $p_j$, sent by $p_i$ before receiving m;
+  let waiting_msgs be the set of the msgs $m'$ sent by
+    $p_i$ to $p_j$ that still can not be delivered
+    due to their barrier restriction (what we mean
+    here is that either their barrier is not delivered
+    yet, or if they are of type ct_past or marker,
+    there was a message with sequence number $\in \{0, \dots, sn - 1\}$
+    that is not delivered and as a consequence, 
+    $m'$ can not still be delivered, because it will 
+    bypass that message);
     
     are_all_past_messages_delivered = $\nexists m'$ with sequence number $\in$ 
         {0, $\dots$, sn - 1} that is not delivered
@@ -149,12 +155,7 @@ When MSG(m, type, sn, barrier) is received from $p_i$ by $p_j$:
 
     let to_be_delivered_msgs be that subset of the
       set waiting_msgs that waited only for m in order
-      to be delivered (what we mean here is that either m
-      was their barrier, or if they are of type ct_past or
-      marker, m was the only message that currently prevents
-      such messages from delivering because they had to wait
-      for m in order not to bypass it.)
-
+      to be delivered 
     for each msg in to_be_delivered_msgs:
       deliver(msg);
       add msg to delivered_msgs
@@ -246,7 +247,7 @@ deliver them as well.
 
 \section*{\textbf{Part 2: <CHANGE ME>}}
 
-\subsection{The algorithm} % (fold)
+\subsection*{The algorithm} % (fold)
 \label{sub:The algorithm}
 
 The main idea of the algorithm is that either periodically (at some velocity
@@ -278,7 +279,7 @@ process is not faulty, then it will execute this infinitely):
     has, but it is newer than the last one that they have confirmed to have
     received from that processor. The confirmation is individual and so it is
     possible to send to different neighbors different states (if some of them 
-    have not confirmed an old status, we will still send them an old status,
+    have not confirmed an old state, we will still send them an old state,
     until they confirm it). By doing this, we are sure that from time to time
     every process will receive a newer status of all the other processes and
     thus will know that they are not faulty. 
@@ -306,30 +307,39 @@ process is not faulty, then it will execute this infinitely):
     channel (this comes from the requirements of the task), so it will increase
     infinitely its counter for $p_i$ and will send this information to all other
     correct processes (maybe indirectly) with its updates.
-    
+
+    It is possible that not all the messages received from some process (let it
+    be $p_i$) will be counted. Here is how this can occur: if all the processes
+    are connected to $p_i$ and it broadcast an \textbf{I\_AM\_ALIVE} message
+    and this message is received by every other process and they have the same
+    value for the counter of $p_i$, then all those $n$ messages will be counted
+    only once. This however is not a problem, because this is the same as if
+    our channel has lost $n - 1$ messages, which will not affect the described
+    algorithm.
 \end{itemize}
 
 \begin{lstlisting}[frame=single]
 Operation: $p_i$ SEND_STATUSES() to $neighbours_i$:
   for each neighbour in $neighbours_i$:
-    let statuses be a dictionary of the status msgs $p_i$ will send to each its
-    neighbour (the initial value for each element in statuses will be 0)
+    let statuses be a dictionary of the status msgs $p_i$ will
+    send to each its neighbour (the initial value for each
+    element in statuses will be 0)
     for each neighbour in statuses:
       repeat (send MSG(neighbour) to $neighbours_i$);
       until recieve(ACK(neighbour)) from neighbour;
 
-  let latest_statuses be the most recent statuses
-  we have received;
+  let $HB_i$ be the most recent statuses we have in process $p_i$;
 
-  when $p_i$ receives(ACK(statuses)) from some neighbour in $neighbours_i$:
-    statuses[neighbour] = latest_statuses
+  when $p_i$ receives(ACK(statuses)) from some neighbour in
+    $neighbours_i$:
+    statuses[neighbour] = $HB_i$
 
 When $p_j$ RECEIVE_STATUSES(statuses) from $p_i$:
   send ACK(statuses) to $p_i$;
 
   for each process in statuses:
-    if $HB_j$[process] $\le$ $HB_i$[process]:
-      $HB_j$[process] := $HB_i$[process];
+    if $HB_j$[process] $\le$ statuses[process]:
+      $HB_j$[process] := statuses[process];
 
   $HB_j$[i] := $HB_j$[i] + 1;
   
