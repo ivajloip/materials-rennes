@@ -169,7 +169,6 @@ When MSG(m, type, sn, barrier) is received from $p_i$ by $p_j$:
  
 \end{lstlisting}
 
-\clearpage
 
 In order to be able to use the barrier, we need some information about the 
 sequence numbers of the messages - which have already been delivered and which
@@ -317,6 +316,8 @@ process is not faulty, then it will execute this infinitely):
     our channel has lost $n - 1$ messages, which will not affect the described
     algorithm.
 \end{itemize}
+
+\clearpage
 
 \begin{lstlisting}[frame=single]
 Operation: $p_i$ SEND_STATUSES() to $neighbours_i$:
