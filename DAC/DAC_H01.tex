@@ -245,9 +245,9 @@ deliver them as well.
   \end{enumerate}
 \end{proof}
 
-\section*{\textbf{Part 2: <CHANGE ME>}}
+\section*{\textbf{Part 2: Implementing a heartbeat failure detector}}
 
-\subsection*{The algorithm} % (fold)
+\subsection*{1. The algorithm} % (fold)
 \label{sub:The algorithm}
 
 The main idea of the algorithm is that either periodically (at some velocity
@@ -328,7 +328,7 @@ Operation: $p_i$ SEND_STATUSES() to $neighbours_i$:
       repeat (send MSG(neighbour) to $neighbours_i$);
       until recieve(ACK(neighbour)) from neighbour;
 
-  let $HB_i$ be the most recent statuses we have in process $p_i$;
+  let $HB_i$ be the most recent status we have in process $p_i$;
 
   when $p_i$ receives(ACK(statuses)) from some neighbour in
     $neighbours_i$:
@@ -346,5 +346,28 @@ When $p_j$ RECEIVE_STATUSES(statuses) from $p_i$:
 \end{lstlisting}
 % subsection The algorithm (end)
   
-  
+The explanation of the algorithm makes it clear that the completeness property
+of the heartbeat failure detector is correct. If a process is faulty, after some
+fixed time its heartbeat will no longer be increased because he will no longer
+send statuses (including its own). The algorithm holds for the liveness property
+as well. No process decreases the value of the heartbeat and moreover, if a
+process is correct, its heartbeat can increase infinitely.\\
+
+\newtheorem*{th2}{2. Theorem}
+\begin{th2}
+  The algorithm is genuine for a fair channel and for a fair lossy channel.
+\end{th2}
+\begin{proof}[Proof]
+  As we have seen earlier the algorithm is working correctly for a fair channel.
+  We will seen that this is the case with a fair lossy channel. \\
+  We know that for each pair of correct processes there is a fair path that
+  connects them. This means that since a status message is sent infinite
+  number of times, at least once it will be received from a correct process and
+  the statuses will be updated. This way a process can indicate which ones of
+  its neighbours are correct. The liveness and the completeness properties are
+  also taken into account in a fair lossy channel. The heartbeat of a correct
+  process can increase infinitely because its status/statuses will not be lost.
+  For a faulty process the heartbeat will stop increasing after some point in
+  time.
+\end{proof}
 \end{document}
