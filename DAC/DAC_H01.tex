@@ -86,7 +86,7 @@
 Firstly, we will suggest an algorithm that implements a communication channel 
 on which messages with type \emph{ordinary, marker, ct\_future} or 
 \emph{ct\_past} can be sent and received, and secondly we will show that the
-algorithm is genuine and works correctly.
+algorithm is genuine and it works correctly.
 
 \subsection*{1. The algorithm}
 
@@ -94,25 +94,26 @@ Let a process $p_i$ sends a message to a process $p_j$. Each protocol message
 carries four values: \emph{m, type, sn, barrier} where \emph{m} is the original
 message, \emph{type} is the type of the message, \emph{sn} is the sequence
 number of the message and \emph{barrier} determines the ordering in the
-delivery as describes in the tasks text.  The idea of the algorithm is that
+delivery as described in the text of the task.  The idea of the algorithm is that
 process $p_i$ keeps in a local variable \emph{barrier\_sn} the sequence number
 of the last message with type either \emph{cp\_future} or \emph{marker}. We use
 this information to compute the barrier of the messages that will be sent. When
-a message of type \emph{cp\_past} or a message of type \emph{ordinary} has to
+a message of type \emph{ct\_past} or a message of type \emph{ordinary} has to
 be sent, it does not have any influence on the barrier of the messages which
 will be sent after it or of the already sent messages. In order to handle
 \emph{ct\_future} and \emph{marker} messages, our algorithm uses the
 \emph{barrier\_sn} variable to correctly define the barrier so that the each
-message has information about other messages sent before it which have to be
-delivered first.  
+message \emph{m} has an information about other messages that are sent before it
+and that have to be delivered before the message \emph{m}.  
 
 When the process $p_j$ receives the message it has to decide whether to
 deliver it directly (in this case the message will be kept in the set of the
 delivered messages) or to wait for other messages that should be delivered first
 (these messages are also kept in a set). When a message that has to be
-immediately delivered is received, all the message in the "waiting" set are
-checked to see if some of them can be delivered as well (using the information
-from the barrier and the knowledge which messages have already been delivered).
+immediately delivered is received, the algorithm searches among all the messages
+in the "waiting" set for the ones that can be delivered as well (using the
+information from the barrier and the knowledge which messages have already been
+delivered).
 
 \clearpage
 
@@ -137,16 +138,16 @@ Operation: $p_i$.SEND(m, type) to $p_j$:
 
 When MSG(m, type, sn, barrier) is received from $p_i$ by $p_j$:
   let delivered_msgs be the set of the delivered 
-    msgs to $p_j$, sent by $p_i$ before receiving m;
+    msgs by $p_j$, sent by $p_i$ before receiving m;
   let waiting_msgs be the set of the msgs $m'$ sent by
-    $p_i$ to $p_j$ that still can not be delivered
+    $p_i$ to $p_j$ that still cannot be delivered
     due to their barrier restriction (what we mean
     here is that either their barrier is not delivered
     yet, or if they are of type ct_past or marker,
     there was a message with sequence number $\in \{0, \dots, sn - 1\}$
-    that is not delivered and as a consequence, 
-    $m'$ can not still be delivered, because it will 
-    bypass that message);
+    that is not delivered (maybe even not yet received)
+    and as a consequence, $m'$ cannot still be delivered,
+    because it will bypass that message);
     
     are_all_past_messages_delivered = $\nexists m'$ with sequence number $\in$ 
         {0, $\dots$, sn - 1} that is not delivered
@@ -158,7 +159,7 @@ When MSG(m, type, sn, barrier) is received from $p_i$ by $p_j$:
       add m to delivered_msgs
 
     let to_be_delivered_msgs be that subset of the
-      set waiting_msgs that waited only for m in order
+      set waiting_msgs that wait only for m in order
       to be delivered 
     for each msg in to_be_delivered_msgs:
       deliver(msg);
@@ -183,7 +184,7 @@ is to put every sequence number that is delivered in a set. This however is not
 an efficient solution, as over time this set will continually grow in size.
 A better approach would be to have a number that marks the sequence number n
 for which messages 1, $\dots$, n are delivered, and this is not true for n + 1.
-We would also need a set of messages that have sequence number grater than 
+We would also need a set of messages that have sequence number greater than 
 n + 1. When we want to add a message to this structure, we check if its number
 is n + 1. If that is the case, we increment the value of n and we also check
 for the numbers in the set if they are n + 1 (the new n). We do this until
@@ -219,7 +220,7 @@ deliver them as well.
       message from a process $p_i$ will be eventually received  from a process 
       $p_j$. In our algorithm $p_i$ sends a message \emph{m} only once. It
       cannot be lost and furthermore, it will be received by $p_j$ exactly once
-      because the channel cannot duplicate the sent messages. \\
+      because the channel cannot duplicate the sent messages. 
     \item Now we will show that the safety property is correct too. Let us
       assume a message \emph{m} with type \emph{ct\_future} that has been
       received from $p_j$. For every next message, whatever its type, it will
@@ -228,11 +229,11 @@ deliver them as well.
       we conclude that each message sent after \emph{m} will be delivered after
       \emph{m}. \\
       Now if \emph{m} is of type \emph{ct\_past} we know that it will be
-      delivered after the previous message sent (the barrier of \emph{m} will
+      delivered after the previous message sent (the barrier of \emph{m} will be
       that message). The algorithm also forces a message of type \emph{ct\_past}
       to wait before being delivered if there are messages with a sequence
-      number less than the sequence number of \emph{m} which are not even
-      received from $p_j$ yet. So when every single of these messages is
+      number less than the sequence number of \emph{m} which are not delivered
+      or received from $p_j$ yet. So when every single of these messages is
       received and deliver, the process $p_j$ delivers \emph{m} as well. So it
       is impossible \emph{m} to be delivered before any of the messages sent
       before it. \\
@@ -240,7 +241,8 @@ deliver them as well.
       message of type \emph{ct\_past} for the messages sent before it. But we
       also make \emph{barrier\_sn} to be equal to \emph{m} and this way every
       next message will have a barrier which is bigger or equal to the sequence
-      number of \emph{m}. \\
+      number of \emph{m}. Thus, \emph{m} will not be bypassed by the messages
+      sent after it.
       Finally, if the type of \emph{m} is \emph{ordinary} its barrier will be
       the last message of type either \emph{ct\_future} or \emph{marker} sent
       before \emph{m}. This means that \emph{m} cannot bypass either one of
@@ -255,10 +257,10 @@ deliver them as well.
 
 The main idea of the algorithm is that either periodically (at some velocity
 that is specific to each process, and has nothing to do with the velocities
-of any of the other processes) or when some event appears (a message is sent or
+of any of the other processes) or when some event occurs (a message is sent or
 received, including acknowledgment for message received) some specific behavior 
 is executed. The thing that is executed is the action that is needed in order
-for our implementation of the heart-beat algorithm to work. 
+for our implementation of the heartbeat algorithm to work. 
 
 Here is what is the thing that is executed (you may want to notice that if a 
 process is not faulty, then it will execute this infinitely):
@@ -267,15 +269,16 @@ process is not faulty, then it will execute this infinitely):
   \item Each process sends information about the state of all the processes 
     from its perspective. Namely, it sends an array \emph{statuses} that contains
     some counter value for each of the other processes. For every process in
-    this array we have how much times this process has sent I\_AM\_ALIVE and
+    this array we have how many times this process has sent I\_AM\_ALIVE and
     this has been received by some other process (this is not completely
     precise, but a more accurate explanation will be given shortly). To ensure
     that this update will be received, each process sends it to all of its 
     neighbors until it receives an acknowledgment (ACK) and then it starts to
     send them newer information (the most recent information it knows). By
-    sending the same information (the same message), we are sure that if the
-    channel between the two processes is fair, the message will be received
-    at some point (and the ACK will be received, too).
+    sending the same information (the same message) probably infinite number of
+    times, we are sure that if the channel between the two processes is fair,
+    the message will be received at some point (and the ACK will be received,
+    too).
 
     So basically each process sends to its neighbors some state of the status
     of all the other processes. It might not be the most recent that the process
@@ -293,7 +296,7 @@ process is not faulty, then it will execute this infinitely):
     received or lost, the counter for $p_i$ will stop increasing and after 
     some finite amount of time every correct process will have the last value
     for the counter of $p_i$ and will never receive a greater value for this
-    counter. That way the requirement of the heart-beat algorithm will not be
+    counter. That way the requirement of the heartbeat algorithm will not be
     violated.
 
     Now let us describe what happens when \textbf{an update is received}. If the
@@ -308,8 +311,8 @@ process is not faulty, then it will execute this infinitely):
     And as a consequence we will increase its counter infinitely. Also note that
     at least one correct process should be connected to $p_i$ with a fair
     channel (this comes from the requirements of the task), so it will increase
-    infinitely its counter for $p_i$ and will send this information to all other
-    correct processes (maybe indirectly) with its updates.
+    infinitely its counter for $p_i$ and will send this information to all the
+    other correct processes (maybe indirectly) with its updates.
 
     It is possible that not all the messages received from some process (let it
     be $p_i$) will be counted. Here is how this can occur: if all the processes
@@ -321,17 +324,23 @@ process is not faulty, then it will execute this infinitely):
     algorithm.
 \end{itemize}
 
-\clearpage
+\newtheorem*{note1}{Note}
+\begin{note1}
+  The message \textbf{I\_AM\_ALIVE} is not needed as with every update each
+  process sends a clear message to its neighbours that it is still alive. For
+  that reason the algorithm will not send \textbf{I\_AM\_ALIVE} message but
+  it will rely on the update. 
+\end{note1}
 
 \begin{lstlisting}[frame=single]
 Operation: $p_i$ SEND_STATUSES() to $neighbours_i$:
   for each neighbour in $neighbours_i$:
-    let statuses be a dictionary of the status msgs $p_i$ will
-    send to each its neighbour (the initial value for each
-    element in statuses will be 0)
+    let statuses be an associative array of the status msgs
+    $p_i$ will send to each its neighbour (the initial value
+    for each element in statuses will be 0)
     for each neighbour in statuses:
       repeat (send MSG(neighbour) to $neighbours_i$);
-      until recieve(ACK(neighbour)) from neighbour;
+      until receive(ACK(neighbour)) from neighbour;
 
   let $HB_i$ be the most recent status we have in process $p_i$;
 
@@ -353,10 +362,11 @@ When $p_j$ RECEIVE_STATUSES(statuses) from $p_i$:
   
 The explanation of the algorithm makes it clear that the completeness property
 of the heartbeat failure detector is correct. If a process is faulty, after some
-fixed time its heartbeat will no longer be increased because he will no longer
+fixed time its heartbeat will no longer be increased because it will no longer
 send statuses (including its own). The algorithm holds for the liveness property
 as well. No process decreases the value of the heartbeat and moreover, if a
-process is correct, its heartbeat can increase infinitely.\\
+process is correct, its heartbeat can increase infinitely (the explanation is
+given before the algorithm is formally introduced).
 
 \newtheorem*{th2}{2. Theorem}
 \begin{th2}
