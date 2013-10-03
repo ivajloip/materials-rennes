@@ -83,32 +83,36 @@
 \section*{\textbf{Part 1: Reliable channels with ordering properties}
 }
 
-  Firstly, we will suggest an algorithm that implements a communication channel 
-  on which messages with type \emph{ordinary, marker, ct\_future} or 
-  \emph{ct\_past} can be sent and received, and secondly we will show that the
-  algorithm is genuine.
+Firstly, we will suggest an algorithm that implements a communication channel 
+on which messages with type \emph{ordinary, marker, ct\_future} or 
+\emph{ct\_past} can be sent and received, and secondly we will show that the
+algorithm is genuine and works correctly.
 
 \subsection*{1. The algorithm}
 
 Let a process $p_i$ sends a message to a process $p_j$. Each protocol message
-carries four values: \emph{m, type, sn, barrier}. The idea of the algorithm
-is that process $p_i$ keeps in a local variable \emph{barrier\_sn} the
-sequence number of the last message with type either \emph{cp\_future} or
-\emph{marker}. We use this information to define the barrier of the messages
-that will be sent. When a message of type \emph{cp\_past} or a message of
-type \emph{ordinary} has to be sent, it does not have any influence on the
-barrier of the messages which will be sent after it or of the already sent
-messages. In order to handle \emph{ct\_future} and \emph{marker} messages,
-our algorithm uses the \emph{barrier\_sn} variable to correctly define the
-barrier so that the each message has information about other messages
-sent before it which have to be delivered first.
+carries four values: \emph{m, type, sn, barrier} where \emph{m} is the original
+message, \emph{type} is the type of the message, \emph{sn} is the sequence
+number of the message and \emph{barrier} determines the ordering in the
+delivery as describes in the tasks text.  The idea of the algorithm is that
+process $p_i$ keeps in a local variable \emph{barrier\_sn} the sequence number
+of the last message with type either \emph{cp\_future} or \emph{marker}. We use
+this information to compute the barrier of the messages that will be sent. When
+a message of type \emph{cp\_past} or a message of type \emph{ordinary} has to
+be sent, it does not have any influence on the barrier of the messages which
+will be sent after it or of the already sent messages. In order to handle
+\emph{ct\_future} and \emph{marker} messages, our algorithm uses the
+\emph{barrier\_sn} variable to correctly define the barrier so that the each
+message has information about other messages sent before it which have to be
+delivered first.  
 
 When the process $p_j$ receives the message it has to decide whether to
 deliver it directly (in this case the message will be kept in the set of the
-delivered messages) or to wait for its barrier to be received and delivered
-first (these messages are also kept in a set). When a message that has to be
-immediately delivered is received, all the message in the "waiting" set
-whose barrier is the received message will be delivered as well.
+delivered messages) or to wait for other messages that should be delivered first
+(these messages are also kept in a set). When a message that has to be
+immediately delivered is received, all the message in the "waiting" set are
+checked to see if some of them can be delivered as well (using the information
+from the barrier and the knowledge which messages have already been delivered).
 
 \clearpage
 
