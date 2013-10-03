@@ -177,35 +177,44 @@ When MSG(m, type, sn, barrier) is received from $p_i$ by $p_j$:
 
 In order to be able to use the barrier, we need some information about the 
 sequence numbers of the messages - which have already been delivered and which
-are still to be delivered. Note that any sequence number (i.e. value that is a
-correct sequence number) is expected to be delivered at some point. To be able
-to do that, we can do a variety of things. The first thing that comes to mind 
-is to put every sequence number that is delivered in a set. This however is not
-an efficient solution, as over time this set will continually grow in size.
-A better approach would be to have a number that marks the sequence number n
-for which messages 1, $\dots$, n are delivered, and this is not true for n + 1.
-We would also need a set of messages that have sequence number greater than 
-n + 1. When we want to add a message to this structure, we check if its number
-is n + 1. If that is the case, we increment the value of n and we also check
-for the numbers in the set if they are n + 1 (the new n). We do this until
-this set is empty or the number n + 1 is not in the set. 
-If the number that we receive is not n + 1, then we just add it to the set.
-When we have to check if a given number m is already in our data structure,
-we check if m $\le$ n. In this case we know that m has been delivered. Otherwise
-we check if m belongs to the set. If it is not in the set, we haven't delivered
-it yet.
-The idea of the proposed algorithm is to handle the problem with the growing
-size of the set of the delivered messages. We make the assumption that the
-messages are delivered approximately within some time boundaries, i.e. it is
-impossible that almost all the messages with sequence numbers up to 100000
-have been delivered, except for 1.
+are still to be delivered. Note that a message with any sequence number (i.e.
+value that is a correct sequence number) is expected to be delivered at some
+point. To be able to store the needed information, we can do a variety of things.
+Maybe the first thing that comes to mind is to put every sequence number that is
+delivered in a set. This however is not an efficient solution, as over time
+this set will continually grow in size. A better approach would be to have a
+number that marks the sequence number \emph{n} for which messages $1, \dots, n$
+are delivered, and such that this is not true for the message with sn
+\emph{n + 1}. We will also need a set for the sequence numbers of the messages
+that have sn greater than n + 1.  
+
+When we want to add a message to this structure, we check if its number is
+\emph{n + 1}. If that is the case, we set $old_n \leftarrow n$, increment the
+value of \emph{n} and we also check if message with sn \emph{old\_n + 2} has
+already been delivered. If this is the case, we increment both \emph{old\_n} and
+\emph{n} and perform the same check again. We do this until this set is empty
+or the number \emph{n + 1} (\emph{old\_n + 2}) is not in the set. If the number
+that we receive is not n + 1, then we just add it to the set.  
+
+When we have to check if a given number m is already in our data structure, we
+check if $m \le n$. In this case we know that \emph{m} has been delivered.
+Otherwise we check if \emph{m} belongs to the set. If it is not in the set, we
+haven't delivered it yet.  The idea of the proposed algorithm is to handle the
+problem with the growing size of the set of the delivered messages and to make
+checking if all the messages with sn smaller then some value are delivered quite
+fast. We make the assumption that the messages are delivered approximately
+within some time boundaries, i.e. it is impossible that almost all the messages
+with sequence numbers up to 100000 have been delivered, except for 1, because
+in this case our data structure will not behave better then a simple set.
 
 The messages that wait to be delivered can be stored either in a set (this
-might lead to slower use later), or an association array that for each possible
+might lead to slower use later), or in an association array that for each possible
 barrier associates a set (possibly empty) of all the messages that are waiting
-for it. This way it is quite easy when a new message that can be delivered,
-arrives, to deliver it and then check if it blocks other messages and 
-deliver them as well.
+for it and for each message sn our algorithm will remembers the set of messages
+that prevent it from being delivered. This way it is quite easy when a new message
+that can be delivered, arrives, to deliver it and then check if it is the only
+message that blocks some other messages from being delivered and deliver them as
+well. At this point approximately we need to update the associative arrays.
 
 \newtheorem*{th1}{2.  Theorem}
 \begin{th1}
@@ -225,7 +234,9 @@ deliver them as well.
       assume a message \emph{m} with type \emph{ct\_future} that has been
       received from $p_j$. For every next message, whatever its type, it will
       always have a barrier \emph{m} (because we set the \emph{barrier\_sn} to
-      \emph{m}) or its barrier will be some message sent after \emph{m}. By this
+      \emph{m}) or its barrier will be some message sent after \emph{m}. But
+      this message can not be delivered before \emph{m}, and as a consequence
+      the message sent after it will not be delivered before \emph{m}. By this
       we conclude that each message sent after \emph{m} will be delivered after
       \emph{m}. \\
       Now if \emph{m} is of type \emph{ct\_past} we know that it will be
@@ -234,7 +245,7 @@ deliver them as well.
       to wait before being delivered if there are messages with a sequence
       number less than the sequence number of \emph{m} which are not delivered
       or received from $p_j$ yet. So when every single of these messages is
-      received and deliver, the process $p_j$ delivers \emph{m} as well. So it
+      received and delivered, the process $p_j$ delivers \emph{m} as well. So it
       is impossible \emph{m} to be delivered before any of the messages sent
       before it. \\
       If the type of \emph{m} is \emph{marker}, \emph{m} will behave like a
@@ -359,11 +370,47 @@ When $p_j$ RECEIVE_STATUSES(statuses) from $p_i$:
   
 \end{lstlisting}
 % subsection The algorithm (end)
+
+\newtheorem*{lem1}{Lemma}
+\begin{lem1}
+  If some of the correct processes receive information that other process is still
+  alive (by \textbf{I\_AM\_ALIVE} message, or an update), i.e. that its counter
+  has at least some value, then all the correct processes will receive this
+  information eventually.
+\end{lem1}
+\begin{proof}[Proof:]
+  If we have only one process, the problem is not interesting and we will not
+  investigate this case.
+  
+  When there is more then one process in the system, then as we know from the
+  text of the task, any pair of correct processes is connected by a fair path.
+  This means that if some process $p_i$ increases its HB value for some other
+  process, during its updates it will send information about that to all its
+  neighbours. In the fair path to all other correct processes (let $p_j$ be 
+  one of them) there is at least one process that is correct and is directly
+  connected to $p_i$. Every such process will receive the new value at some
+  point of time. It/They will continue to distribute the value to their correct
+  neighbours in the fair path. At any point of time before the message is
+  delivered to $p_j$, we can divide the path in two parts - one that has the new
+  value and one that does not. They are connected with a fair channel, and so
+  at least one process from those that does not have the new value will receive 
+  it with its updates at some finite point of time. This will continue until
+  the update is received by $p_j$.
+  
+  As $p_j$ is any correct process, this means that all the correct processes
+  will receive the new value at some point of time.
+
+  Please note that it is possible the update to be discarded as a newer value
+  has emerged for the counter, but this is not a contradiction to the text of 
+  the lemma, as all it wants is after some finite amount of time all the correct
+  processes to have greater or equal value for the counter of the process.
+\end{proof}
   
 The explanation of the algorithm makes it clear that the completeness property
 of the heartbeat failure detector is correct. If a process is faulty, after some
 fixed time its heartbeat will no longer be increased because it will no longer
-send statuses (including its own). The algorithm holds for the liveness property
+send statuses (including its own) and no messages are duplicated an infinite 
+number of times by the channel. The algorithm holds for the liveness property
 as well. No process decreases the value of the heartbeat and moreover, if a
 process is correct, its heartbeat can increase infinitely (the explanation is
 given before the algorithm is formally introduced).
@@ -378,11 +425,12 @@ given before the algorithm is formally introduced).
   We know that for each pair of correct processes there is a fair path that
   connects them. This means that since a status message is sent infinite
   number of times, at least once it will be received from a correct process and
-  the statuses will be updated. This way a process can indicate which ones of
-  its neighbours are correct. The liveness and the completeness properties are
-  also taken into account in a fair lossy channel. The heartbeat of a correct
-  process can increase infinitely because its status/statuses will not be lost.
-  For a faulty process the heartbeat will stop increasing after some point in
-  time.
+  the statuses will be updated. The lemma tells us that if some of the correct
+  processes have the update, all the other correct processes will receive it 
+  as well. This way a process can indicate which ones of its neighbours are
+  correct. The liveness and the completeness properties are also taken into
+  account in a fair lossy channel. The heartbeat of a correct process can
+  increase infinitely because its status/statuses will not be lost.  For a
+  faulty process the heartbeat will stop increasing after some point in time.
 \end{proof}
 \end{document}
