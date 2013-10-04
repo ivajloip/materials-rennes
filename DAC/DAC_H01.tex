@@ -164,6 +164,7 @@ When MSG(m, type, sn, barrier) is received from $p_i$ by $p_j$:
       for each msg in to_be_delivered_msgs:
         deliver(msg);
         add msg to delivered_msgs
+        remove msg from waiting_msgs
         to_be_delivered_msgs := to_be_delivered_msgs $\cup$
           $\{m' | m' \in waiting\_msgs \text{ and msg is preventing } m'
             \text{ from being delivered}\}$
@@ -174,6 +175,12 @@ When MSG(m, type, sn, barrier) is received from $p_i$ by $p_j$:
   return(ok)
  
 \end{lstlisting}
+
+\newtheorem*{note1}{Note}
+\begin{note1}
+  The initial values for the sets waiting\_msgs and delivered\_msgs in the
+  algorithm are the empty sets.
+\end{note1}
 
 In order to be able to use the barrier, we need some information about the 
 sequence numbers of the messages - which have already been delivered and which
@@ -190,7 +197,7 @@ that have sn greater than n + 1.
 
 When we want to add a message to this structure, we check if its number is
 \emph{n + 1}. If that is the case, we set $old_n \leftarrow n$, increment the
-value of \emph{n} and we also check if message with sn \emph{old\_n + 2} has
+value of \emph{n} and we also check if a message with sn \emph{old\_n + 2} has
 already been delivered. If this is the case, we increment both \emph{old\_n} and
 \emph{n} and perform the same check again. We do this until this set is empty
 or the number \emph{n + 1} (\emph{old\_n + 2}) is not in the set. If the number
@@ -205,12 +212,12 @@ checking if all the messages with sn smaller then some value are delivered quite
 fast. We make the assumption that the messages are delivered approximately
 within some time boundaries, i.e. it is impossible that almost all the messages
 with sequence numbers up to 100000 have been delivered, except for 1, because
-in this case our data structure will not behave better then a simple set.
+in this case our data structure will not behave better than a simple set.
 
 The messages that wait to be delivered can be stored either in a set (this
-might lead to slower use later), or in an association array that for each possible
+might lead to slower use later), or in an associative array that for each possible
 barrier associates a set (possibly empty) of all the messages that are waiting
-for it and for each message sn our algorithm will remembers the set of messages
+for it and for each message sn our algorithm will remember the set of messages
 that prevent it from being delivered. This way it is quite easy when a new message
 that can be delivered, arrives, to deliver it and then check if it is the only
 message that blocks some other messages from being delivered and deliver them as
@@ -276,7 +283,7 @@ for our implementation of the heartbeat algorithm to work.
 Here is what is the thing that is executed (you may want to notice that if a 
 process is not faulty, then it will execute this infinitely):
 \begin{itemize}
-  \item Each process sends I\_AM\_ALIVE message to all its neighbors.
+  \item Each process sends I\_AM\_ALIVE message to all its neighbours.
   \item Each process sends information about the state of all the processes 
     from its perspective. Namely, it sends an array \emph{statuses} that contains
     some counter value for each of the other processes. For every process in
@@ -284,18 +291,18 @@ process is not faulty, then it will execute this infinitely):
     this has been received by some other process (this is not completely
     precise, but a more accurate explanation will be given shortly). To ensure
     that this update will be received, each process sends it to all of its 
-    neighbors until it receives an acknowledgment (ACK) and then it starts to
+    neighbours until it receives an acknowledgment (ACK) and then it starts to
     send them newer information (the most recent information it knows). By
     sending the same information (the same message) probably infinite number of
     times, we are sure that if the channel between the two processes is fair,
     the message will be received at some point (and the ACK will be received,
     too).
 
-    So basically each process sends to its neighbors some state of the status
+    So basically each process sends to its neighbours some state of the status
     of all the other processes. It might not be the most recent that the process
     has, but it is newer than the last one that they have confirmed to have
     received from that processor. The confirmation is individual and so it is
-    possible to send to different neighbors different states (if some of them 
+    possible to send to different neighbours different states (if some of them 
     have not confirmed an old state, we will still send them an old state,
     until they confirm it). By doing this, we are sure that from time to time
     every process will receive a newer status of all the other processes and
@@ -335,13 +342,13 @@ process is not faulty, then it will execute this infinitely):
     algorithm.
 \end{itemize}
 
-\newtheorem*{note1}{Note}
-\begin{note1}
+\newtheorem*{note2}{Note}
+\begin{note2}
   The message \textbf{I\_AM\_ALIVE} is not needed as with every update each
   process sends a clear message to its neighbours that it is still alive. For
   that reason the algorithm will not send \textbf{I\_AM\_ALIVE} message but
-  it will rely on the update. 
-\end{note1}
+  it will rely on the update.
+\end{note2}
 
 \begin{lstlisting}[frame=single]
 Operation: $p_i$ SEND_STATUSES() to $neighbours_i$:
@@ -349,22 +356,21 @@ Operation: $p_i$ SEND_STATUSES() to $neighbours_i$:
     let statuses be an associative array of the status msgs
     $p_i$ will send to each its neighbour (the initial value
     for each element in statuses will be 0)
-    for each neighbour in statuses:
-      repeat (send MSG(neighbour) to $neighbours_i$);
-      until receive(ACK(neighbour)) from neighbour;
+    repeat (send MSG(statuses[neighbour]) to $neighbours_i$);
+    until receive(ACK(statuses[neighbour])) from neighbour;
 
   let $HB_i$ be the most recent status we have in process $p_i$;
 
-  when $p_i$ receives(ACK(statuses)) from some neighbour in
-    $neighbours_i$:
+  When $p_i$ receives(ACK(statuses[neighbour])) from neighbour in
+  $neighbours_i$:
     statuses[neighbour] = $HB_i$
 
-When $p_j$ RECEIVE_STATUSES(statuses) from $p_i$:
-  send ACK(statuses) to $p_i$;
+When $p_j$ RECEIVE_STATUSES($statuses_i$) from $p_i$:
+  send ACK($statuses_i$) to $p_i$;
 
-  for each process in statuses:
-    if $HB_j$[process] $\le$ statuses[process]:
-      $HB_j$[process] := statuses[process];
+  for each process in $statuses_i$:
+    if $HB_j$[process] $\le$ $statuses_i$[process]:
+      $HB_j$[process] := $statuses_i$[process];
 
   $HB_j$[i] := $HB_j$[i] + 1;
   
@@ -374,15 +380,14 @@ When $p_j$ RECEIVE_STATUSES(statuses) from $p_i$:
 \newtheorem*{lem1}{Lemma}
 \begin{lem1}
   If some of the correct processes receive information that other process is still
-  alive (by \textbf{I\_AM\_ALIVE} message, or an update), i.e. that its counter
-  has at least some value, then all the correct processes will receive this
-  information eventually.
+  alive (by \textbf{I\_AM\_ALIVE} message, or an update), then all the correct
+  processes will receive the value of its counter eventually.
 \end{lem1}
 \begin{proof}[Proof:]
   If we have only one process, the problem is not interesting and we will not
   investigate this case.
   
-  When there are more then one processes in the system, then as we know from the
+  When there are more than one processes in the system, then as we know from the
   text of the task, any pair of correct processes is connected by a fair path.
   This means that if some process $p_i$ increases its HB value for some other
   process, during its updates it will send information about that to all its
@@ -392,7 +397,7 @@ When $p_j$ RECEIVE_STATUSES(statuses) from $p_i$:
   point of time. It/They will continue to distribute the value to their correct
   neighbours in the fair path. At any point of time before the message is
   delivered to $p_j$, we can divide the path into two parts one that has the new
-  value and one that does not(at least $p_i$ has the new value and at least
+  value and one that does not (at least $p_i$ has the new value and at least
   $p_j$ does not). They are connected with a fair channel, and so at least one
   process from those that does not have the new value will receive it with its
   updates at some finite point of time. This will continue until the update is
@@ -418,11 +423,12 @@ given before the algorithm is formally introduced).
 
 \newtheorem*{th2}{2. Theorem}
 \begin{th2}
-  The algorithm is genuine for a fair channel and for a fair lossy channel.
+  The algorithm is genuine for a fair channel and for a fair lossy channel and
+  it works correctly.
 \end{th2}
 \begin{proof}[Proof]
   As we have seen earlier the algorithm is working correctly for a fair channel.
-  We will seen that this is the case with a fair lossy channel. \\
+  We will see that this is also the case with a fair lossy channel. \\
   We know that for each pair of correct processes there is a fair path that
   connects them. This means that since a status message is sent infinite
   number of times, at least once it will be received from a correct process and
