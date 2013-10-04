@@ -382,7 +382,7 @@ When $p_j$ RECEIVE_STATUSES(statuses) from $p_i$:
   If we have only one process, the problem is not interesting and we will not
   investigate this case.
   
-  When there is more then one process in the system, then as we know from the
+  When there are more then one processes in the system, then as we know from the
   text of the task, any pair of correct processes is connected by a fair path.
   This means that if some process $p_i$ increases its HB value for some other
   process, during its updates it will send information about that to all its
@@ -391,12 +391,13 @@ When $p_j$ RECEIVE_STATUSES(statuses) from $p_i$:
   connected to $p_i$. Every such process will receive the new value at some
   point of time. It/They will continue to distribute the value to their correct
   neighbours in the fair path. At any point of time before the message is
-  delivered to $p_j$, we can divide the path in two parts - one that has the new
-  value and one that does not. They are connected with a fair channel, and so
-  at least one process from those that does not have the new value will receive 
-  it with its updates at some finite point of time. This will continue until
-  the update is received by $p_j$.
-  
+  delivered to $p_j$, we can divide the path into two parts one that has the new
+  value and one that does not(at least $p_i$ has the new value and at least
+  $p_j$ does not). They are connected with a fair channel, and so at least one
+  process from those that does not have the new value will receive it with its
+  updates at some finite point of time. This will continue until the update is
+  received by $p_j$.  
+
   As $p_j$ is any correct process, this means that all the correct processes
   will receive the new value at some point of time.
 
