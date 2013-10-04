@@ -144,8 +144,8 @@ When MSG(m, type, sn, barrier) is received from $p_i$ by $p_j$:
     due to their barrier restriction (what we mean
     here is that either their barrier is not delivered
     yet, or if they are of type ct_past or marker,
-    there was a message with sequence number $\in \{0, \dots, sn - 1\}$
-    that is not delivered (maybe even not yet received)
+    there is a message with sequence number $\in \{0, \dots, sn - 1\}$
+    that is not yet delivered (maybe even not yet received)
     and as a consequence, $m'$ cannot still be delivered,
     because it will bypass that message);
     
@@ -158,22 +158,22 @@ When MSG(m, type, sn, barrier) is received from $p_i$ by $p_j$:
       deliver(m);
       add m to delivered_msgs
 
-    let to_be_delivered_msgs be that subset of the
-      set waiting_msgs that wait only for m in order
-      to be delivered 
-    for each msg in to_be_delivered_msgs:
-      deliver(msg);
-      add msg to delivered_msgs
-      to_be_delivered_msgs := to_be_delivered_msgs $\cup$
-        $\{m' | m' \in waiting\_msgs \text{ and msg is preventing m' from being delivered}\}$
-  else:
-    add m to waiting_msgs
-  endif
+      let to_be_delivered_msgs be that subset of the
+        set waiting_msgs that wait only for m in order
+        to be delivered 
+      for each msg in to_be_delivered_msgs:
+        deliver(msg);
+        add msg to delivered_msgs
+        to_be_delivered_msgs := to_be_delivered_msgs $\cup$
+          $\{m' | m' \in waiting\_msgs \text{ and msg is preventing } m'
+            \text{ from being delivered}\}$
+    else:
+      add m to waiting_msgs
+    endif
 
   return(ok)
  
 \end{lstlisting}
-
 
 In order to be able to use the barrier, we need some information about the 
 sequence numbers of the messages - which have already been delivered and which
