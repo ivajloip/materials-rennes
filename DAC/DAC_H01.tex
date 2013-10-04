@@ -146,7 +146,7 @@ When MSG(m, type, sn, barrier) is received from $p_i$ by $p_j$:
     yet, or if they are of type ct_past or marker,
     there is a message with sequence number $\in \{0, \dots, sn - 1\}$
     that is not yet delivered (maybe even not yet received)
-    and as a consequence, $m'$ cannot still be delivered,
+    and as a consequence, $m'$ still cannot be delivered,
     because it will bypass that message);
     
     are_all_past_messages_delivered = $\nexists m'$ with sequence number $\in$ 
