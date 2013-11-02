@@ -155,7 +155,7 @@ the immutable graph topology from the graph analysis results.
 
   Finally, the bulk synchronous parallel (BSP) paradigm is introduced. As "it
   requires that the whole graph be stored in the collective memory of the
-  cluster"[1], which greatly limits the size of the graph that is to be analysed
+  cluster"[1], which greatly limits the size of the graph that is to be analyzed
   and so this technique is also not better than the proposed by the article.
 
   On the overall, the related work section provides a number of examples of 
@@ -165,8 +165,34 @@ the immutable graph topology from the graph analysis results.
 
 \subsection{MapReduce} % (fold)
 \label{sub:MapReduce}
+  In this part of the article, the authors describe the MapReduce framework -
+  how it works, when some actions are executed and other details. For more
+  details, please refer to article [1].
   
+  There is no explanation however of initialization and closure of mappers and
+  reducers that are later used - when those methods are invoked, what is their 
+  purpose, etc. There are also obvious typing error that are inadmissible for
+  published articles.  
 % subsection MapReduce (end)
+
+\subsection{Graph algorithms} % (fold)
+\label{sub:Graph algorithms}
+  In this section, the reader is introduced with a definition of a directed
+  graph. Also the type of graph algorithms that will be implementable by the
+  described design pattern is provided.
+
+  Finally, a more precise definition of the example Page-Ranking algorithm is 
+  provided. Page-Ranking calculates the importance of vertex $v_i$ in a graph,
+  based on the graph structure. It computes the probability of reaching that 
+  vertex through a random walk in the graph. The probability to reach vertex
+  $v_i$ (denoted as $P_i$) is the sum of the probabilities to reach some of 
+  the vertexes $v_j$, for which there is an edge ($v_j, v_i$) divided by the 
+  number of outgoing edges from $v_j$. As there is no way to know $P_j$ that is
+  needed to compute $P_i$ in the example above, a different approach is used - 
+  we start with some probabilities and iteratively refine those probabilities,
+  using the probabilities from the previous iteration, until they seem to
+  remain unchanged during some iteration. Then we stop.
+% subsection Graph algorithms (end)
 
 % section Paper Content (end)
 
