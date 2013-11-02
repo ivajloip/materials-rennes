@@ -1,0 +1,173 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[english,bulgarian]{babel}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amscd}
+\usepackage{amssymb}
+\usepackage{graphics}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage{multicol}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\oddsidemargin 0mm
+\evensidemargin 0mm
+\topmargin 0mm
+\textheight 216mm
+\textwidth 165mm
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[CE,CO]{Summary of \emph{"Map-Based Graph Analysis on MapReduce"}}
+\fancyfoot[CE,CO]{\thepage}
+
+\lstset{basicstyle=\ttfamily,
+  mathescape=true,
+  escapeinside=||,
+  emph={Task, Operation, for, each, if, else, endif, endfor, while, then, When, do, repeat, until, endrepeat},
+  emphstyle={\color{gray}\bfseries\itshape}}
+
+\def\CC {{\mathbb C}}        % Complex numbers
+\def\RR {{\mathbb R}}        % Real numbers
+\def\ZZ {{\mathbb Z}}        % Integers
+\def\NN {{\mathbb N}}        % Positive integers
+\def\be  {\begin{eqnarray}}  % Begin of math formula with number
+\def\ee  {\end{eqnarray}}    % End of math formula with number
+\def\ben {\begin{eqnarray*}} % Begin of math formula without number 
+\def\een {\end{eqnarray*}}   % End of math formula with number 
+\newcommand{\hr}{\rule{\linewidth}{0.1mm}}
+\newcommand{\bighs}{\hspace{15pt}}
+\newcommand{\hs}{\hspace{10pt}}
+\renewcommand{\tilde}{\overset{-}}
+
+\newenvironment{itemize*}{
+  \begin{itemize}
+    \setlength{\itemsep}{0pt}
+    \setlength{\parskip}{0pt}
+    \setlength{\parsep}{0pt}
+}{
+  \end{itemize}
+}
+
+\newenvironment{enumerate*}{
+  \begin{enumerate}
+    \setlength{\itemsep}{0pt}
+    \setlength{\parskip}{0pt}
+    \setlength{\parsep}{0pt}
+}{
+  \end{enumerate}
+}
+
+\newtheoremstyle{plain}{1pt}{0pt}{}{}{}{}{.5em}{\thmname{\textbf{#1}}:\thmnote{#3}}
+
+\theoremstyle{plain}
+\renewcommand\thesection{\Roman{section}.}
+\renewcommand\thesubsection{\thesection\Roman{subsection}.}
+\renewcommand\thesubsubsection{\thesubsection\Roman{subsubsection}.}
+
+% Makes the size of the symbols in the formulas fixed (not getting smaller)
+\everymath{\displaystyle}
+
+\begin{document}
+
+\section*{\centering
+  Map-Based Graph Analysis on MapReduce - summary \\
+  Ivaylo Petrov 
+}
+
+\hr
+
+\section{Paper Content} % (fold)
+\label{sec:Paper Content}
+The article that is going to be assessed is \emph{Map-Based Graph Analysis on
+MapReduce} by Upa Gupta and Leonidas Fegaras. It provides information about 
+data processing using MapReduce framework and more specifically big graph 
+processing that requires iterative graph algorithms. The authors of the article
+believe that there is a need for efficient design pattern for solving such
+problems, as more and more graph data is generated and the size of those
+graphs is growing. They propose such a design pattern based on separation of
+the immutable graph topology from the graph analysis results.
+
+\subsection{Introduction} % (fold)
+\label{sub:Introduction}
+  The introduction of the article first present the importance of the problem - 
+  as more and more companies need to process ever increasing amount of data,
+  that is presented in the form of graphs (usually millions of nodes and
+  billions of edges), it is often required to use in a way the de-facto
+  framework for large-scale data analysis $\rightarrow$ Hadoop.
+
+  The authors also point out, that in most cases the element that has the
+  greatest impact on the performance of the algorithms that use Hadoop, is the
+  communication time. Although there have been previous attempts to improve
+  this aspects of the algorithms (introducing some new design patters for
+  example), there is still possibility for improvement.
+
+  The basic idea of the authors is to introduce a new design pattern for a 
+  family of iterative graph algorithms. They use an example to describe their
+  idea and to illustrate how it can be used in practice. The example is the
+  page-ranking algorithm. Although it is described in details how this algorithm
+  can be made to use their design pattern, the pattern that they propose can be
+  used for many other problem. As expected the improvement has its price and 
+  some restrictions for cases where it can be applied. The restriction of the
+  proposed design pattern is that it only works for \emph{"iterative graph algorithms
+  on directed graphs where partial results associated with nodes can be
+  improved at each iteration"}[1]. In other words only data about the notes is
+  computed and stored and the algorithm should be trying to optimize it on each
+  iteration. There are many situations where such algorithms are needed and as
+  a consequence the possible improvement is very important.
+  
+  Although the proposed algorithm is presented in more details later, a rough
+  explanation will be given, in order the reader to attain a better
+  understanding of the explanations that are to follow.
+
+  The idea of the algorithm is to divide the graph in several parts (a multiple
+  of the number of computational nodes in most cases). Every part is processed
+  by a single node that is always the same, i.e. it does not change during the
+  different iterations. This way some data that is required for the computations
+  (the graph topology that the node should process) can be made local for the
+  node and the cost of the communication can be decreased. As the computation of
+  each node are dependent on the computations of all the nodes during the previous 
+  iteration, all the result from the previous iterations are written on the 
+  distributed file system and thus every node can access it for its needs. This
+  way the need of reducers is eliminated and as a consequence, it is possible to
+  decrease the communication (as shuffling of data is skipped).
+
+  On the overall, the introduction gives good idea about the article.
+% subsection Introduction (end)
+
+\subsection{Related work} % (fold)
+\label{sub:Related work}
+  In this part of the article we are briefly introduced to Twister and Haloop,
+  which are attempts to improve the inefficiency of MapReduce framework for 
+  graph processing. The two however cannot scale which means that for most 
+  contexts they are not usable.
+
+  We are also introduced to Schimmy design pattern[2], but as a disadvantage of
+  this technique, the authors of the article point out the fact that it
+  "requires the shuffling of the partial results"[1].
+
+  After that it is explained that Incoop[3] and Google's Percolator[4] might be
+  good for some purposes, but as they do not target general graph processing, 
+  they can not be compared to the proposed design pattern.
+
+  Finally, the bulk synchronous parallel (BSP) paradigm is introduced. As "it
+  requires that the whole graph be stored in the collective memory of the
+  cluster"[1], which greatly limits the size of the graph that is to be analysed
+  and so this technique is also not better than the proposed by the article.
+
+  On the overall, the related work section provides a number of examples of 
+  other attempts to solve the same or similar problem and for each of them it
+  states what is the advantage of the proposed by the article solution.
+% subsection Related work (end)
+
+\subsection{MapReduce} % (fold)
+\label{sub:MapReduce}
+  
+% subsection MapReduce (end)
+
+% section Paper Content (end)
+
+\end{document}
