@@ -169,10 +169,11 @@ the immutable graph topology from the graph analysis results.
   how it works, when some actions are executed and other details. For more
   details, please refer to article [1].
   
-  There is no explanation however of initialization and closure of mappers and
-  reducers that are later used - when those methods are invoked, what is their 
-  purpose, etc. There are also obvious typing error that are inadmissible for
-  published articles.  
+  There is no explanation however of some of the parts of the MapReduce
+  framework that are later used in the pseudo-code. For example the
+  initialization and closure of mappers and reducers is not explained - when
+  those methods are invoked, what is their purpose, etc. There are also obvious
+  typing error that are inadmissible for published articles.  
 % subsection MapReduce (end)
 
 \subsection{Graph algorithms} % (fold)
@@ -193,6 +194,110 @@ the immutable graph topology from the graph analysis results.
   using the probabilities from the previous iteration, until they seem to
   remain unchanged during some iteration. Then we stop.
 % subsection Graph algorithms (end)
+
+\subsection{Earlier work} % (fold)
+\label{sub:Earlier work}
+  In this section, the authors present an direct implementation of the
+  Page-Ranking algorithm in MapReduce framework. The idea of this implementation
+  is for each edge of the graph to calculate the probability to follow it in
+  a random walk of the graph and sum those probability for the end vertexes. 
+  During the process the edges are also emitted (declared as partial result that
+  we will later need) so that they can be used again later. During the reduce
+  phase the probabilities for each vertex $v_i$ are added and all the edges that
+  have it as a start vertex, are updated to have the correct probability to be
+  on vertex $v_i$.
+  
+  The description is good, however the authors are inconsistent with names on
+  places. At places some variable name is used for one thing and at others
+  places it is used for something completely different. Still the overall
+  description of the "Basic implementation" is easily understandable.  
+
+  After the description of the basic implementation, a Schimmy implementation is
+  provided. The basic idea of this new implementation is to skip the part of 
+  emitting the graph topology as it does not change. To do this the graph is 
+  partitioned and each reducer works on only one partition. During the reduce
+  phase the partitions are read from the local disk. Each vertex that belongs
+  to the partition is updated. For easier update a clever way is invented - 
+  the vertexes are sorted as well as the edges in the partition. With only one
+  pass through all the vertexes from the partition and the edges, the new 
+  probabilities are calculated and updated on the corresponding edges. For more
+  information how this is done see [1].
+
+  The explanation of the Schimmy implementation is understandable and its 
+  advantage over the basic implementation is clearly stated. 
+% subsection Earlier work (end)
+
+\subsection{Map-Based Graph Analysis} % (fold)
+\label{sub:Map-Based Graph Analysis}
+  In this section the authors provide more details how their approach is better
+  then the Schimmy implementation. After that the explanation of the proposed
+  implementation is given.
+
+  The proposed solution consists of only map stage (there is no reduce stage). 
+  This avoids the need of shuffling and sorting of partial results and reduces
+  the communication cost of the algorithm. As in Schimmy a parallel merge-join
+  is used (see [1] for more details). The difference with the already described
+  approach is that the merge is not between a partition of the graph and 
+  partial results for each vertex, but between the "partition of the graph and 
+  global table that contains the partial results associated with all nodes"[1].
+  Another difference is that the partitioning is done in a more sophisticated 
+  manner - edges are not divided randomly among the different partitions, but
+  instead it is necessary that all the edges with the same destination go in 
+  the same partition. The partitions are sorted by the source vertex of the 
+  edges. 
+
+  The algorithm also uses a global binary file that is placed on the DFS and it
+  contains the partial results of each node after the end of each iteration. 
+  This file is sorted by the vertexes' IDs.
+
+  There are some necessary pre-computations for the algorithm.
+
+  Here is what the mapper does - for each destination vertex n in the partition
+  $P_i$ (note that they are sorted in increasing order in the file) and each
+  edge (from, to) from the same partition, if n is equal to from, then we use
+  the vertex to update a in memory representation of the probability to reach
+  vertex \emph{to}. As both sets are sorted, we don't need for each edge to go 
+  through all the vertexes - we can do the same with only one pass through 
+  all the vertexes and one pass through all the edges of the partition. In the
+  end of the iteration, the memory representation of the probabilities is 
+  written to the disk. As it is impossible two partitions to contain equal 
+  destination vertexes, we know that only one mapper will calculate the 
+  probability to reach certain node.
+
+  We already discussed the good parts of this algorithm. The authors provide
+  some experiments that show that on the overall their approach improves the 
+  time that is necessary for the computations by 10\%. They however do not say
+  anything about possible crashes and other weaknesses that their approach
+  might have. One of the strongest disadvantages of the proposed approach is the problem with
+  node failures. The use of MapReduce framework by no mean assures that there can
+  not be any problems with a computational node crash. In such case using the proposed
+  design pattern, it is practically impossible to continue the calculations as 
+  there are side effects from the execution of the mappers (which is not handled
+  by any mean by the framework) and we can not know the state of this sider
+  effect (writing to a file on the DFS). Imagine that a computational node 
+  crashes. By the time we know about this crash, it is possible that some of the
+  other nodes have finished the map task for an input slot (all the tasks that
+  should be executed by the same mapper) and as a consequence they might have
+  written the new probabilities. In the context of page-ranking maybe this is not a 
+  serious problem (even though it deviates from the correct algorithm), however
+  it might be for some other similar iterative algorithm and the authors should
+  have warned about it.
+% subsection Map-Based Graph Analysis (end)
+
+In the experiments part the authors provide information about a simulations
+that they performed to test their approach. However there are not enough details
+for example about what were the settings of Hadoop for the different
+implementations. They said in the paper that they have set the replication
+factor to 1 for their implementation. Was the same setting used for the other
+implementations as well and what is the impact of this to the overall 
+performance? Those questions were not answered.
+
+To sum up, the paper is clearly written in most of its parts and it presents
+some good ideas of ways to improve the efficiency of MapReduce graph algorithms,
+however there is no account for the possible bad effects of the use of the 
+proposed design pattern, there is no detailed information about the experiments
+that showed that there is an improvement, there were typing errors and one of
+the pseudo-code blocks is either wrong, or poorly explained. 
 
 % section Paper Content (end)
 
