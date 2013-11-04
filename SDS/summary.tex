@@ -84,21 +84,22 @@
 %\label{sec:Paper Content}
 The article that is going to be assessed is \emph{Map-Based Graph Analysis on
 MapReduce} by Upa Gupta and Leonidas Fegaras, published in 2013. It provides
-information about data processing using MapReduce framework (Hadoop is one such
-framework) and more specifically big graph processing that requires iterative
-graph algorithms. The authors of the article believe that there is a need for
-efficient design pattern for solving such class of problems, as more and more
-graph data is generated and the size of those graphs is growing. They propose
-such a design pattern based on separation of the immutable graph topology from
-the graph analysis results. This design pattern can be applied to a large range
-of problems.  
+information about data processing using MapReduce framework (sometimes the open
+source framework Hadoop is referred to instead of MapReduce as some of its 
+specifics are employed) and more specifically big graph processing that
+requires iterative graph algorithms. The authors of the article believe that
+there is a need for efficient design pattern for solving such class of
+problems, as more and more graph data is generated and the size of those graphs
+is growing. They propose such a design pattern based on separation of the
+immutable graph topology from the graph analysis results. This design pattern
+can be applied to a large range of problems.  
 
 %\subsection{Introduction} % (fold)
 %\label{sub:Introduction}
   The authors point out, that in most cases the element that has the greatest
   impact on the performance of the algorithms that use Hadoop, is the
   communication time. Although there have been previous attempts to improve
-  this aspects of the algorithms (introducing some new design patters for
+  those aspects of the algorithms (introducing some new design patters for
   example), there is still possibility for improvement.  
 
   The authors use an example to describe their idea about the design pattern
@@ -123,7 +124,7 @@ of problems.
   iteration"}[1]. In other words only data about the notes is computed and
   stored and the algorithm should be trying to optimize it on each iteration. 
   There are many situations where such algorithms are needed and as a
-  consequence the possible improvement is very important.  
+  consequence the possible improvement is very important and valuable.  
 
   Even though the proposed algorithm is presented in more details later, a rough
   explanation will be given, in order the reader to attain a better
@@ -140,7 +141,7 @@ of problems.
   from the previous iterations are written on the distributed file system and
   thus every node can access it for its needs. This way the need of reducers is
   eliminated and as a consequence, it is possible to decrease the communication
-  (as shuffling of data is also skipped).  
+  as shuffling of data is also skipped.  
 % subsection Introduction (end)
 
 %\subsection{Related work} % (fold)
@@ -154,8 +155,8 @@ of problems.
 %\label{sub:MapReduce}
   In the MapReduce part of the article, the authors describe the MapReduce
   framework - how it works, when some actions are executed and other details.
-  For more details, please refer to article [1]. There is no explanation
-  however of some of the parts of the MapReduce framework that are later used
+  For more information, please refer to article [1]. There is no explanation,
+  however, of some of the parts of the MapReduce framework that are later used
   in the pseudo-code. For example the initialization and closure of mappers and
   reducers is not explained - when those methods are invoked, what is their
   purpose, etc. There are also obvious typing errors that are inadmissible for
@@ -171,12 +172,12 @@ of problems.
   After that the authors present an direct implementation of the
   Page-Ranking algorithm in MapReduce framework. The idea of this implementation
   is for each edge of the graph to calculate the probability to follow it in
-  a random walk of the graph and sum those probability for the end vertices. 
-  During the process the edges are also emitted (declared as partial result that
-  we will be needed later) so that they can be used again after that. During the
-  reduce phase the probabilities for each vertex $v_i$ are added and all the
-  edges that have it as a start vertex, are updated to have the correct
-  probability to be on vertex $v_i$.
+  a random walk of the graph and sum those probability for the destination
+  vertices. During the process the edges are also emitted (declared as partial
+  result that we will be needed later) so that they can be used again after
+  that. During the reduce phase the probabilities for each vertex $v_i$ are
+  added and all the edges that have it as a start vertex, are updated to have
+  the correct probability to be on vertex $v_i$.
   
   The provided description of the basic implementation is good, however the
   authors are inconsistent with names at some places. Sometimes one variable
@@ -228,7 +229,7 @@ of problems.
   with only one pass through all the vertices and one pass through all the
   edges of the partition. In the end of the task (when the mapper is closing),
   the memory representation of the probabilities is written to the disk. As it
-  is impossible that two partitions to contain equal destination vertices, we
+  is impossible that two partitions contain equal destination vertices, we
   know that only one mapper will calculate the probability to reach certain
   node and there will be no problem to merge the results from the different
   mappers. 
@@ -243,24 +244,25 @@ of problems.
   In such case, using the proposed design pattern, it is practically impossible
   to continue the calculations as there are side effects from the execution of
   the mappers (which is not handled by any mean by the framework) and we can
-  not know the state of this side effect (writing to a file on the DFS).
+  not know the state of those side effects (writing to a file on the DFS).
   Imagine that a computational node crashes. By the time we know about this
   crash, it is possible that some of the other nodes have finished the map task
   for an input slot (all the tasks that should be executed by the same mapper)
   and as a consequence they might have written the new probabilities. In this
-  situation we can not rerun the same mapper on other node, as some of its input
-  might be changed. In the context of page-ranking maybe this is not a serious
-  problem (even though it deviates from the correct algorithm), however it
-  might be for some other similar iterative algorithm and the authors should
-  have warned about it.  
+  situation we can not rerun the same mapper from the crashed node on some other
+  node, as some of its input might be changed. In the context of page-ranking
+  maybe this is not a serious problem (even though it deviates from the correct
+  algorithm), however it might be for some other similar iterative algorithm
+  and the authors should have warned about it or at least they should have
+  discussed it.  
 % subsection Map-Based Graph Analysis (end)
 
 In the experiments part the authors provide information about a simulations
 that they performed to test their approach. However there are not enough details
 for example about what were the settings of Hadoop for the different
 implementations. They said in the paper that they have set the replication
-factor to 1 for their implementation. Was the same setting used for the other
-implementations as well and what is the impact of this to the overall 
+factor of the DFS to 1 for their implementation. Was the same setting used for
+the other implementations as well and what is the impact of this to the overall 
 performance? Those questions were not answered.
 
 To sum up, the paper is clearly written in most of its parts and it presents
@@ -271,6 +273,15 @@ that showed that there is an improvement, there were typing errors and one of
 the pseudo-code blocks is either wrong, or poorly explained. All those things
 jeopardize the reliability of this paper.
 % section Paper Content (end)
+
+An improvement that can solve the problem with the crashing nodes could be the 
+use of snapshots of the file which is written on the DFS. After each iteration
+for example, the name of the file can be changed. This way the crash of a node
+will not prevent a mapper from being rerun (it just need to have information 
+about which snapshot to use). As this might lead to the use of too much space,
+however, it might be better to preserve just the last few snapshots, that are
+needed by some of the mappers (the mappers still have not computed the partial
+results using the snapshots).
 
 \section*{References:} % (fold)
 \label{sec:References:}
