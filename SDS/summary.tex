@@ -107,7 +107,7 @@ of problems.
   $v_i$ in a graph, based on the graph structure. It computes the probability
   of reaching that vertex through a random walk in the graph. The probability
   to reach vertex $v_i$ (denoted as $P_i$) is the sum of the probabilities to
-  reach some of the vertexes $v_j$, for which there is an edge ($v_j, v_i$)
+  reach some of the vertices $v_j$, for which there is an edge ($v_j, v_i$)
   divided by the number of outgoing edges from $v_j$. As there is no way to
   know $P_j$ that is needed to compute $P_i$ in the example above, a different
   approach is used - we start with some probabilities and iteratively refine
@@ -171,7 +171,7 @@ of problems.
   After that the authors present an direct implementation of the
   Page-Ranking algorithm in MapReduce framework. The idea of this implementation
   is for each edge of the graph to calculate the probability to follow it in
-  a random walk of the graph and sum those probability for the end vertexes. 
+  a random walk of the graph and sum those probability for the end vertices. 
   During the process the edges are also emitted (declared as partial result that
   we will be needed later) so that they can be used again after that. During the
   reduce phase the probabilities for each vertex $v_i$ are added and all the
@@ -191,9 +191,9 @@ of problems.
   partitioned and each reducer (a reducer instance working on one group of
   keys) works on only one partition. During the reduce phase the partitions are
   read from the local disk. Each vertex that belongs to the partition is
-  updated.  For easier update a clever way is invented - the vertexes are
+  updated.  For easier update a clever way is invented - the vertices are
   sorted as well as the edges in the partition. With only one pass through all
-  the vertexes from the partition and the edges, the new probabilities are
+  the vertices from the partition and the edges, the new probabilities are
   calculated and updated on the corresponding edges. For more information how
   this is done see [1]. 
 % subsection Earlier work (end)
@@ -215,7 +215,7 @@ of problems.
 
   The algorithm also uses a global binary file that is placed on the DFS and it
   contains the partial results of each node after the end of each iteration. 
-  This file is sorted by the vertexes' IDs. There are some necessary
+  This file is sorted by the vertices' IDs. There are some necessary
   pre-computations for the algorithm.  
 
   Here is what the mapper does - for each destination vertex \emph{n} in the
@@ -224,11 +224,11 @@ of problems.
   to \emph{from}, then we use the vertex \emph{form} and the probability to
   get on it from the previous iteration, to update a in memory representation
   of the probability to reach vertex \emph{to}. As both sets are sorted, we
-  don't need for each edge to go through all the vertexes - we can do the same
-  with only one pass through all the vertexes and one pass through all the
+  don't need for each edge to go through all the vertices - we can do the same
+  with only one pass through all the vertices and one pass through all the
   edges of the partition. In the end of the task (when the mapper is closing),
   the memory representation of the probabilities is written to the disk. As it
-  is impossible that two partitions to contain equal destination vertexes, we
+  is impossible that two partitions to contain equal destination vertices, we
   know that only one mapper will calculate the probability to reach certain
   node and there will be no problem to merge the results from the different
   mappers. 
