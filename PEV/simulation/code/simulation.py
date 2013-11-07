@@ -30,7 +30,8 @@ class Event:
     return self._time <= other._time
 
   def __str__(self):
-    return "<Event(time={0})>".format(self._time)
+    return "<Event(time={0}, type={1}, server={2})>".format(self._time,
+        self._type, self._on_server)
 
   def __repr__(self):
     return self.__str__()
@@ -42,9 +43,7 @@ class PriorityQueue:
 
   def merge(self, iterable):
     self.heap = list(heapq.merge(self.heap, iterable))
-    print(self.heap)
     heapq.heapify(self.heap)
-    print(self.heap)
 
   def pop(self):
     return heapq.heappop(self.heap)
@@ -69,52 +68,68 @@ def get_input_times(number_of_clients, l):
   return [result[0]] + [result[index - 1] + result[index]
       for index in range(1, number_of_clients)]
 
-def calculate_destination_server(source, elements_in_queue):
+def calculate_destination_server(source, graph, config, elements_in_queue):
   if source == 0:
-    if random.random() < 0.4:
-      return 1
+    if random.random() < 0:
+      if elements_in_queue[1] < config.queue_sizes[1]:
+        return 1
+      else:
+        return -1
     else:
-      return 2
+      if elements_in_queue[2] < config.queue_sizes[2]:
+        return 2
+      else:
+        return -2
   if source == 1:
     return 3
   if source == 2:
-    if elements_in_queue[3] < 20:
-      return 3
-    else:
-      return -1
+    return 3
 
-  return -1
+  return -4
 
-def process_next_event(queue, muis, times, elements_in_queue):
+def process_next_event(queue, config, times, elements_in_queue, losses):
   next_event = queue.pop()
+
+  #print("### next event is {0}".format(next_event))
 
   if next_event._type == 0:
     elements_in_queue[next_event._on_server] += 1
 
-    new_event = serve(next_event, muis)
+    new_event = serve(next_event, config.muis, times)
     times[next_event._on_server] = new_event._time
+
+    #print("___ New event {0}".format(new_event))
 
     queue.push(new_event)
   else:
     elements_in_queue[next_event._on_server] -= 1
     dest = calculate_destination_server(next_event._on_server, 
-        elements_in_queue)
+        None, config, elements_in_queue)
 
-    new_event = Event(next_event._time, 0, dest)
-    if new_event._on_server >= 0:
+    if dest >= 0:
+      new_event = Event(next_event._time, 0, dest)
+
+      #print("^^^ New event {0}".format(new_event))
+
       queue.push(new_event)
+    else: 
+      losses[-dest] += 1
 
 def serve(event, muis, times): 
   mui = muis[event._on_server]
-  serve_time= get_exponentially_distributed_value(mui)
+  serve_time = get_exponentially_distributed_value(mui)
+
   service_start_time = max(event._time, times[event._on_server])
+
+  #print("serve: times={0}   service_start_time={1}   serve_time={2}".format(
+  #  times, service_start_time, serve_time))
 
   return Event(service_start_time + serve_time, 1, event._on_server)
 
 def parse_cmd_args(args):
   number_of_clients = 10
   return Configuration(number_of_clients, 4, [2], [4, 4, 4, 4],
-      [number_of_clients + 1, number_of_clients + 1, 20, number_of_clients + 1],
+      [number_of_clients + 1, number_of_clients + 1, 10, number_of_clients + 1],
       [0], [3])
 
 def get_configuration(): 
@@ -126,11 +141,18 @@ def get_configuration():
 def run_simulation(config):
   queue = PriorityQueue([Event(_, 0, 0)
     for _ in get_input_times(config.number_of_clients, config.lambds[0])])
+  times = [0, 0, 0, 0]
+  elements_in_queue = [0, 0, 0, 0]
+  losses = [0, 0, 0, 0, 0]
   while(not queue.empty()):
-    process_next_event(queue, config.muis, [0, 0, 0, 0], [0, 0, 0, 0])
+    process_next_event(queue, config, times, elements_in_queue, losses)
 
-  print("Some results")
+  print("Losses {0}".format(losses))
+
+test_config = Configuration(1000, 4, [1], [20, 10, 20, 2],
+    [1000000, 1000000, 20, 100000], [0], [3])
+
 
 if __name__ == '__main__':
   config = get_configuration()
-  run_simulation(config)
+  run_simulation(test_config)
