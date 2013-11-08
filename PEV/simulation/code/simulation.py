@@ -4,15 +4,14 @@ import random
 import heapq
 
 class Configuration: 
-  def __init__(self, number_of_clients, number_of_servers, lambds, muis,
-      queue_sizes, input_servers, output_servers):
+  def __init__(self, number_of_clients, lambds, muis,
+      queue_sizes, graph_filename, output_file):
     self.number_of_clients = number_of_clients
-    self.number_of_servers = number_of_servers
     self.lambds = lambds
     self.muis = muis
     self.queue_sizes = queue_sizes
-    self.input_servers = input_servers
-    self.output_servers = output_servers
+    self.graph_filename = graph_filename
+    self.output_file = output_file
 
 class Event:
   def __init__(self, time, event_type=0, on_server = None):
@@ -68,69 +67,96 @@ def get_input_times(number_of_clients, l):
   return [result[0]] + [result[index - 1] + result[index]
       for index in range(1, number_of_clients)]
 
-def calculate_destination_server(source, graph, config, elements_in_queue):
-  if source == 0:
-    if random.random() < 0:
-      if elements_in_queue[1] < config.queue_sizes[1]:
-        return 1
-      else:
-        return -1
+def calculate_destination_server(source, graph, config, output_servers,
+    elements_in_queue):
+  possible_dests = [_[0] for _ in graph[source]]
+
+  if len(possible_dests) == 1:
+    dest = possible_dests[0]
+    if dest == len(graph):
+      return -(len(elements_in_queue))
+    if elements_in_queue[dest] < config.queue_sizes[dest]:
+      return dest
     else:
-      if elements_in_queue[2] < config.queue_sizes[2]:
-        return 2
-      else:
-        return -2
-  if source == 1:
-    return 3
-  if source == 2:
-    return 3
+      return -dest
+  else:
+    dests_probabilities = [_[1] for _ in graph[source]]
+    rand_value = random.random()
+    probability_ranges = [dests_probabilities[0]] + [
+        dests_probabilities[index] + dests_probabilities[index - 1] for index in
+          range(1, len(dests_probabilities))]
 
-  return -4
+    for index in range(len(dests_probabilities)):
+      if rand_value < probability_ranges[index]:
+        dest = possible_dests[index]
+        if dest == len(graph):
+          return -(len(elements_in_queue))
+        if elements_in_queue[dest] < config.queue_sizes[dest]:
+          return dest
+        else:
+          return -dest
 
-def process_next_event(queue, config, times, elements_in_queue, losses):
+    return -(len(elements_in_queue))
+
+def process_next_event(queue, config, graph, times, elements_in_queue, losses,
+    wait_times, response_times, output_servers):
   next_event = queue.pop()
-
-  #print("### next event is {0}".format(next_event))
 
   if next_event._type == 0:
     elements_in_queue[next_event._on_server] += 1
 
-    new_event = serve(next_event, config.muis, times)
+    new_event = serve(next_event, config.muis, times, wait_times,
+        response_times)
     times[next_event._on_server] = new_event._time
-
-    #print("___ New event {0}".format(new_event))
 
     queue.push(new_event)
   else:
     elements_in_queue[next_event._on_server] -= 1
     dest = calculate_destination_server(next_event._on_server, 
-        None, config, elements_in_queue)
+        graph, config, output_servers, elements_in_queue)
 
     if dest >= 0:
       new_event = Event(next_event._time, 0, dest)
-
-      #print("^^^ New event {0}".format(new_event))
 
       queue.push(new_event)
     else: 
       losses[-dest] += 1
 
-def serve(event, muis, times): 
+def serve(event, muis, times, wait_times, response_times): 
   mui = muis[event._on_server]
   serve_time = get_exponentially_distributed_value(mui)
 
   service_start_time = max(event._time, times[event._on_server])
 
-  #print("serve: times={0}   service_start_time={1}   serve_time={2}".format(
-  #  times, service_start_time, serve_time))
+  new_event = Event(service_start_time + serve_time, 1, event._on_server)
 
-  return Event(service_start_time + serve_time, 1, event._on_server)
+  wait_time = -(event._time - service_start_time)
+  wait_times[event._on_server] += wait_time
+  response_times[event._on_server] += serve_time
 
-def parse_cmd_args(args):
-  number_of_clients = 10
-  return Configuration(number_of_clients, 4, [2], [4, 4, 4, 4],
-      [number_of_clients + 1, number_of_clients + 1, 10, number_of_clients + 1],
-      [0], [3])
+  return new_event
+
+def parse_cmd_args(raw_args):
+  args_hash = {_[0] : _[1] for _ in zip(raw_args[::2], raw_args[1::2])}
+
+  print(args_hash)
+
+  number_of_clients = int(args_hash['-nc'])
+  queue_sizes = [int(_) for _ in args_hash['-queue-sizes'].split(',')]
+  muis = [int(_) for _ in args_hash['-muis'].split(',')]
+  lambds = [int(_) for _ in args_hash['-lambdas'].split(',')]
+  graph_filename = args_hash['-graph']
+  output_file = args_hash['-output-file']
+
+  return Configuration(number_of_clients, lambds, muis, queue_sizes,
+      graph_filename, output_file)
+  
+  #return Configuration(, [2], [4, 4, 4, 4],
+  #    [number_of_clients + 1, number_of_clients + 1, 10, number_of_clients + 1],
+  #    'graph1.in')
+  #
+  #return Configuration(1000, [1], [20, 10, 20, 2],
+  #  [1000000, 1000000, 20, 100000], 'graph1.in')
 
 def get_configuration(): 
   if len(sys.argv) > 1 and sys.argv[1] == '--no-gui':
@@ -144,15 +170,51 @@ def run_simulation(config):
   times = [0, 0, 0, 0]
   elements_in_queue = [0, 0, 0, 0]
   losses = [0, 0, 0, 0, 0]
+  wait_times = [0, 0, 0, 0]
+  response_times = [0, 0, 0, 0]
+  graph, input_servers, output_servers, n = read_graph(config.graph_filename)
+
   while(not queue.empty()):
-    process_next_event(queue, config, times, elements_in_queue, losses)
+    process_next_event(queue, config, graph, times, elements_in_queue, losses,
+        wait_times, response_times, output_servers)
 
   print("Losses {0}".format(losses))
+  print("Wait times {0}".format(wait_times))
+  print("response_times {0}".format(response_times))
 
-test_config = Configuration(1000, 4, [1], [20, 10, 20, 2],
-    [1000000, 1000000, 20, 100000], [0], [3])
+  output_results(config, losses, wait_times, response_times)
 
+def format_list(l):
+  return ', '.join([str(_) for _ in l])
+
+def output_results(config, losses, wait_times, response_times):
+  result = ', '.join([str(config.number_of_clients),
+    format_list(config.lambds), format_list(config.muis), format_list(losses), 
+    format_list(wait_times), format_list(response_times)])
+
+  with open(config.output_file, 'a') as file:
+    file.writelines([result + '\n'])
+
+def read_graph(filename):
+  with open(filename, 'r') as file:
+    lines = file.readlines()
+    lines = [_ for _ in lines if _[0] != '#']
+
+    n = int(lines[0])
+    input_servers = [int(_) for _ in lines[1].split(' ')]
+    output_servers = [int(_) for _ in lines[2].split(' ')]
+    graph = [[] for _ in range(n)]
+
+    for _ in lines[3:]:
+      numbers = _.split(' ')
+      start, end, probability = int(numbers[0]), int(numbers[1]), float(numbers[2])
+      graph[start].append((end, probability))
+
+    for _ in output_servers:
+      graph[_].append((n, 1))
+
+    return (graph, input_servers, output_servers, n)
 
 if __name__ == '__main__':
   config = get_configuration()
-  run_simulation(test_config)
+  run_simulation(config)
