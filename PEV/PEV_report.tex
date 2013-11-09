@@ -1,0 +1,204 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[english,bulgarian]{babel}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amscd}
+\usepackage{amssymb}
+\usepackage{graphics}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage{multicol}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\oddsidemargin 0mm
+\evensidemargin 0mm
+\topmargin 0mm
+\textheight 216mm
+\textwidth 165mm
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[CE,CO]{PEV report}
+\fancyfoot[CE,CO]{\thepage}
+
+\lstset{basicstyle=\ttfamily,
+  mathescape=true,
+  escapeinside=||,
+  emph={Task, Operation, for, each, if, else, endif, endfor, while, then, When, do, repeat, until, endrepeat},
+  emphstyle={\color{gray}\bfseries\itshape}}
+
+\def\CC {{\mathbb C}}        % комплексни числа
+\def\RR {{\mathbb R}}        % реални числа
+\def\ZZ {{\mathbb Z}}        % цели числа
+\def\NN {{\mathbb N}}        % естествени числа
+\def\be  {\begin{eqnarray}}  % формула с номерация
+\def\ee  {\end{eqnarray}}    % край на формулата
+\def\ben {\begin{eqnarray*}} % формула без номерация
+\def\een {\end{eqnarray*}}   % край на \bena
+\newcommand{\hr}{\rule{\linewidth}{0.1mm}}
+\newcommand{\bighs}{\hspace{15pt}}
+\newcommand{\hs}{\hspace{10pt}}
+\renewcommand{\tilde}{\overset{-}}
+
+\newenvironment{itemize*}{
+  \begin{itemize}
+    \setlength{\itemsep}{0pt}
+    \setlength{\parskip}{0pt}
+    \setlength{\parsep}{0pt}
+}{
+  \end{itemize}
+}
+
+\newenvironment{enumerate*}{
+  \begin{enumerate}
+    \setlength{\itemsep}{0pt}
+    \setlength{\parskip}{0pt}
+    \setlength{\parsep}{0pt}
+}{
+  \end{enumerate}
+}
+
+%\renewenvironment{proof}[1][\proofname]{}{\qed}
+
+\newtheoremstyle{plain}{1pt}{0pt}{}{}{}{}{.5em}{\thmname{\textbf{#1}}:\thmnote{#3}}
+
+\theoremstyle{plain}
+
+% Прави формулите да са с нормален шрифт на текста (примерно дробите не стават по-малки)
+\everymath{\displaystyle}
+
+\begin{document}
+
+\section*{\centering
+  Performance evaluation report - 2013-2014 \\
+  by\\
+  Ivaylo Petrov and Hristina Hristova 
+}
+
+\hr
+\section{\textbf{System M \textbackslash M \textbackslash *}}
+
+We are going to analyse a system with three \emph{M\textbackslash M\textbackslash 1}
+servers and one \emph{M\textbackslash M\textbackslash 1\textbackslash H} server
+as shown on \emph{Figure 1} by using the data from the simulator which we computed
+for this system. From server 1 a unit can go to server 2 with a probability
+\emph{p} and to server 3 - with probability \emph{1-p}. Since server 3 has a
+limit of \emph{H} for the units in its waiting queue, there can occur losses
+in the system.\\
+some figure \\
+For that system we have six free parameters: $lambda, mu_1, mu_2, mu_3, mu_4,
+queue\_limit$. By varying them we will show the impact they have on the system
+losses, the waiting times and the response times of the units.
+
+\subsection*{Analysis}
+
+Firstly, we have conducted experiments in which we varied separately the values of
+the free parameters in the range of 1 to 100. This way we hope to find connections
+between the behavior of these parameters and the rest of the variables. We have
+also computed the correlations between the variables. It can be seen from
+(\emph{Figure 2}) that there is little point in trying to find connections
+between $mu_3$ and the response time of server 1 for example since they are
+weakly correlated and because of pure logical reasons.\\
+The simulation data is simulated with a parameter that varies while the rest of
+the free parameters are constant (set to 40). In order to compare the results by
+different criteria we have simulated each case twice - with 10 and then with 40
+units limit for the third server when all but the queue limit is varied, and with
+10 and then 40 as a value for the constant parameters when $queue\_limit$ is
+being increased. The probability \emph{p} is set to 0.5.\\
+We are interested in the waiting times of a unit in servers 3 and 4. The results
+from varying $mu_1$ are shown in the form of graphics. For the waiting time in
+server 3 we observe a local (most probably a global) maximum. It is interesting
+that for small values of $mu_1$ ($\le$ 15) that waiting time is the same as when
+$mu_1 \ge$ 90. \emph{Graphic 1} show also that when the limit of the queue of
+server 3 increases, even smaller waiting times for bigger values of $mu_1$ are
+observed. From the second graphic we can see how the losses of the system are
+explained by $mu_1$. We conclude that the bigger $mu_1$ the bigger the lost
+units.\\
+
+\includegraphics[width=160mm, height=90mm]{graphics/chart_1.png}\\
+\includegraphics[width=160mm, height=90mm]{graphics/chart_2.png}\\
+
+So far we have observed that a system with parameters ($mu_1$, 40, 40, 40,
+40/10) behaves well (in a sense that the losses are small) when $mu_1$ is small.
+On the other hand the smaller the $mu_1$ the smaller the response time of a unit
+for server 1.\\
+Let us now explain the results we get from varying $mu_3$. For the waiting time
+of server 3 we can notice that when $mu_3$ becomes $\ge queue\_limit$ it begins
+to incline to 0. Still we observe that for smaller values of the limit of the queue
+of server 3 the time a unit has to wait is smaller. Of course this depends on the
+value of $mu_3$ as well which is set to 40. The response time of server 3 will be
+low if the rate $mu_3$ is at high values. An interesting observation is the behavior
+of the waiting time of server 4 when the queue limit is changing. Graphic 3 leads
+as to a conclusion that firstly, the rate of the waiting time of server 4 is almost
+constant (with a small dispersion) and secondly it is smaller for smaller values
+of \emph{queue\_limit}.\\
+
+\includegraphics[width=160mm, height=90mm]{graphics/chart_3.png}\\
+
+Now we look at the loss rate and notice that at high levels of $mu_3$ losses are
+not observed. Here we also observe a better behavior when the value of the queue
+limit is 10 from when it is 40.\\
+Now we will explain more with more details why and how we can manage to keep the
+levels of the lost units in the system at low values of \emph{queue\_limit}. As
+we can see from \emph{Graphic 5} when the limit is approximately 4 times less
+than the service rate $mu_1$ the losses begin to incline to 0. This is very
+interesting result because it means that we reduce the loss rate even when the
+limit of the queue for server 3 is small. We do not need to set it to very high
+levels in order to avoid losses.\\
+
+\includegraphics[width=160mm, height=90mm]{graphics/chart_4.png}\\
+
+\section*{\textbf{Cubic regression model}
+}
+
+By running our simulation and by varying the parameters, we firstly collected
+diverse data which included over 2500 examples. The main idea is to build a model
+based on this data that predicts the value of the losses in server 3 by taking
+into account the parameters we vary. After making some calculations of the impact of the
+free parameters on the variable \emph{losses server 3}, we concluded that the
+best approach would be to use cubic regression. Our decision is supported by the
+results which show that $m_3$ has the greatest influence on \emph{losses
+server 3} and the cubic estimation of $mu_3$ is the best approximation for
+the losses which occur in server 3.
+
+\subsection*{The model}
+
+In order to apply the regression approach to the data we firstly have to make some
+assumptions. The free variables have to be independent (a.k.a uncorrelated). On
+theory we can explain why they have to be independent very simply: since each
+server has its own serving speed, they do not depend either on one another or on
+the input rate \emph{lambda}. The results on the data from the simulations show
+the same thing - $mu_1, mu_2, mu_3, mu_4, lambda, queue limit$ are uncorrelated.
+This also proves that the way we have built the simulator is correct and the
+influence of the randomness is reduced to minimal.\\
+We have to assume that the residuals of the regression are normally distributed
+and to check for this after building the model so that we can decide if it good
+or not.\\
+Before showing the results from the regression, we will introduce the reader to
+the descriptive statistics of the free variables.\\
+\emph{some data and explanations}\\
+With the data given, we introduce the cubic regression model:\\
+
+\begin{lstlisting}[frame=single]
+  losses in server 3 := 399,446 -
+                        0.052 * lambda +
+                        1,515 * $mu1$ -
+                        0.074 * $mu_2$ -
+                        30,351 * $mu_3$ -
+                        0,042 * $mu_4$ -
+                        1,112 * queue limit +
+                        0,304 * $mu_3^{2}$ -
+                        0,001 * $mu_3^{3}$
+\end{lstlisting}
+
+The results show that when we know the values of the free parameters we can find
+the size of the losses in server 3. The model explains 73\% of the data. This
+results are very good given the number of observations. To see of the model is
+correct we look at the residuals. As the graph shows, they are approximately
+normally distributed. We conclude that in the 73\% of the cases the cubic regression
+is the approach that explains the losses occurred in the system.
+
+\end{document}
