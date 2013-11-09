@@ -143,20 +143,13 @@ def parse_cmd_args(raw_args):
 
   number_of_clients = int(args_hash['-nc'])
   queue_sizes = [int(_) for _ in args_hash['-queue-sizes'].split(',')]
-  muis = [int(_) for _ in args_hash['-muis'].split(',')]
+  muis = [float(_) for _ in args_hash['-muis'].split(',')]
   lambds = [int(_) for _ in args_hash['-lambdas'].split(',')]
   graph_filename = args_hash['-graph']
   output_file = args_hash['-output-file']
 
   return Configuration(number_of_clients, lambds, muis, queue_sizes,
       graph_filename, output_file)
-  
-  #return Configuration(, [2], [4, 4, 4, 4],
-  #    [number_of_clients + 1, number_of_clients + 1, 10, number_of_clients + 1],
-  #    'graph1.in')
-  #
-  #return Configuration(1000, [1], [20, 10, 20, 2],
-  #  [1000000, 1000000, 20, 100000], 'graph1.in')
 
 def get_configuration(): 
   if len(sys.argv) > 1 and sys.argv[1] == '--no-gui':
@@ -165,24 +158,39 @@ def get_configuration():
     return None
 
 def run_simulation(config):
-  queue = PriorityQueue([Event(_, 0, 0)
-    for _ in get_input_times(config.number_of_clients, config.lambds[0])])
-  times = [0, 0, 0, 0]
-  elements_in_queue = [0, 0, 0, 0]
-  losses = [0, 0, 0, 0, 0]
-  wait_times = [0, 0, 0, 0]
-  response_times = [0, 0, 0, 0]
-  graph, input_servers, output_servers, n = read_graph(config.graph_filename)
+  final_wait_times = [0, 0, 0, 0]
+  final_losses = [0, 0, 0, 0, 0]
+  final_response_times = [0, 0, 0, 0]
+  repetitions = 100
 
-  while(not queue.empty()):
-    process_next_event(queue, config, graph, times, elements_in_queue, losses,
-        wait_times, response_times, output_servers)
+  for _ in range(repetitions):
+    queue = PriorityQueue([Event(_, 0, 0)
+      for _ in get_input_times(config.number_of_clients, config.lambds[0])])
+    times = [0, 0, 0, 0]
+    elements_in_queue = [0, 0, 0, 0]
+    losses = [0, 0, 0, 0, 0]
+    wait_times = [0, 0, 0, 0]
+    response_times = [0, 0, 0, 0]
+    graph, input_servers, output_servers, n = read_graph(config.graph_filename)
 
-  print("Losses {0}".format(losses))
-  print("Wait times {0}".format(wait_times))
-  print("response_times {0}".format(response_times))
+    while(not queue.empty()):
+      process_next_event(queue, config, graph, times, elements_in_queue, losses,
+          wait_times, response_times, output_servers)
 
-  output_results(config, losses, wait_times, response_times)
+    final_wait_times = [_[0] + _[1] for _ in zip(final_wait_times, wait_times)]
+    final_losses = [_[0] + _[1] for _ in zip(final_losses, losses)]
+    final_response_times = [_[0] + _[1]
+        for _ in zip(final_response_times, response_times)]
+
+  final_wait_times = [_ / repetitions for _ in final_wait_times]
+  final_losses = [_ / repetitions for _ in final_losses]
+  final_response_times = [_ / repetitions for _ in final_response_times]
+
+  print("Losses {0}".format(final_losses))
+  print("Wait times {0}".format(final_wait_times))
+  print("Response_times {0}".format(final_response_times))
+
+  output_results(config, final_losses, final_wait_times, final_response_times)
 
 def format_list(l):
   return ', '.join([str(_) for _ in l])
@@ -190,7 +198,8 @@ def format_list(l):
 def output_results(config, losses, wait_times, response_times):
   result = ', '.join([str(config.number_of_clients),
     format_list(config.lambds), format_list(config.muis), format_list(losses), 
-    format_list(wait_times), format_list(response_times)])
+    format_list(wait_times), format_list(response_times), 
+    format_list(config.queue_sizes)])
 
   with open(config.output_file, 'a') as file:
     file.writelines([result + '\n'])
