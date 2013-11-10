@@ -5,13 +5,14 @@ import heapq
 
 class Configuration: 
   def __init__(self, number_of_clients, lambds, muis,
-      queue_sizes, graph_filename, output_file):
+      queue_sizes, graph_filename, output_file, repetitions):
     self.number_of_clients = number_of_clients
     self.lambds = lambds
     self.muis = muis
     self.queue_sizes = queue_sizes
     self.output_file = output_file
     self.init_graph(graph_filename)
+    self.repetitions = repetitions
 
   def init_graph(self, filename):
     with open(filename, 'r') as file:
@@ -106,35 +107,33 @@ def get_input_times(number_of_clients, l):
   return [result[0]] + [result[index - 1] + result[index]
       for index in range(1, number_of_clients)]
 
+def correct_dest_error(dest, config, elements_in_queue):
+    if dest == config.number_of_servers:
+      return -(config.number_of_servers)
+    if elements_in_queue[dest] < config.queue_sizes[dest]:
+      return dest
+    else:
+      return -dest
+
 def calculate_destination_server(source, config, elements_in_queue):
   graph = config.graph
   number_of_servers = config.number_of_servers
   possible_dests = [_[0] for _ in graph[source]]
 
   if len(possible_dests) == 1:
-    dest = possible_dests[0]
-    if dest == number_of_servers:
-      return -(number_of_servers)
-    if elements_in_queue[dest] < config.queue_sizes[dest]:
-      return dest
-    else:
-      return -dest
+    return correct_dest_error(possible_dests[0], config, elements_in_queue)
   else:
     dests_probabilities = [_[1] for _ in graph[source]]
-    rand_value = random.random()
     probability_ranges = [dests_probabilities[0]] + [
         dests_probabilities[index] + dests_probabilities[index - 1] for index in
           range(1, len(dests_probabilities))]
+    rand_value = random.random()
 
     for index in range(len(dests_probabilities)):
       if rand_value < probability_ranges[index]:
         dest = possible_dests[index]
-        if dest == number_of_servers:
-          return -(number_of_servers)
-        if elements_in_queue[dest] < config.queue_sizes[dest]:
-          return dest
-        else:
-          return -dest
+
+        return correct_dest_error(dest, config, elements_in_queue)
 
     return -(number_of_servers)
 
@@ -183,16 +182,15 @@ def parse_cmd_args(raw_args):
   muis = [float(_) for _ in args_hash['-muis'].split(',')]
   lambds = [int(_) for _ in args_hash['-lambdas'].split(',')]
   graph_filename = args_hash['-graph']
-  output_file = args_hash['-output-file']
+  output_file = args_hash.get('-output-file', None)
+  repetitions = int(args_hash.get('-repetitions', 100))
 
   return Configuration(number_of_clients, lambds, muis, queue_sizes,
-      graph_filename, output_file)
+      graph_filename, output_file, repetitions)
 
 def get_configuration(): 
   if len(sys.argv) > 1 and sys.argv[1] == '--no-gui':
     return parse_cmd_args(sys.argv[2:])
-  else:
-    return None
 
 def square_merger(a, b):
   return a + b * b
@@ -201,7 +199,7 @@ def run_simulation(config):
   final_statistics = RunStatistics(config.number_of_servers)
   squared_final_statistics = RunStatistics(config.number_of_servers)
 
-  repetitions = 100
+  repetitions = config.repetitions
 
   for _ in range(repetitions):
     queue = PriorityQueue([Event(_, 0, 0)
@@ -251,7 +249,7 @@ def print_all_statistics(statistics, squared_statistics, repetitions):
 
   interval = calculate_confidence_intervals(losses[-1], squared_losses[-1], 
       repetitions)
-  print("Losses for the whole system are in ({:.4f}, {:.4f}) with confidence 90%".
+  print("Passed through the whole system are in ({:.4f}, {:.4f}) with confidence 90%".
       format(*interval))
 
   print_statistic(repetitions, wait_times, squared_wait_times, "Wait times")
@@ -262,6 +260,9 @@ def format_list(l):
   return ', '.join([str(_) for _ in l])
 
 def output_results(config, losses, wait_times, response_times):
+  if config.output_file == None:
+    return
+
   result = ', '.join([str(config.number_of_clients),
     format_list(config.lambds), format_list(config.muis), format_list(losses), 
     format_list(wait_times), format_list(response_times), 
@@ -269,7 +270,6 @@ def output_results(config, losses, wait_times, response_times):
 
   with open(config.output_file, 'a') as file:
     file.writelines([result + '\n'])
-
 
 if __name__ == '__main__':
   config = get_configuration()
