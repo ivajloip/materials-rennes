@@ -1,0 +1,173 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[english,bulgarian]{babel}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amscd}
+\usepackage{amssymb}
+\usepackage{graphics}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage{multicol}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{enumitem}
+
+\oddsidemargin 0mm
+\evensidemargin 0mm
+\topmargin 0mm
+\textheight 216mm
+\textwidth 165mm
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[CE,CO]{PEV Simulation}
+\fancyfoot[CE,CO]{\thepage}
+
+\lstset{basicstyle=\ttfamily,
+  mathescape=true,
+  escapeinside=||,
+  emph={Task, Operation, for, each, if, else, endif, endfor, while, then, When, do, repeat, until, endrepeat},
+  emphstyle={\color{gray}\bfseries\itshape}}
+
+\def\CC {{\mathbb C}}        
+\def\RR {{\mathbb R}}       
+\def\ZZ {{\mathbb Z}}      
+\def\NN {{\mathbb N}}     
+\def\be  {\begin{eqnarray}} 
+\def\ee  {\end{eqnarray}}  
+\def\ben {\begin{eqnarray*}} 
+\def\een {\end{eqnarray*}}   
+\newcommand{\hr}{\rule{\linewidth}{0.1mm}}
+\newcommand{\bighs}{\hspace{15pt}}
+\newcommand{\hs}{\hspace{10pt}}
+\renewcommand{\tilde}{\overset{-}}
+
+\newenvironment{itemize*}{
+  \begin{itemize}[noitemsep,nolistsep]
+    \setlength{\itemsep}{0pt}
+    \setlength{\parskip}{0pt}
+    \setlength{\parsep}{0pt}
+}{
+  \end{itemize}
+}
+
+\newenvironment{enumerate*}{
+  \begin{enumerate}[noitemsep,nolistsep]
+    \setlength{\itemsep}{0pt}
+    \setlength{\parskip}{0pt}
+    \setlength{\parsep}{0pt}
+}{
+  \end{enumerate}
+}
+
+\newtheoremstyle{plain}{1pt}{0pt}{}{}{}{}{.5em}{\thmname{\textbf{#1}}:\thmnote{#3}}
+
+\theoremstyle{plain}
+
+\everymath{\displaystyle}
+
+\renewcommand{\labelenumii}{\arabic{enumi}.\arabic{enumii}}
+
+\begin{document}
+
+\section*{\centering
+  Code explonation
+}
+
+\hr
+
+The proposed simulation engine is entirely written in Python. It is tested with
+python version 3.3, however it should work with older version as well.
+
+The simulation engine can receive a number of parameters: 
+\begin{itemize*}
+  \item '-nc' $\rightarrow$ how many clients should be provided as input.
+  \item '-queue-sizes' $\rightarrow$ the sizes for each of the queues. For the
+    queues that are infinitely big, the user has to enter a value equal or 
+    greater than the number of clients.
+  \item '-muis' $\rightarrow$ The speed for processing the clients for each 
+    server.
+  \item '-lambdas' $ \rightarrow $ The speed at which the clients arrive to the
+    input servers. Please note that the code was never tested with more than
+    one input - server 1.
+  \item '-graph' $ \rightarrow $ The file that describes the graph topology.
+    That file contains the number of servers, input servers, output servers,
+    and connections between servers with the probability to follow some of 
+    those connection. For example is we have 0 2 0.5 this means that from 
+    server 1 we can go to server 3 and the probability to go there, and not to
+    some of the other servers that 0 is connected to, is 0.5.
+  \item '-output-file' $ \rightarrow $ A file to which to append a comma
+    separated representation of the output (useful for processing with excel).
+    It is optional.
+  \item '-repetitions' $ \rightarrow $ The number of execution of the simulation
+    from which the mean statistics are extracted. If it is not provided, 100 is
+    used.
+\end{itemize*}
+
+Those parameters are saved in an instance of the class \textbf{Configuration}
+that is passed to the methods that need it.
+
+For the purpose of this section when we say \textbf{event} we will refer to the
+event of client packet being received by some of the servers or departing from
+the servers.
+
+The main idea of the simulation engine is to have a set of events and process 
+them according to the time at which they occur. Each event has time when it
+arises, type - arrival at server or departure, server to or from which it moves
+and is modeled by a class \textbf{Event}.
+
+The events are saved in a priority queue realized using heap. This was
+considered one of the simplest implementations that is supposed to work good 
+even for big values for the number of clients.
+
+Other class that is used in the program is the class \textbf{RunStatistics}. It
+saves information about the wait times, losses and response times. 
+
+For the random values we use the standard python library \textbf{random}, which
+is capable of giving uniformly distributed random int values in some range,
+double value in the range [0, 1) or exponentually distributed values.
+
+\subsection*{Simulator execution} % (fold)
+\label{sub:Simulator execution}
+  The simulation consists of the following steps:
+  \begin{enumerate*}
+    \item Parse the parameters and the graph topology.
+    \item Execute '-repetitions' times the simulation that consists of:
+      \begin{enumerate*}
+        \item Generate random exponentually distributed times when the client 
+          arrivals should occur, create events for them and put them in the queue.
+        \item Initialize the variables for the times up until which the servers
+          are busy with 0, initialize the number of clients in each queue to 0.
+        \item Process for each event in the queue with regard of the type of the
+          event, the server on which it is, the graph topology and its
+          probabilities, the number of clients in the server queue. If the 
+          event is of type 0 (arrival), then we determine the time at which it
+          will be processed, update the appropriate statistics, queue sizes and
+          time up until which the server is busy. If the type is 1 (departure),
+          then we determine the destination to which the packet would like to 
+          go and the time at which it will arrive. If the queue of the
+          destination is full, the event is dropped, otherwise if the
+          destination is the exit from the system, we just count the event and
+          again drop it. If, however, the destination is not the exit point, 
+          then we insert a new arrival event in the queue with the appropriate
+          information.
+      \end{enumerate*}
+    \item In the end of each repetition, update the global statistics (squared
+      and normal).
+    \item Print the confidence intervals and output the comma-separeted-values
+      (CSV) file if requested by the user.
+  \end{enumerate*}
+
+\newtheorem*{note1}{Note}
+\begin{note1}
+  From theoretical point of view, it is better to drop packages when they arrive
+  and the queue is full, however as the communication time is supposed to be
+  negligable and for that reason - ignored, the elements in the queue are not
+  expected between the departure and the arrival at the next server.
+\end{note1}
+% subsection Simulator execution (end)
+
+
+\end{document}
