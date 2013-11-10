@@ -56,6 +56,26 @@ class PriorityQueue:
   def empty(self):
     return len(self.heap) == 0
 
+class RunStatistics:
+  def __init__(self, n):
+    self.wait_times = [0.0 for _ in range(n)]
+    self.losses = [0.0 for _ in range(n + 1)]
+    self.response_times = [0.0 for _ in range(n)]
+    
+  def merge(self, other, merger=float.__add__):
+    self.wait_times = [merger(*_)
+        for _ in zip(self.wait_times, other.wait_times)]
+    self.losses = [merger(*_) for _ in zip(self.losses, other.losses)]
+    self.response_times = [merger(*_)
+        for _ in zip(self.response_times, other.response_times)]
+
+  def normalize(self, runs):
+    final_wait_times = [_ / runs for _ in self.wait_times]
+    final_losses = [_ / runs for _ in self.losses]
+    final_response_times = [_ / runs for _ in self.response_times]
+
+    return (final_wait_times, final_losses, final_response_times)
+      
 
 def get_exponentially_distributed_value(l):
   return random.expovariate(l)
@@ -74,7 +94,7 @@ def calculate_destination_server(source, graph, config, output_servers,
   if len(possible_dests) == 1:
     dest = possible_dests[0]
     if dest == len(graph):
-      return -(len(elements_in_queue))
+      return -(len(graph))
     if elements_in_queue[dest] < config.queue_sizes[dest]:
       return dest
     else:
@@ -90,23 +110,23 @@ def calculate_destination_server(source, graph, config, output_servers,
       if rand_value < probability_ranges[index]:
         dest = possible_dests[index]
         if dest == len(graph):
-          return -(len(elements_in_queue))
+          return -(len(graph))
         if elements_in_queue[dest] < config.queue_sizes[dest]:
           return dest
         else:
           return -dest
 
-    return -(len(elements_in_queue))
+    return -(len(graph))
 
-def process_next_event(queue, config, graph, times, elements_in_queue, losses,
-    wait_times, response_times, output_servers):
+def process_next_event(queue, config, graph, times, elements_in_queue, 
+    statistics, output_servers):
   next_event = queue.pop()
 
   if next_event._type == 0:
     elements_in_queue[next_event._on_server] += 1
 
-    new_event = serve(next_event, config.muis, times, wait_times,
-        response_times)
+    new_event = serve(next_event, config.muis, times, statistics.wait_times,
+        statistics.response_times)
     times[next_event._on_server] = new_event._time
 
     queue.push(new_event)
@@ -120,7 +140,7 @@ def process_next_event(queue, config, graph, times, elements_in_queue, losses,
 
       queue.push(new_event)
     else: 
-      losses[-dest] += 1
+      statistics.losses[-dest] += 1
 
 def serve(event, muis, times, wait_times, response_times): 
   mui = muis[event._on_server]
@@ -139,7 +159,7 @@ def serve(event, muis, times, wait_times, response_times):
 def parse_cmd_args(raw_args):
   args_hash = {_[0] : _[1] for _ in zip(raw_args[::2], raw_args[1::2])}
 
-  print(args_hash)
+  #print(args_hash)
 
   number_of_clients = int(args_hash['-nc'])
   queue_sizes = [int(_) for _ in args_hash['-queue-sizes'].split(',')]
@@ -157,40 +177,72 @@ def get_configuration():
   else:
     return None
 
+def square_merger(a, b):
+  return a + b * b
+
 def run_simulation(config):
-  final_wait_times = [0, 0, 0, 0]
-  final_losses = [0, 0, 0, 0, 0]
-  final_response_times = [0, 0, 0, 0]
+  graph, input_servers, output_servers, n = read_graph(config.graph_filename)
+
+  final_statistics = RunStatistics(n)
+  squared_final_statistics = RunStatistics(n)
+
   repetitions = 100
 
   for _ in range(repetitions):
     queue = PriorityQueue([Event(_, 0, 0)
       for _ in get_input_times(config.number_of_clients, config.lambds[0])])
-    times = [0, 0, 0, 0]
-    elements_in_queue = [0, 0, 0, 0]
-    losses = [0, 0, 0, 0, 0]
-    wait_times = [0, 0, 0, 0]
-    response_times = [0, 0, 0, 0]
-    graph, input_servers, output_servers, n = read_graph(config.graph_filename)
+    times = [0 for _ in range(n)]
+    elements_in_queue = [0 for _ in range(n)]
+    statistics = RunStatistics(n)
 
     while(not queue.empty()):
-      process_next_event(queue, config, graph, times, elements_in_queue, losses,
-          wait_times, response_times, output_servers)
+      process_next_event(queue, config, graph, times, elements_in_queue,
+          statistics, output_servers)
 
-    final_wait_times = [_[0] + _[1] for _ in zip(final_wait_times, wait_times)]
-    final_losses = [_[0] + _[1] for _ in zip(final_losses, losses)]
-    final_response_times = [_[0] + _[1]
-        for _ in zip(final_response_times, response_times)]
+    final_statistics.merge(statistics)
+    squared_final_statistics.merge(statistics, square_merger)
 
-  final_wait_times = [_ / repetitions for _ in final_wait_times]
-  final_losses = [_ / repetitions for _ in final_losses]
-  final_response_times = [_ / repetitions for _ in final_response_times]
-
-  print("Losses {0}".format(final_losses))
-  print("Wait times {0}".format(final_wait_times))
-  print("Response_times {0}".format(final_response_times))
+  final_data = final_statistics.normalize(repetitions)
+  final_wait_times, final_losses, final_response_times = final_data
 
   output_results(config, final_losses, final_wait_times, final_response_times)
+
+  print_all_statistics(final_statistics, squared_final_statistics, repetitions)
+
+def calculate_confidence_intervals(value, squared_value, n):
+  coefficient = 1.64
+  variance = ((squared_value - n * value * value) / (n - 1)) ** 0.5
+  deviation = coefficient * variance / (n ** 0.5)
+
+  return (value - deviation, value + deviation)
+
+def print_statistic(repetitions, data, squared_data, name):
+  message_template = (
+      "{0} for server {1} is in the interval ({2:.4f}, {3:.4f})" +
+      " with confidence 90%")
+  for _ in range(len(data)):
+    interval = calculate_confidence_intervals(data[_], squared_data[_],
+        repetitions)
+
+    print(message_template.format(name, _, *interval))
+
+def print_all_statistics(statistics, squared_statistics, repetitions):
+  data = statistics.normalize(repetitions)
+  wait_times, losses, response_times = data
+
+  squared_data = squared_statistics.normalize(1)
+  squared_wait_times, squared_losses, squared_response_times = squared_data
+
+  print_statistic(repetitions, losses[:-1], squared_losses[:-1], "Loses")
+
+  interval = calculate_confidence_intervals(losses[-1], squared_losses[-1], 
+      repetitions)
+  print("Losses for the whole system are in ({:.4f}, {:.4f}) with confidence 90%".
+      format(*interval))
+
+  print_statistic(repetitions, wait_times, squared_wait_times, "Wait times")
+  print_statistic(repetitions, response_times, squared_response_times,
+      "Response times")
 
 def format_list(l):
   return ', '.join([str(_) for _ in l])
