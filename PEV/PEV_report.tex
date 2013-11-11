@@ -90,9 +90,9 @@
 
 In this report we will describe the results of the simulator we have built for
 two different network topologies. After analysing the data, we will introduce a
-model that explains it in the majority of cases. After that we will make compare
-our results from the simulation and the model to the approximation of the expected
-behavior of the network topologies.
+model that explains it in the majority of cases. After that we will make a
+comparison between our results from the simulation and the model to the
+approximation of the expected behavior of the network topologies.
 
 \section*{\textbf{System M \textbackslash M \textbackslash *}}
 
@@ -114,66 +114,96 @@ queue\_limit$. By varying them we will show the impact they have on the system
 losses, the waiting times and the response times of the servers.
 
 \subsection*{Analysis}
+In order to perform the analysis, we had to think of a way to calculate the
+waiting time in this case when losses can occur. As we could not find a correct
+way to do it in the materials, provided for the course, we decided to calculate
+it in the following way. We sum the waiting times for each unit for each server
+and then divide the result by the number of packets that were sent to this 
+server. Note that we do not use the number of packets that were actually
+processed by the server, but the number that was sent to it. We decided to use
+this method for calculation of the wait time, instead of using the way were we
+divide by the number of actually processed messages, because it seemed more 
+natural for us. In the real life, if the server can not handle a new client's
+request, it will just sent a message that says that it is busy in most cases.
+This is the same as handling the request instantly and having a service time of
+0 for it.
 
-Firstly, we have conducted a number of experiments in which we varied separately the values of
-the free parameters in the range of 1 to 100. The number of the input units in
-each experiment was 1000. We hope to find connections between the behavior of
-these parameters and the rest of the variables, namely units losses, waiting times
-and response times. We have also computed the correlations between the variables.
-For example, we know that there is little point in trying to find connections
-between $\mu_3$ and the response time of server 1 since they are weakly correlated.
-This fact is very natural, however.\\
-The simulation data is obtained with one parameter that varies and the rest of
-the free parameters set to a constant value (10 or 40). In order to compare the results by
-different criteria we have simulated each case twice - first with 10 and then with 40
-units limit for the third server when all but the queue limit is varied, and with
-10 and then 40 as a value for the constant parameters when $queue\_limit$ is
-being varied. The probability \emph{p} in those simulations was set to 0.5.\\
-In the following paragraph we are interested in the waiting times of a unit in servers 3 and 4. The results
-from varying $\mu_1$ are shown in Figure~\ref{fig:influence_of_mu1_on_wt3_when_queue_limit_changes}. For the waiting time in
-server 3 we observe a local (most probably also a global) maximum. It is an interesting
-fact that for small values of $\mu_1$ ($\le$ 15) the waiting time is the same as when
-$\mu_1 \ge$ 90. Figure~\ref{fig:influence_of_mu1_on_wt3_when_queue_limit_changes} also shows that when the limit of the queue of
-server 3 increases, smaller waiting times for bigger values of $\mu_1$ are
-observed. From Figure~\ref{fig:influence_of_mu1_on_system:losses} we can see how the losses of the system are
-explained by $\mu_1$. We conclude that the bigger $\mu_1$ the bigger the lost
-units.
+Having decided that, we have conducted a number of experiments in which we
+varied separately the values of the free parameters in the range of 1 to 100.
+The number of the input units in each experiment was 1000. We wanted to find
+connections between the behavior of these parameters and the rest of the
+variables, namely units losses, waiting times and response times. We have also
+computed the correlations between the variables. For example, we know that
+there is little point in trying to find connections between $\mu_3$ and the
+response time of server 1 since they are weakly correlated. This fact is very
+natural, however. 
+
+The simulation data is obtained with some parameters that vary and the rest of
+the free parameters set to a constant value (10 or 40). The number of varying 
+parameters is 1 in most cases, although there is one case in which it is 2. 
+In order to compare the results by different criteria we have run the
+simulations in the following manner: we set all the free parameters to one
+constant value (first 10 and after that 40), which is the same for all of them,
+and let one or two of them to vary in the range of 1 to 100. The probability
+\emph{p} in those simulations was set to 0.5.  
+
+In the following paragraph we are interested in the waiting times of a unit in
+servers 3 and 4. The results from varying $\mu_1$ and \emph{lambda} (using the 
+same value for both) are shown in
+Figure~\ref{fig:influence_of_mu1_on_wt3_when_queue_limit_changes}. For the
+waiting time in server 3 we observe a local (most probably also a global)
+maximum. It is an interesting fact that for small values of $\mu_1$ and
+\emph{lambda} ($\le$ 15) the waiting time is the same as when they are $\ge$
+90. This maximum could be explained by the fact that when we increase of the
+varying parameters, the packets are delayed with increasing speed. The waiting
+time increases as more and more packets are left in the queue to wait for
+processing. After some value for the varying parameters, the queue of server 3
+is becoming full from time to time and there are losses. Those loses result in
+the decrease of the waiting time due to the way we decided to calculate it.
+Figure~\ref{fig:influence_of_mu1_on_wt3_when_queue_limit_changes} also shows
+that when the limit of the queue of server 3 increases, smaller waiting times 
+for bigger values of $\mu_1$ (and \emph{lambda}) are observed. From
+Figure~\ref{fig:influence_of_mu1_on_system:losses} we can also see how the
+losses of the system are explained by those variables. We conclude that the
+bigger $\mu_1$ and \emph{lambda} the bigger the lost units.  
 
 \begin{figure}
   \caption{Influence of $\mu_1$ on WT3 when queue limit changes}
-  \includegraphics[width=\textwidth, height=90mm]{graphics/chart_1.png}\\
+  \includegraphics[width=\textwidth, height=90mm]{graphics/chart_1.png}
   \label{fig:influence_of_mu1_on_wt3_when_queue_limit_changes}
 \end{figure}
 \begin{figure}
   \caption{Influence of $\mu_1$ on system losses}
-  \includegraphics[width=\textwidth, height=90mm]{graphics/chart_2.png}\\
+  \includegraphics[width=\textwidth, height=90mm]{graphics/chart_2.png}
   \label{fig:influence_of_mu1_on_system:losses}
 \end{figure}
 
-So far we have observed that a system with parameters ($\mu_1$, 40, 40, 40,
-40, 10) behaves well (in a sense that the losses are small) when $\mu_1$ is small.
-On the other hand the smaller the $\mu_1$ the smaller the response time of a unit
-for server 1.
+So far we have observed that a system with parameters (\emph{lambda}, $\mu_1$,
+40, 40, 40, 10) behaves well (in a sense that the losses are small) when
+$\mu_1$ and \emph{lambda} are small. On the other hand the smaller the varying
+parameters, the smaller the response time of a unit for server 1.
 
-Let us now explain another series of simulations where we vary $\mu_3$. Firstly, for the waiting time
-of server 3 we can notice that when $\mu_3$ becomes $\ge queue\_limit$, it begins
-to incline to 0. We also observe that for smaller values of the limit of the queue
-of server 3, the time a unit has to wait is smaller. This is natural, as each
-unit has to wait all the other units that are before it in the queue and with
-smaller queue, fewer such units will exist. Of course waiting time depends on the
-value of $\mu_1$ as well which is set to 40. Let us also note that the response time of server 3 will be
-low if the rate $\mu_3$ has a high value. Another interesting observation is the behavior
-of the waiting time of server 4 when the queue limit is changing.
-Figure~\ref{fig:influence_of_mu3_on_wt3_when_queue_limit_changes} leads
-us to the conclusion that firstly, the rate of the waiting time of server 4 is almost
-constant (with a small dispersion) and secondly, it is smaller for smaller values
-of \emph{queue\_limit}. The last point can be explained by the fact that smaller values
-for \emph{queue size} lead to bigger number of losses, which in turn leads to
-less units reaching server 4 and this way decreasing its waiting time.
+Let us now explain another series of simulations where we vary $\mu_3$.
+Firstly, for the waiting time of server 3 we can notice that when $\mu_3$
+becomes $\ge queue\_limit$, it begins to incline to 0. We also observe that for
+smaller values of the limit of the queue of server 3, the time a unit has to
+wait is smaller. This is natural, as each unit has to wait all the other units
+that are before it in the queue and with smaller queue, fewer such units will
+exist. Of course waiting time depends on the value of $\mu_1$ as well which is
+set to 40. Let us also note that the response time of server 3 will be low if
+the rate $\mu_3$ has a high value. Another interesting observation is the
+behavior of the waiting time of server 4 when the queue limit is changing. 
+Figure~\ref{fig:influence_of_mu3_on_wt3_when_queue_limit_changes} leads us to
+the conclusion that firstly, the rate of the waiting time of server 4 is almost
+constant (with a small dispersion) and secondly, it is smaller for smaller
+values of \emph{queue\_limit}. The last point can be explained by the fact that
+smaller values for \emph{queue size} lead to bigger number of losses, which in
+turn leads to less units reaching server 4 and this way decreasing its waiting
+time.  
 
 \begin{figure}
   \caption{Influence of $\mu_3$ on WT3 when queue limit changes}
-  \includegraphics[width=\textwidth, height=90mm]{graphics/chart_3.png}\\
+  \includegraphics[width=\textwidth, height=90mm]{graphics/chart_3.png}
   \label{fig:influence_of_mu3_on_wt3_when_queue_limit_changes}
 \end{figure}
 
@@ -239,8 +269,6 @@ adjusted R) of the model we have build.
 
 With the data given, we compute the cubic regression model. The software that is
 use for the statistical model is \emph{SPSS}:\\
-
-\clearpage
 
 \begin{lstlisting}[frame=single]
   losses in server 3 := 399,446 -
@@ -310,19 +338,19 @@ The lighter green lines correspond to extremely good results shown by our
 simulation. As it can be seen from them, the losses, the loss probability, the
 mean throughput and the mean response errors are close to zero. In the first
 examples we set the probability \emph{p} to 0.5. To understand whether \emph{p}
-is the factor that makes our model correct, we change it to 0.7 and we observe
+is the factor that makes our model correct, we change it to 0.3 and we observe
 that the accuracy of the simulation is the same.
 
 There are two cases, though, where we can see that the simulation gives worse
 results than the results from the regression model. Firstly, let us look at the
 example (200, 100, 10, 10, 10, 1) with the probability \emph{p} = 0.5. We can notice
 that the results from the regression model are very close the approximations but not as
-close as if the probability \emph{p} is slightly increased to 0.504. The fact
+close as if the probability \emph{p} is slightly decreased to 0.496. The fact
 that the regression model we have build does not depend on the value of
 \emph{p} is interesting (and on one hand proves its correctness) even if at
 first look this may seem strange. If we see more closely the values of the
 losses when \emph{p} is changing we will notice that they are the
-same. Still, when \emph{p} is 0.504 the cubic approximation is better than the
+same. Still, when \emph{p} is 0.496 the cubic approximation is better than the
 results from the simulation.  This is because the real model depends strongly
 on that probability and it is changing. For the majority of cases, it can be
 concluded that when for some cases the cubic regression model is not strong
@@ -362,7 +390,7 @@ the expected values for the characteristics.
 
 \begin{figure}
   \caption{Graph Topology}
-  \includegraphics[width=\textwidth, height=90mm]{graphics/hard_graph.png}\\
+  \includegraphics[width=\textwidth, height=90mm]{graphics/hard_graph.png}
   \label{fig:hard_graph}
 \end{figure}
 
@@ -376,55 +404,65 @@ both times are increasing at the same speed. The difference of the waiting times
 is not very big still more accuracy could have been achieved.\\
 Now let us change the values of the parameters and make the same experiment. Now
 the characteristics are (40, $\mu_1$, 40, 40, 40, 40, 40) with the same probabilities.
-On the Figure~\ref{fig:waiting_time2} are presented the results. When $\mu_1$ is around and more than 20, it is observed the opposite in
-this case - the values we get for the waiting time of server 3 from our simulation are
-smaller than the expected ones. Here we notice bigger difference in the times. Again they
-are increasing in the both situations but now the speed of the results from the approximation is
-twice or more the speed of the results from the simulation for $\mu_1 \ge 20$.
-It can be concluded that the simulation in the cases presented so far concerning
-the more complex topology is behaving well when there is a constriction for $\mu_1$.\\
+On the Figure~\ref{fig:waiting_time2} are presented the results. When $\mu_1$
+is around and more than 20, it is observed the opposite in this case - the
+values we get for the waiting time of server 3 from our simulation are smaller
+than the expected ones. Here we notice bigger difference in the times. Again
+they are increasing in the both situations but now the speed of the results
+from the approximation is twice or more the speed of the results from the
+simulation for $\mu_1 \ge 20$.  It can be concluded that the simulation in the
+cases presented so far concerning the more complex topology is behaving well
+when there is a constriction for $\mu_1$. 
 
-\begin{figure}
+\begin{figure}[h]
   \caption{Behavior of the simulation waiting time when $\mu_1$ increases}
-  \includegraphics[width=160mm, height=90mm]{graphics/chart_5.png}\\
+  \includegraphics[width=160mm, height=90mm]{graphics/chart_5.png}
   \label{fig:waiting_time1}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[h]
   \caption{Behavior of the simulation waiting time when $\mu_1$ increases - different parameters}
-  \includegraphics[width=160mm, height=90mm]{graphics/chart_6.png}\\
+  \includegraphics[width=160mm, height=90mm]{graphics/chart_6.png}
   \label{fig:waiting_time2}
 \end{figure}
 
 We are not only considering waiting time but we are also interested in the mean
 throughput especially in the cases when $\lambda$ and $\mu_2$ are changing.
 The next two following figures show represent the mean throughput in these situations.
-First we have the values (lambda, 40, 40, 40, 40, 40, 40) (the probabilities in
+First we have the values ($\lambda$, 40, 40, 40, 40, 40, 40) (the probabilities in
 the both cases stay the same). The main observations are that the expected throughput
 and the simulated one are increasing and with the increasing of $\lambda$ the
 difference between them becomes bigger. This is explained with the different loss
 probabilities - the expectation is that there will be losses but our simulation
-does not detect any.\\
+does not detect any.
+
 The more interesting case is when we vary $\mu_2$. This time our simulations
 computes non-zero losses like the expectation follows. As shown on Figure~\ref{fig:throughput2}
 for small values of $\mu_2$ the results from the simulation are quite close to
 what is estimated as an approximation. With the increasing of $\mu_2$, the both
-throughput seem to be almost constant. The difference between them is between 1
+throughputs seem to be almost constant. The difference between them is between 1
 and 2 units. This is better behavior than in the previous case due to the fact
 that the increasing speeds in the both cases are almost 0 for big $\mu_2$ and the
-difference is constant.\\
+difference is constant.
 
-\begin{figure}
+\begin{figure}[h]
   \caption{Behavior of the simulation mean throughput when $\lambda$ increases}
   \includegraphics[width=160mm, height=90mm]{graphics/chart_7.png}\\
   \label{fig:throughput1}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[h]
   \caption{Behavior of the simulation mean throughput when $\mu_2$ increases}
   \includegraphics[width=160mm, height=90mm]{graphics/chart_8.png}\\
   \label{fig:throughput2}
 \end{figure}
 
+To sum up, in most cases the observed results from the simulations can be easily
+explained and the results from the approximations are close to them. There are
+however cases, when the results are not quite good and not as expected. A
+possible cause for at least some of those problem is the proposed way for
+computation of wait time. It would be good to try to obtain result for the other
+proposed way for computing the wait times and see it it will lead to better
+values.
 
 \end{document}
