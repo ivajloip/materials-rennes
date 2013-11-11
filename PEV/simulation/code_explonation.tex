@@ -87,23 +87,23 @@ python version 3.3, however it should work with older version as well.
 The simulation engine can receive a number of parameters: 
 \begin{itemize*}
   \item '-nc' $\rightarrow$ how many clients should be provided as input.
-  \item '-queue-sizes' $\rightarrow$ the sizes for each of the queues. For the
-    queues that are infinitely big, the user has to enter a value equal or 
-    greater than the number of clients.
-  \item '-muis' $\rightarrow$ The speed for processing the clients for each 
-    server.
-  \item '-lambdas' $ \rightarrow $ The speed at which the clients arrive to the
-    input servers. Please note that the code was never tested with more than
-    one input - server 1.
+  \item '-queue-sizes' $\rightarrow$ a comma-separated list of the sizes for
+    each of the queues. For the queues that are infinitely big, the user has to
+    enter a value equal or greater than the number of clients.
+  \item '-muis' $\rightarrow$ a comma-separated list of the speed for
+    processing the clients for each server.
+  \item '-lambdas' $ \rightarrow $ a comma-separated list of the speed at which
+    the clients arrive to the input servers. Please note that the code was
+    never tested with more than one input - server 1.
   \item '-graph' $ \rightarrow $ The file that describes the graph topology.
     That file contains the number of servers, input servers, output servers,
     and connections between servers with the probability to follow some of 
     those connection. For example is we have 0 2 0.5 this means that from 
     server 1 we can go to server 3 and the probability to go there, and not to
     some of the other servers that 0 is connected to, is 0.5.
-  \item '-output-file' $ \rightarrow $ A file to which to append a comma
-    separated representation of the output (useful for processing with excel).
-    It is optional.
+  \item '-output-file' $ \rightarrow $ A file to which to append a
+    comma-separated representation of the output (useful for processing with
+    excel). It is optional.  
   \item '-repetitions' $ \rightarrow $ The number of execution of the simulation
     from which the mean statistics are extracted. If it is not provided, 100 is
     used.
