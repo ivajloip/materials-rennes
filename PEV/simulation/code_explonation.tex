@@ -31,6 +31,9 @@
   emph={Task, Operation, for, each, if, else, endif, endfor, while, then, When, do, repeat, until, endrepeat},
   emphstyle={\color{gray}\bfseries\itshape}}
 
+\setlist[itemize]{noitemsep,nolistsep}
+\setlist[enumerate]{noitemsep,nolistsep}
+
 \def\CC {{\mathbb C}}        
 \def\RR {{\mathbb R}}       
 \def\ZZ {{\mathbb Z}}      
@@ -45,7 +48,7 @@
 \renewcommand{\tilde}{\overset{-}}
 
 \newenvironment{itemize*}{
-  \begin{itemize}[noitemsep,nolistsep]
+  \begin{itemize}
     \setlength{\itemsep}{0pt}
     \setlength{\parskip}{0pt}
     \setlength{\parsep}{0pt}
@@ -54,7 +57,7 @@
 }
 
 \newenvironment{enumerate*}{
-  \begin{enumerate}[noitemsep,nolistsep]
+  \begin{enumerate}
     \setlength{\itemsep}{0pt}
     \setlength{\parskip}{0pt}
     \setlength{\parsep}{0pt}
@@ -168,6 +171,5 @@ double value in the range [0, 1) or exponentually distributed values.
   expected between the departure and the arrival at the next server.
 \end{note1}
 % subsection Simulator execution (end)
-
 
 \end{document}
