@@ -12,7 +12,7 @@
 \usepackage{multicol}
 \usepackage{listings}
 \usepackage{xcolor}
-\usepackage{enumitem}
+%\usepackage{enumitem}
 
 \oddsidemargin 0mm
 \evensidemargin 0mm
@@ -31,9 +31,9 @@
   emph={Task, Operation, for, each, if, else, endif, endfor, while, then, When, do, repeat, until, endrepeat},
   emphstyle={\color{gray}\bfseries\itshape}}
 
-\setlist[itemize]{noitemsep,nolistsep} % remove spaces between itemize and
+%\setlist[itemize]{noitemsep,nolistsep} % remove spaces between itemize and
   % its surroundings and between its items
-\setlist[enumerate]{noitemsep,nolistsep} % remove spaces between enumerate and
+%\setlist[enumerate]{noitemsep,nolistsep} % remove spaces between enumerate and
   % its surroundings and between its items
 
 \def\CC {{\mathbb C}}        % Complex numbers
@@ -87,17 +87,28 @@
 }
 
 \hr
+
+In this report we will describe the results of the simulator we have built for
+two different network topologies. After analysing the data, we will introduce a
+model that explains it in the majority of cases. After that we will make compare
+our results from the simulation and the model to the approximation of the expected
+behavior of the network topologies.
+
+\begin{figure}
+  \caption{Graph topology}
+  \includegraphics[width=\textwidth, height=90mm]{graphics/simple_graph.png}\\
+  \label{fig:simple_graph}
+\end{figure}
+
 \section*{\textbf{System M \textbackslash M \textbackslash *}}
 
 We are going to analyse a system with three \emph{M\textbackslash M\textbackslash 1}
 servers and one \emph{M\textbackslash M\textbackslash 1\textbackslash H} server
-as shown on {\color{red}Figure 1} by using the data from the simulator which we computed
+as shown on \emph{Figure~\ref{fig:simple_graph}} by using the data from the simulator which we computed
 for this system. From server 1 a unit can go to server 2 with a probability
 \emph{p} and to server 3 - with probability \emph{1-p}. Since server 3 has a
 limit of \emph{H} for the units in its waiting queue, losses can occur in the
-system. From servers 2 and 3, the units go to server 4 with probability 1.
-{\color{red}some figure} 
-
+system. From servers 2 and 3, the units go to server 4 with probability 1.\\
 For that system we have six free parameters: $\lambda, \mu_1, \mu_2, \mu_3, \mu_4,
 queue\_limit$. By varying them we will show the impact they have on the system
 losses, the waiting times and the response times of the servers.
@@ -105,21 +116,19 @@ losses, the waiting times and the response times of the servers.
 \subsection*{Analysis}
 
 Firstly, we have conducted a number of experiments in which we varied separately the values of
-the free parameters in the range of 1 to 100. We hoped to find connections
-between the behavior of these parameters and the rest of the variables,
-namely units losses, waiting times and response times. We have
-also computed the correlations between the variables. It can be seen from
-({\color{red}Figure 2}) that there is little point in trying to find connections
-between $\mu_3$ and the response time of server 1 for example since they are
-weakly correlated. This fact is very natural, however.
-
+the free parameters in the range of 1 to 100. The number of the input units in
+each experiment was 1000. We hope to find connections between the behavior of
+these parameters and the rest of the variables, namely units losses, waiting times
+and response times. We have also computed the correlations between the variables.
+For example, we know that there is little point in trying to find connections
+between $\mu_3$ and the response time of server 1 since they are weakly correlated.
+This fact is very natural, however.\\
 The simulation data is obtained with one parameter that varies and the rest of
 the free parameters set to a constant value (10 or 40). In order to compare the results by
 different criteria we have simulated each case twice - first with 10 and then with 40
 units limit for the third server when all but the queue limit is varied, and with
 10 and then 40 as a value for the constant parameters when $queue\_limit$ is
-being varied. The probability \emph{p} in those simulations was set to 0.5.
-
+being varied. The probability \emph{p} in those simulations was set to 0.5.\\
 In the following paragraph we are interested in the waiting times of a unit in servers 3 and 4. The results
 from varying $\mu_1$ are shown in Figure~\ref{fig:influence_of_mu1_on_wt3_when_queue_limit_changes}. For the waiting time in
 server 3 we observe a local (most probably also a global) maximum. It is an interesting
@@ -151,7 +160,7 @@ of server 3 we can notice that when $\mu_3$ becomes $\ge queue\_limit$, it begin
 to incline to 0. We also observe that for smaller values of the limit of the queue
 of server 3, the time a unit has to wait is smaller. This is natural, as each
 unit has to wait all the other units that are before it in the queue and with
-smaller queue, fewer such units will exist. Of course wait time depends on the
+smaller queue, fewer such units will exist. Of course waiting time depends on the
 value of $\mu_1$ as well which is set to 40. Let us also note that the response time of server 3 will be
 low if the rate $\mu_3$ has a high value. Another interesting observation is the behavior
 of the waiting time of server 4 when the queue limit is changing.
@@ -178,7 +187,7 @@ levels of the lost units in the system low at low values of \emph{queue\_limit}.
 As we can see from Figure~\ref{fig:influence_of_mu3_on_system:losses} when the
 queue limit is 10 and $\mu_3$ is approximately 5 the losses begin to incline to 0
 while when the queue limit is 40 this happens when $\mu_3$ reaches 20. And when
-$\mu_3$ is small the losses are less in the case when then queue limit is
+$\mu_3$ is small the losses are less in the case when the queue limit is
 smaller. This is very interesting result because it means that we reduce
 the loss rate even when the limit of the size queue for server 3 is small. We
 do not need to set it to very high levels in order to avoid losses.  
@@ -194,8 +203,8 @@ do not need to set it to very high levels in order to avoid losses.
 
 After the primary analysis we turn our attention to building a model from the
 simulation data and later on comparing the results from that model to the
-results from the simulation and those of the approximation that we will
-introduce in the next section. By running our simulation and by varying the
+results from the simulation and those of the approximation that will be
+introduced in the next section. By running our simulation and by varying the
 parameters, we firstly collected diverse data which included over 2500
 examples. The main idea was to build a model based on this data that predicts
 the value of the losses in server 3 by taking into account the parameters we
@@ -222,12 +231,16 @@ We have to assume that the residuals of the regression are normally distributed
 and to check for this after building the model so that we can decide if it is
 good or not.
 
-Before showing the results from the regression, we will introduce the reader to
-the descriptive statistics of the free variables.
+The descriptive statistics of the free variables can be found in the document
+statistical\_results/descriptive\_statistics\_model\_summary.pdf. In the some document
+the reader can find also the model summary (which includes the square R and
+adjusted R) of the model we have build.
 
-{\color{red} some data and explanations}
 
-With the data given, we compute the cubic regression model:\\
+With the data given, we compute the cubic regression model. The software that is
+use for the statistical model is \emph{SPSS}:\\
+
+\clearpage
 
 \begin{lstlisting}[frame=single]
   losses in server 3 := 399,446 -
@@ -242,10 +255,10 @@ With the data given, we compute the cubic regression model:\\
 \end{lstlisting}
 
 The results show that when we know the values of the free parameters we can find
-the size of the losses in server 3. The model explains 73\% of the data. This
-results are very good given the number of observations. To see if the model is
-correct we look at the residuals. As the graph shows, they are approximately
-normally distributed. We conclude that in the 73\% of the cases the cubic
+the size of the losses in server 3. The model explains 73\% ($R^{2}$ = 0.730) of the data. This
+results are very good given the number of observations. We can also consider them representative. 
+To see if the model is correct we look at the residuals in the document statistical\_results/residuals.pdf.
+As the graphic shows, they are approximately normally distributed. We conclude that in the 73\% of the cases the cubic
 regression is the approach that explains the losses occurred in the system.
 
 \subsection*{The approximations}
@@ -274,12 +287,12 @@ probability $p_{loss}$ and the probability \emph{p} for a unit to go to that
 server. In general, \emph{losses} = \emph{output * p} * $p_{loss}$, where
 \emph{output} is the number of units that have been served in the previous
 server, connected to the one we analyze. There is a way to compute the mean
-waiting time too. We use the following reasoning: when we have the mean people
+waiting time too. We use the following reasoning: when we have the mean clients
 in the server queue, we simply multiply it by the service time. This gives us a
-good approximation for the waiting time.
+good approximation for the mean waiting time.
 
 Let us remark how we are going to compute the results for the cubic regression.
-The model gives as the losses in the server and by using them, we can compute
+The model gives us the losses in the server and by using them, we can compute
 the loss probability (as shown above). For the mean response time, the mean
 throughput and the mean waiting time we use the formulas we have decided to use
 for the approximations but with a loss probability that is equal to the one
@@ -287,8 +300,8 @@ estimated with the cubic regression.
 
 \subsection*{Comparisons and results}
 
-Let us first take a look at the behavior of the third server. In the
-({\color{red} some name}) table are the results which we got from the
+Let us first take a look at the behavior of the third server. In the file
+model\_comparisons/results\_sgraph\_cubic.pdf are the results which we got from the
 simulation, from the cubic regression and from applying the formulas from the
 theoretical approximation. We have done several examples varying the free
 parameters and we will explain the observed results.  
@@ -302,39 +315,39 @@ that the accuracy of the simulation is the same.
 
 There are two cases, though, where we can see that the simulation gives worse
 results than the results from the regression model. Firstly, let us look at the
-example (200, 100, 10, 10, 10, 1) and probability \emph{p} = 0.5. We can notice
-that the results from this model are very close the approximations but not as
+example (200, 100, 10, 10, 10, 1) with the probability \emph{p} = 0.5. We can notice
+that the results from the regression model are very close the approximations but not as
 close as if the probability \emph{p} is slightly increased to 0.504. The fact
 that the regression model we have build does not depend on the value of
 \emph{p} is interesting (and on one hand proves its correctness) even if at
 first look this may seem strange. If we see more closely the values of the
-characteristics when \emph{p} is changing we will notice that they are the
+losses when \emph{p} is changing we will notice that they are the
 same. Still, when \emph{p} is 0.504 the cubic approximation is better than the
 results from the simulation.  This is because the real model depends strongly
 on that probability and it is changing. For the majority of cases, it can be
-concluded that when for some case the cubic regression model is not strong
-enough, there exists situation (when \emph{p} is different) in which the same
-results are much better and closer to the observed by the approximation results
+concluded that when for some cases the cubic regression model is not strong
+enough, there exists situation (when \emph{p} is different) in which the results
+with the same loss levels are much better and closer to the observed by the approximation results
 (even closer than the one observed by the simulation).
 
-Surprisingly, in the case described above, the simulation does not just behaves
+Surprisingly, in the case described above, the simulation does not just behave
 worse than the cubic approximation, it behaves much worse than for example in
 the other cases. This gives us a space for consideration whether this is true in
 general. In the situations in which the simulation is a bad approximation we
-may have a build a model that can explain extremely well the expected results.
+may have built a model that can explain extremely well the expected results (the cubic regression).
 
 Of course, cubic regression model has some disadvantages. Since it is not
 absolutely accurate (it seems to overestimate the loss probability) there exist
 situations in which the mean response time is negative. In these cases, we
 cannot conclude that the cubic model is correct. Such cases are marked in
-yellow in the document.  Even more inadequate is the behavior of the regression
-model in the case marked in dark red. The losses are a negative value which
+yellow in the document. Even more inadequate is the behavior of the regression
+model in the case marked in dark red. The losses are negative which
 cannot be interpreted logically.  Such distortions occur because $\mu_3$ is
 significantly bigger than in the previous examples (and than the other $\mu$s
 and $\lambda$) and this has a huge impact on the results of the cubic model. In
-this case though, the simulation results are satisfying.
+this case though, at least the simulation results are quite satisfying.
 
-One question that needs to be answered is when does the simulation behaves bad.
+One question that needs to be answered is when the simulation behaves bad.
 We have already seen one example of such a behavior. We can observe that
 unlikely the other cases, that particular case has $\lambda$ that is bigger than
 $\mu_1$. To see if this is the right conclusion, at the end we have shown more
