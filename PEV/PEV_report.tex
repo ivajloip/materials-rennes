@@ -1,6 +1,6 @@
 \documentclass[12pt]{article}
 \usepackage[utf8]{inputenc}
-\usepackage[english,bulgarian]{babel}
+\usepackage[english]{babel}
 \usepackage{amsfonts}
 \usepackage{amsthm}
 \usepackage{amsmath}
@@ -12,6 +12,7 @@
 \usepackage{multicol}
 \usepackage{listings}
 \usepackage{xcolor}
+\usepackage{enumitem}
 
 \oddsidemargin 0mm
 \evensidemargin 0mm
@@ -30,14 +31,20 @@
   emph={Task, Operation, for, each, if, else, endif, endfor, while, then, When, do, repeat, until, endrepeat},
   emphstyle={\color{gray}\bfseries\itshape}}
 
-\def\CC {{\mathbb C}}        % комплексни числа
-\def\RR {{\mathbb R}}        % реални числа
-\def\ZZ {{\mathbb Z}}        % цели числа
-\def\NN {{\mathbb N}}        % естествени числа
-\def\be  {\begin{eqnarray}}  % формула с номерация
-\def\ee  {\end{eqnarray}}    % край на формулата
-\def\ben {\begin{eqnarray*}} % формула без номерация
-\def\een {\end{eqnarray*}}   % край на \bena
+\setlist[itemize]{noitemsep,nolistsep} % remove spaces between itemize and
+  % its surroundings and between its items
+\setlist[enumerate]{noitemsep,nolistsep} % remove spaces between enumerate and
+  % its surroundings and between its items
+
+\def\CC {{\mathbb C}}        % Complex numbers
+\def\RR {{\mathbb R}}        % Real numbers
+\def\ZZ {{\mathbb Z}}        % Integers
+\def\NN {{\mathbb N}}        % Positive integers
+\def\be  {\begin{eqnarray}}  % Begin of math formula with number
+\def\ee  {\end{eqnarray}}    % End of math formula with number
+\def\ben {\begin{eqnarray*}} % Begin of math formula without number 
+\def\een {\end{eqnarray*}}   % End of math formula with number 
+
 \newcommand{\hr}{\rule{\linewidth}{0.1mm}}
 \newcommand{\bighs}{\hspace{15pt}}
 \newcommand{\hs}{\hspace{10pt}}
@@ -61,13 +68,14 @@
   \end{enumerate}
 }
 
-%\renewenvironment{proof}[1][\proofname]{}{\qed}
-
 \newtheoremstyle{plain}{1pt}{0pt}{}{}{}{}{.5em}{\thmname{\textbf{#1}}:\thmnote{#3}}
 
 \theoremstyle{plain}
+\renewcommand\thesection{\Roman{section}.}
+\renewcommand\thesubsection{\thesection\Roman{subsection}.}
+\renewcommand\thesubsubsection{\thesubsection\Roman{subsubsection}.}
 
-% Прави формулите да са с нормален шрифт на текста (примерно дробите не стават по-малки)
+% Makes the size of the symbols in the formulas fixed (not getting smaller)
 \everymath{\displaystyle}
 
 \begin{document}
@@ -79,215 +87,258 @@
 }
 
 \hr
-\section{\textbf{System M \textbackslash M \textbackslash *}}
+\section*{\textbf{System M \textbackslash M \textbackslash *}}
 
 We are going to analyse a system with three \emph{M\textbackslash M\textbackslash 1}
 servers and one \emph{M\textbackslash M\textbackslash 1\textbackslash H} server
-as shown on \emph{Figure 1} by using the data from the simulator which we computed
+as shown on {\color{red}Figure 1} by using the data from the simulator which we computed
 for this system. From server 1 a unit can go to server 2 with a probability
 \emph{p} and to server 3 - with probability \emph{1-p}. Since server 3 has a
-limit of \emph{H} for the units in its waiting queue, there can occur losses
-in the system. From servers 2 and 3, the units go to server 4 with probability 1.
-some figure \\
-For that system we have six free parameters: $lambda, mu_1, mu_2, mu_3, mu_4,
+limit of \emph{H} for the units in its waiting queue, losses can occur in the
+system. From servers 2 and 3, the units go to server 4 with probability 1.
+{\color{red}some figure} 
+
+For that system we have six free parameters: $\lambda, \mu_1, \mu_2, \mu_3, \mu_4,
 queue\_limit$. By varying them we will show the impact they have on the system
-losses, the waiting times and the response times of the units.
+losses, the waiting times and the response times of the servers.
 
 \subsection*{Analysis}
 
-Firstly, we have conducted experiments in which we varied separately the values of
-the free parameters in the range of 1 to 100. This way we hope to find connections
-between the behavior of these parameters and the rest of the variables. We have
+Firstly, we have conducted a number of experiments in which we varied separately the values of
+the free parameters in the range of 1 to 100. We hoped to find connections
+between the behavior of these parameters and the rest of the variables,
+namely units losses, waiting times and response times. We have
 also computed the correlations between the variables. It can be seen from
-(\emph{Figure 2}) that there is little point in trying to find connections
-between $mu_3$ and the response time of server 1 for example since they are
-weakly correlated and because of pure logical reasons.\\
-The simulation data is simulated with a parameter that varies while the rest of
-the free parameters are constant (set to 40). In order to compare the results by
-different criteria we have simulated each case twice - with 10 and then with 40
+({\color{red}Figure 2}) that there is little point in trying to find connections
+between $\mu_3$ and the response time of server 1 for example since they are
+weakly correlated. This fact is very natural, however.
+
+The simulation data is obtained with one parameter that varies and the rest of
+the free parameters set to a constant value (10 or 40). In order to compare the results by
+different criteria we have simulated each case twice - first with 10 and then with 40
 units limit for the third server when all but the queue limit is varied, and with
 10 and then 40 as a value for the constant parameters when $queue\_limit$ is
-being increased. The probability \emph{p} is set to 0.5.\\
-We are interested in the waiting times of a unit in servers 3 and 4. The results
-from varying $mu_1$ are shown in the form of graphics. For the waiting time in
-server 3 we observe a local (most probably a global) maximum. It is interesting
-that for small values of $mu_1$ ($\le$ 15) the waiting time is the same as when
-$mu_1 \ge$ 90. \emph{Graphic 1} show also that when the limit of the queue of
-server 3 increases, smaller waiting times for bigger values of $mu_1$ are
-observed. From the second graphic we can see how the losses of the system are
-explained by $mu_1$. We conclude that the bigger $mu_1$ the bigger the lost
-units.\\
+being varied. The probability \emph{p} in those simulations was set to 0.5.
 
-\includegraphics[width=160mm, height=90mm]{graphics/chart_1.png}\\
-\includegraphics[width=160mm, height=90mm]{graphics/chart_2.png}\\
+In the following paragraph we are interested in the waiting times of a unit in servers 3 and 4. The results
+from varying $\mu_1$ are shown in Figure~\ref{fig:influence_of_mu1_on_wt3_when_queue_limit_changes}. For the waiting time in
+server 3 we observe a local (most probably also a global) maximum. It is an interesting
+fact that for small values of $\mu_1$ ($\le$ 15) the waiting time is the same as when
+$\mu_1 \ge$ 90. Figure~\ref{fig:influence_of_mu1_on_wt3_when_queue_limit_changes} also shows that when the limit of the queue of
+server 3 increases, smaller waiting times for bigger values of $\mu_1$ are
+observed. From Figure~\ref{fig:influence_of_mu1_on_system:losses} we can see how the losses of the system are
+explained by $\mu_1$. We conclude that the bigger $\mu_1$ the bigger the lost
+units.
 
-So far we have observed that a system with parameters ($mu_1$, 40, 40, 40,
-40/10) behaves well (in a sense that the losses are small) when $mu_1$ is small.
-On the other hand the smaller the $mu_1$ the smaller the response time of a unit
-for server 1.\\
-Let us now explain the results we get from varying $mu_3$. For the waiting time
-of server 3 we can notice that when $mu_3$ becomes $\ge queue\_limit$ it begins
-to incline to 0. Still we observe that for smaller values of the limit of the queue
-of server 3 the time a unit has to wait is smaller. Of course this depends on the
-value of $mu_3$ as well which is set to 40. The response time of server 3 will be
-low if the rate $mu_3$ is at high values. An interesting observation is the behavior
-of the waiting time of server 4 when the queue limit is changing. Graphic 3 leads
-as to the conclusion that firstly, the rate of the waiting time of server 4 is almost
+\begin{figure}
+  \caption{Influence of $\mu_1$ on WT3 when queue limit changes}
+  \includegraphics[width=\textwidth, height=90mm]{graphics/chart_1.png}\\
+  \label{fig:influence_of_mu1_on_wt3_when_queue_limit_changes}
+\end{figure}
+\begin{figure}
+  \caption{Influence of $\mu_1$ on system losses}
+  \includegraphics[width=\textwidth, height=90mm]{graphics/chart_2.png}\\
+  \label{fig:influence_of_mu1_on_system:losses}
+\end{figure}
+
+So far we have observed that a system with parameters ($\mu_1$, 40, 40, 40,
+40, 10) behaves well (in a sense that the losses are small) when $\mu_1$ is small.
+On the other hand the smaller the $\mu_1$ the smaller the response time of a unit
+for server 1.
+
+Let us now explain another series of simulations where we vary $\mu_3$. Firstly, for the waiting time
+of server 3 we can notice that when $\mu_3$ becomes $\ge queue\_limit$, it begins
+to incline to 0. We also observe that for smaller values of the limit of the queue
+of server 3, the time a unit has to wait is smaller. This is natural, as each
+unit has to wait all the other units that are before it in the queue and with
+smaller queue, fewer such units will exist. Of course wait time depends on the
+value of $\mu_1$ as well which is set to 40. Let us also note that the response time of server 3 will be
+low if the rate $\mu_3$ has a high value. Another interesting observation is the behavior
+of the waiting time of server 4 when the queue limit is changing.
+Figure~\ref{fig:influence_of_mu3_on_wt3_when_queue_limit_changes} leads
+us to the conclusion that firstly, the rate of the waiting time of server 4 is almost
 constant (with a small dispersion) and secondly, it is smaller for smaller values
-of \emph{queue\_limit}.\\
+of \emph{queue\_limit}. The last point can be explained by the fact that smaller values
+for \emph{queue size} lead to bigger number of losses, which in turn leads to
+less units reaching server 4 and this way decreasing its waiting time.
 
-\includegraphics[width=160mm, height=90mm]{graphics/chart_3.png}\\
+\begin{figure}
+  \caption{Influence of $\mu_3$ on WT3 when queue limit changes}
+  \includegraphics[width=\textwidth, height=90mm]{graphics/chart_3.png}\\
+  \label{fig:influence_of_mu3_on_wt3_when_queue_limit_changes}
+\end{figure}
 
-Now we look at the loss rate and we remark that at high levels of $mu_3$ losses are
-not observed. Here we also notice a good behavior of the system when the value
-of the queue limit is 40 but even better when it is 10.\\
+If we look at the loss rate, we can remark that at high levels of $\mu_3$ losses
+are not observed. Here we also notice a good behavior of the system in terms of
+wait time when the value of the queue limit is 40, but even better when it is
+10.  
+
 Now we will explain with more details why and how we can manage to keep the
 levels of the lost units in the system low at low values of \emph{queue\_limit}.
-As we can see from \emph{Graphic 4} when the limit is approximately 4 times less
-than the service rate $mu_1$ the losses begin to incline to 0. This is very
-interesting result because it means that we reduce the loss rate even when the
-limit of the queue for server 3 is small. We do not need to set it to very high
-levels in order to avoid losses.\\
+As we can see from Figure~\ref{fig:influence_of_mu3_on_system:losses} when the
+queue limit is 10 and $\mu_3$ is approximately 5 the losses begin to incline to 0
+while when the queue limit is 40 this happens when $\mu_3$ reaches 20. And when
+$\mu_3$ is small the losses are less in the case when then queue limit is
+smaller. This is very interesting result because it means that we reduce
+the loss rate even when the limit of the size queue for server 3 is small. We
+do not need to set it to very high levels in order to avoid losses.  
 
-\includegraphics[width=160mm, height=90mm]{graphics/chart_4.png}\\
+\begin{figure}
+  \caption{Influence of $\mu_3$ on system losses}
+  \includegraphics[width=160mm, height=90mm]{graphics/chart_4.png}\\
+  \label{fig:influence_of_mu3_on_system:losses}
+\end{figure}
 
 \subsection*{\textbf{Cubic regression model}
 }
 
 After the primary analysis we turn our attention to building a model from the
-simulation data and later on comparing the results to the results from the
-simulation and those of the approximation that we will introduce in the next
-section. By running our simulation and by varying the parameters, we firstly collected
-diverse data which included over 2500 examples. The main idea is to build a model
-based on this data that predicts the value of the losses in server 3 by taking
-into account the parameters we vary. If we have a good model for the losses, we
-will be able to calculate the loss probability, the mean throughput, the waiting
-time and the response time.\\
-After making some calculations of the impact of the free parameters on the variable
-\emph{losses server 3}, we concluded that the best approach would be to use cubic
-regression. Our decision is supported by the results which show that $mu_3$ has
-the greatest influence on \emph{losses server 3} and the cubic estimation of $mu_3$
-is the best approximation for these losses.\\
+simulation data and later on comparing the results from that model to the
+results from the simulation and those of the approximation that we will
+introduce in the next section. By running our simulation and by varying the
+parameters, we firstly collected diverse data which included over 2500
+examples. The main idea was to build a model based on this data that predicts
+the value of the losses in server 3 by taking into account the parameters we
+vary. If we have a good model for the losses, we will be able to calculate the
+loss probability, the mean throughput, the waiting time and the response time.
 
-In order to apply the regression approach to the data we firstly have to make some
-assumptions. The free variables have to be independent (a.k.a uncorrelated). On
-theory we can explain why they have to be independent very simply: since each
-server has its own serving speed, these speeds do not depend either on one another
-or on the input rate \emph{lambda}. The results of the data from the simulations show
-the same thing - $mu_1, mu_2, mu_3, mu_4, lambda, queue limit$ are uncorrelated.
+After making some calculations of the impact of the free parameters on the
+variable \emph{losses server 3}, we concluded that the best approach would be
+to use cubic regression. Our decision is supported by the results which show
+that $\mu_3$ has the greatest influence on \emph{losses server 3} and the cubic
+estimation of $\mu_3$ is the best approximation for these losses.
+
+In order to apply the regression approach to the data we firstly have to make
+some assumptions. The free variables have to be independent (i.e.
+uncorrelated). On theory we can explain why they have to be independent very
+simply: since each server has its own serving speed, these speeds do not depend
+neither on one another nor on the input rate $\lambda$. The results of the
+data from the simulations show the same thing -
+$\mu_1, \mu_2, \mu_3, \mu_4, \lambda, \text{\emph{queue limit}}$ are uncorrelated.
 This also proves that the way we have built the simulator is correct and the
-influence of the randomness is reduced to minimal.\\
+influence of the randomness is reduced to minimal. 
+
 We have to assume that the residuals of the regression are normally distributed
-and to check for this after building the model so that we can decide if it is good
-or not.\\
+and to check for this after building the model so that we can decide if it is
+good or not.
+
 Before showing the results from the regression, we will introduce the reader to
-the descriptive statistics of the free variables.\\
-\emph{some data and explanations}\\
+the descriptive statistics of the free variables.
+
+{\color{red} some data and explanations}
+
 With the data given, we compute the cubic regression model:\\
 
 \begin{lstlisting}[frame=single]
   losses in server 3 := 399,446 -
-                        0.052 * lambda +
-                        1,515 * $mu1$ -
-                        0.074 * $mu_2$ -
-                        30,351 * $mu_3$ -
-                        0,042 * $mu_4$ -
+                        0.052 * $\lambda$ +
+                        1,515 * $\mu_1$ -
+                        0.074 * $\mu_2$ -
+                        30,351 * $\mu_3$ -
+                        0,042 * $\mu_4$ -
                         1,112 * queue limit +
-                        0,304 * $mu_3^{2}$ -
-                        0,001 * $mu_3^{3}$
+                        0,304 * $\mu_3^{2}$ -
+                        0,001 * $\mu_3^{3}$
 \end{lstlisting}
 
 The results show that when we know the values of the free parameters we can find
 the size of the losses in server 3. The model explains 73\% of the data. This
 results are very good given the number of observations. To see if the model is
 correct we look at the residuals. As the graph shows, they are approximately
-normally distributed. We conclude that in the 73\% of the cases the cubic regression
-is the approach that explains the losses occurred in the system.
+normally distributed. We conclude that in the 73\% of the cases the cubic
+regression is the approach that explains the losses occurred in the system.
 
 \subsection*{The approximations}
 
-Now that we have the cubic regression model for the losses, we have only one step
-left before comparing the results from the simulation to those of the theory 
-predictions - introducing the approximations. In this section we will compute the
-formulas which we need for the comparison - the loss probability $p_{loss}$, the mean
-throughput \emph{F}, the mean response time \emph{E(R)} and the mean waiting time
-\emph{E(W)}.
+Now that we have the cubic regression model for the losses, we have only one
+step left before comparing the results from the simulation to those of the
+theory predictions - introducing the approximations. In this section we will
+compute the formulas which we need for the comparison - the loss probability
+$p_{loss}$, the mean throughput \emph{F}, the mean response time \emph{E(R)}
+and the mean waiting time \emph{E(W)}.
 
 \begin{lstlisting}[frame=single]
   for a server M\M\1\H
-  with input rate lambda and service rate mu:
+  with input rate $\lambda$ and service rate $\mu$:
 
-  q := lambda / mu
+  q := $\frac{\lambda}{\mu}$
   $p_{loss}$ := $q^{H}$((1-q)/(1-$q^{H+1}$))
-  F := lambda(1 - $p_{loss}$)
+  F := $\lambda(1 - p_{loss})$
   
   From Little we have: F E(R) = E(N)
 \end{lstlisting}
 
 We have a formula for E(N) and by using \emph{Little} we can easily calculate
-E(R). Furthermore, we can estimate the losses of a server if we know the probability
-$p_{loss}$ and the probability \emph{p} for a unit to go to that server. In
-general, \emph{losses} = \emph{output*p} * $p_{loss}$, where \emph{output}
-is the number of units that have been served in the previous server, connected to
-the one we analyse. There is a way to compute the mean waiting time too. We use
-the following reasoning: when we have the mean people in the server queue, we
-simply multiply it by the service time. This gives us a good approximation for
-the waiting time.\\
+E(R). Furthermore, we can estimate the losses of a server if we know the
+probability $p_{loss}$ and the probability \emph{p} for a unit to go to that
+server. In general, \emph{losses} = \emph{output * p} * $p_{loss}$, where
+\emph{output} is the number of units that have been served in the previous
+server, connected to the one we analyze. There is a way to compute the mean
+waiting time too. We use the following reasoning: when we have the mean people
+in the server queue, we simply multiply it by the service time. This gives us a
+good approximation for the waiting time.
+
 Let us remark how we are going to compute the results for the cubic regression.
 The model gives as the losses in the server and by using them, we can compute
 the loss probability (as shown above). For the mean response time, the mean
 throughput and the mean waiting time we use the formulas we have decided to use
 for the approximations but with a loss probability that is equal to the one
-estimated with the cubic regression.\\
+estimated with the cubic regression.
 
 \subsection*{Comparisons and results}
 
-Let us first take a look at the behavior of the third server. In the (some name)
-table are the results which we got from the simulation, from the cubic regression and
-from applying straightforward the formulas from the theory. We have done several examples
-with varying the free parameters and we will explain the observed results.\\
-The lighter green lines correspond to extremely good results shown by our simulation. As it
-can be seen from them, the losses, the loss probability, the mean throughput and
-the mean response errors are close to zero. In the first examples we set the probability
-\emph{p} to 0.5. To understand whether \emph{p} is the factor that makes our model
-correct, we change it to 0.7. And we observe that the accuracy of the simulation
-is the same.\\
-There are two cases, though, where we can see that the simulation gives worse results
-than the results from the regression model. Firstly, let us look at the example
-(200, 100, 10, 10, 10, 1) and probability \emph{p} = 0.5. We can notice that the
-results from this model are very close the approximations but not as close as if
-the probability \emph{p} is slightly increased to 0.504. The fact that the
-regression model we have build does not depend on the value of \emph{p} is
-interesting (and on one hand proves its correctness) even if at first look this
-may seem strange. If we see more closely the values of the characteristics when
-\emph{p} is changing we will notice that they are the same. Still, when \emph{p}
-is 0.504 the cubic approximation is better than the results from the simulation.
-This is because the real model depends strongly on that probability and it is
-changing. For the majority of cases, it can be concluded that when for some case
-the cubic regression model is not strong enough, there exists situation (when
-\emph{p} is different) in which the same results are much better and closer to
-the observed by the approximation results (even closer than the one observed by
-the simulation).\\
-Surprisingly, in the described above case, the simulation does not just behaves
+Let us first take a look at the behavior of the third server. In the
+({\color{red} some name}) table are the results which we got from the
+simulation, from the cubic regression and from applying the formulas from the
+theoretical approximation. We have done several examples varying the free
+parameters and we will explain the observed results.  
+
+The lighter green lines correspond to extremely good results shown by our
+simulation. As it can be seen from them, the losses, the loss probability, the
+mean throughput and the mean response errors are close to zero. In the first
+examples we set the probability \emph{p} to 0.5. To understand whether \emph{p}
+is the factor that makes our model correct, we change it to 0.7 and we observe
+that the accuracy of the simulation is the same.
+
+There are two cases, though, where we can see that the simulation gives worse
+results than the results from the regression model. Firstly, let us look at the
+example (200, 100, 10, 10, 10, 1) and probability \emph{p} = 0.5. We can notice
+that the results from this model are very close the approximations but not as
+close as if the probability \emph{p} is slightly increased to 0.504. The fact
+that the regression model we have build does not depend on the value of
+\emph{p} is interesting (and on one hand proves its correctness) even if at
+first look this may seem strange. If we see more closely the values of the
+characteristics when \emph{p} is changing we will notice that they are the
+same. Still, when \emph{p} is 0.504 the cubic approximation is better than the
+results from the simulation.  This is because the real model depends strongly
+on that probability and it is changing. For the majority of cases, it can be
+concluded that when for some case the cubic regression model is not strong
+enough, there exists situation (when \emph{p} is different) in which the same
+results are much better and closer to the observed by the approximation results
+(even closer than the one observed by the simulation).
+
+Surprisingly, in the case described above, the simulation does not just behaves
 worse than the cubic approximation, it behaves much worse than for example in
 the other cases. This gives us a space for consideration whether this is true in
 general. In the situations in which the simulation is a bad approximation we
-may have a build a model that can explain extremely well the expected results.\\
-Of course, cubic regression model has some disadvantages. Since it is not absolutely
-accurate (it seems to overestimate the loss probability) there exist situations
-in which the mean response time is negative. In these cases, we cannot conclude
-that the cubic model is correct. Such cases are marked in yellow in the document.
-Even more inadequate is the behavior of the regression model in the case marked
-in dark red. The losses are a negative value which cannot be interpreted logically.
-Such distortions occur because $mu_3$ is significantly bigger than in the previous
-examples (and than the other \emph{mu}s and \emph{lambda}) and this has a huge
-impact on the results of the cubic model. In this case though, the simulation
-results are satisfying.\\
-One question that needs to be answered is when the simulation behaves bad. We
-have already seen one example of such a behavior. We can observe that unlikely
-the other cases, that particular case has \emph{lambda} that is bigger than
-$mu_1$. To see if this is the right conclusion, at the end we have shown more
+may have a build a model that can explain extremely well the expected results.
+
+Of course, cubic regression model has some disadvantages. Since it is not
+absolutely accurate (it seems to overestimate the loss probability) there exist
+situations in which the mean response time is negative. In these cases, we
+cannot conclude that the cubic model is correct. Such cases are marked in
+yellow in the document.  Even more inadequate is the behavior of the regression
+model in the case marked in dark red. The losses are a negative value which
+cannot be interpreted logically.  Such distortions occur because $\mu_3$ is
+significantly bigger than in the previous examples (and than the other $\mu$s
+and $\lambda$) and this has a huge impact on the results of the cubic model. In
+this case though, the simulation results are satisfying.
+
+One question that needs to be answered is when does the simulation behaves bad.
+We have already seen one example of such a behavior. We can observe that
+unlikely the other cases, that particular case has $\lambda$ that is bigger than
+$\mu_1$. To see if this is the right conclusion, at the end we have shown more
 examples with this property. The results from them are clear. We can conclude
-that when \emph{lambda} < $mu_1$ the simulation results are distorted.
+that when $\lambda < \mu_1$ the simulation results are distorted.
 
 \end{document}
