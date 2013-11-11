@@ -94,13 +94,13 @@ model that explains it in the majority of cases. After that we will make compare
 our results from the simulation and the model to the approximation of the expected
 behavior of the network topologies.
 
-\begin{figure}
+\section*{\textbf{System M \textbackslash M \textbackslash *}}
+
+\begin{figure}[h]
   \caption{Graph topology}
   \includegraphics[width=\textwidth, height=90mm]{graphics/simple_graph.png}\\
   \label{fig:simple_graph}
 \end{figure}
-
-\section*{\textbf{System M \textbackslash M \textbackslash *}}
 
 We are going to analyse a system with three \emph{M\textbackslash M\textbackslash 1}
 servers and one \emph{M\textbackslash M\textbackslash 1\textbackslash H} server
@@ -301,7 +301,7 @@ estimated with the cubic regression.
 \subsection*{Comparisons and results}
 
 Let us first take a look at the behavior of the third server. In the file
-model\_comparisons/results\_sgraph\_cubic.pdf are the results which we got from the
+\linebreak model\_comparisons/results\_sgraph\_cubic.pdf are the results which we got from the
 simulation, from the cubic regression and from applying the formulas from the
 theoretical approximation. We have done several examples varying the free
 parameters and we will explain the observed results.  
@@ -353,5 +353,78 @@ unlikely the other cases, that particular case has $\lambda$ that is bigger than
 $\mu_1$. To see if this is the right conclusion, at the end we have shown more
 examples with this property. The results from them are clear. We can conclude
 that when $\lambda < \mu_1$ the simulation results are distorted.
+
+Let us now look at another more complex topology as shown on the Figure~\ref{fig:hard_graph}.
+We have one more server - server 5. This time the units from server 2 can go to
+server 3 as well with a probability of \emph{1- $p_2$}. We have simulated the
+behavior of such a graph and now we will introduce the results in comparison to
+the expected values for the characteristics.
+
+\begin{figure}
+  \caption{Graph Topology}
+  \includegraphics[width=\textwidth, height=90mm]{graphics/hard_graph.png}\\
+  \label{fig:hard_graph}
+\end{figure}
+
+As a first example we take the following values for the free characteristics:
+(10, $\mu_1$, 10, 10, 10, 10, 10) with probabilities \emph{1 - $p_1$} = 0.5 and
+\emph{1 - $p_2$} = 0.3. We compute the approximation of the expected waiting
+time of the third server and on one graphic we compare it to the results by the
+simulation. Figure~\ref{fig:waiting_time1} shows that the levels of the waiting time that is to
+be expected are slightly lower than these of our simulation. It is observed that
+both times are increasing at the same speed. The difference of the waiting times
+is not very big still more accuracy could have been achieved.\\
+Now let us change the values of the parameters and make the same experiment. Now
+the characteristics are (40, $\mu_1$, 40, 40, 40, 40, 40) with the same probabilities.
+On the Figure~\ref{fig:waiting_time2} are presented the results. When $\mu_1$ is around and more than 20, it is observed the opposite in
+this case - the values we get for the waiting time of server 3 from our simulation are
+smaller than the expected ones. Here we notice bigger difference in the times. Again they
+are increasing in the both situations but now the speed of the results from the approximation is
+twice or more the speed of the results from the simulation for $\mu_1 \ge 20$.
+It can be concluded that the simulation in the cases presented so far concerning
+the more complex topology is behaving well when there is a constriction for $\mu_1$.\\
+
+\begin{figure}
+  \caption{Behavior of the simulation waiting time when $\mu_1$ increases}
+  \includegraphics[width=160mm, height=90mm]{graphics/chart_5.png}\\
+  \label{fig:waiting_time1}
+\end{figure}
+
+\begin{figure}
+  \caption{Behavior of the simulation waiting time when $\mu_1$ increases - different parameters}
+  \includegraphics[width=160mm, height=90mm]{graphics/chart_6.png}\\
+  \label{fig:waiting_time2}
+\end{figure}
+
+We are not only considering waiting time but we are also interested in the mean
+throughput especially in the cases when $\lambda$ and $\mu_2$ are changing.
+The next two following figures show represent the mean throughput in these situations.
+First we have the values (lambda, 40, 40, 40, 40, 40, 40) (the probabilities in
+the both cases stay the same). The main observations are that the expected throughput
+and the simulated one are increasing and with the increasing of $\lambda$ the
+difference between them becomes bigger. This is explained with the different loss
+probabilities - the expectation is that there will be losses but our simulation
+does not detect any.\\
+The more interesting case is when we vary $\mu_2$. This time our simulations
+computes non-zero losses like the expectation follows. As shown on Figure~\ref{fig:throughput2}
+for small values of $\mu_2$ the results from the simulation are quite close to
+what is estimated as an approximation. With the increasing of $\mu_2$, the both
+throughput seem to be almost constant. The difference between them is between 1
+and 2 units. This is better behavior than in the previous case due to the fact
+that the increasing speeds in the both cases are almost 0 for big $\mu_2$ and the
+difference is constant.\\
+
+\begin{figure}
+  \caption{Behavior of the simulation mean throughput when $\lambda$ increases}
+  \includegraphics[width=160mm, height=90mm]{graphics/chart_7.png}\\
+  \label{fig:throughput1}
+\end{figure}
+
+\begin{figure}
+  \caption{Behavior of the simulation mean throughput when $\mu_2$ increases}
+  \includegraphics[width=160mm, height=90mm]{graphics/chart_8.png}\\
+  \label{fig:throughput2}
+\end{figure}
+
 
 \end{document}
