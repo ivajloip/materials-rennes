@@ -121,7 +121,7 @@ it in the following way. We sum the waiting times for each unit for each server
 and then divide the result by the number of packets that were sent to this 
 server. Note that we do not use the number of packets that were actually
 processed by the server, but the number that was sent to it. We decided to use
-this method for calculation of the wait time, instead of using the way were we
+this method for calculation of the waiting time, instead of using the way where we
 divide by the number of actually processed messages, because it seemed more 
 natural for us. In the real life, if the server can not handle a new client's
 request, it will just sent a message that says that it is busy in most cases.
@@ -314,10 +314,7 @@ E(R). Furthermore, we can estimate the losses of a server if we know the
 probability $p_{loss}$ and the probability \emph{p} for a unit to go to that
 server. In general, \emph{losses} = \emph{output * p} * $p_{loss}$, where
 \emph{output} is the number of units that have been served in the previous
-server, connected to the one we analyze. There is a way to compute the mean
-waiting time too. We use the following reasoning: when we have the mean clients
-in the server queue, we simply multiply it by the service time. This gives us a
-good approximation for the mean waiting time.
+server, connected to the one we analyze.
 
 Let us remark how we are going to compute the results for the cubic regression.
 The model gives us the losses in the server and by using them, we can compute
@@ -460,9 +457,9 @@ difference is constant.
 To sum up, in most cases the observed results from the simulations can be easily
 explained and the results from the approximations are close to them. There are
 however cases, when the results are not quite good and not as expected. A
-possible cause for at least some of those problem is the proposed way for
-computation of wait time. It would be good to try to obtain result for the other
-proposed way for computing the wait times and see it it will lead to better
+possible cause for at least some of those problems is the proposed way for
+computation of the waiting time. It would be good to try to obtain result for the other
+proposed way for computing the waiting times and see if it will lead to better
 values.
 
 \end{document}
