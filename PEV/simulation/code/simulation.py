@@ -104,8 +104,10 @@ def get_input_times(number_of_clients, l):
   result = [get_exponentially_distributed_value(l)
       for client in range(number_of_clients)]
 
-  return [result[0]] + [result[index - 1] + result[index]
-      for index in range(1, number_of_clients)]
+  for index in range(1, len(result)):
+    result[index] = result[index] + result[index - 1]
+
+  return result
 
 def correct_dest_error(dest, config, elements_in_queue):
     if dest == config.number_of_servers:
