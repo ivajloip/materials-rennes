@@ -199,6 +199,17 @@ Jamie Shotton, Steve Hodges, Dustin Freeman, Andrew Davison, Andrew Fitzgibbon.
       interaction. This requires the selection of an representation, that can
       easily deal with this dynamicity, without compromising the real-time
       nature of the computations.
+
+      It is also mentioned that systems that use ToF, which stands for
+      Time-of-Flight does not deal with dynamic scenes. This is peculiar, as the
+      technology of ToF is just used to obtain depth map. There are two ways
+      those maps to be obtained - through devices that use ToF, which however is
+      currently too pricey, or projecting a known infrared pattern onto the
+      scene and determining depth based on the pattern's deformation
+      \cite{body-scanning}. The later is, however, much cheaper. With this said,
+      it is not clear why the authors of \cite{kinectfusion} mix depth map
+      observation with dynamic scene. There might have been a reason for that,
+      but it should have been better described.
     \item \textbf{Mobility without additional infrastructure} The idea of the
       project is to create mobile (at least to some degree) system that can be
       used to reconstruct any indoor spaces. This distinguishes the proposed
@@ -241,13 +252,14 @@ Jamie Shotton, Steve Hodges, Dustin Freeman, Andrew Davison, Andrew Fitzgibbon.
   The system tries to constantly keep track of the camera position in the space,
   calculating constantly the 6DOF and adding new data as camera is moved or new
   observations are added for places, where before that there were holes, i.e.
-  there was no information for that part of the scene. The camera potion does
+  there was no information for that part of the scene. The camera motion does
   not have to be too big in order new data to be acquired, this can happen, for
   example, because of a slight camera shake. The authors point out that given
   the real-time speed of the reconstruction, the level of details of the
-  reconstructed objects is more then good. Using the RGB camera that the Kinect
-  sensor has, it is also possible to map textures to the reconstructed objects
-  as shown in Figure~\ref{fig:model_with_texture}B.
+  reconstructed objects is more then good. More details on that will be provided
+  later in this paper. Using the RGB camera that the Kinect sensor has, it is
+  also possible to map textures to the reconstructed objects as shown in
+  Figure~\ref{fig:model_with_texture}B.
 
   \begin{figure}[h]
     \centering
@@ -280,115 +292,158 @@ Jamie Shotton, Steve Hodges, Dustin Freeman, Andrew Davison, Andrew Fitzgibbon.
   the execution. Such scene can be viewed in
   Figure~\ref{fig:model_with_texture}C, where there is a big number of small
   spheres that are added to the real scene.
+
+  In order to obtain the velocity information that was previously mentioned, the
+  authors of the article divide the space in two parts - foreground and
+  background. In the foreground is the interacting and moving user and in the
+  background is the static scene. This segmentation is achieved through
+  declaration of the pixels where the scene has changed too much as outliers
+  that are after that processed and separately rendered and added in the final
+  visualization. 
+
+  It is this segmentation that allows relatively rapidly moving foreground
+  objects to interact and collide with rigid virtual ones. 
+
+  What is maybe even more interesting about this segmentation is that it
+  actually allows us to calculate interactions between foreground objects
+  (users) and background scene. The points of interaction indicate the positions
+  where the user comes into contact with the scene. This can be used to detect
+  touching points between the user and any surface, which in turn can be used to
+  allow direct multi-touch interactions (see Figure~\ref{fig:interactions}A and
+  B).
+
+  \begin{figure}[h]
+    \centering
+    \caption{Interactions between user and environment}
+    \includegraphics[height=40mm]{graphics/interaction_actual.png}
+    \includegraphics[height=40mm]{graphics/virtual_interactoin.png}
+    \label{fig:interactions}
+  \end{figure}
 % section KinectFusion (end)
 
+\section{Implementation} % (fold)
+\label{sec:Implementation}
+  The implementation of the system has to rely on significant computational
+  power for a great number of relatively simple tasks. For that purpose the
+  authors decided to use GPUs for the computations as they are specifically
+  designed for such applications and as there are possibilities to use them not
+  only to do graphical computations, but also to do a wide range of concurrent
+  computations, that are relatively independent as is the currently depicted
+  case. For the implementation the authors of the article use CUDA (a parallel
+  computing platform and programming model created by NVIDIA and implemented by
+  the graphics processing units (GPUs) that they produce) in order to run a big
+  number of parallel threads simultaneously. 
+
+  The computational process that is presented can be divided in the following
+  parts that will be described after that: Depth Map Conversion, Camera
+  Tracking, Volumetric Integration, Raycasting (see Figure~\ref{fig:pipeline}).
+  Each of them is executed for each new data provided by the sensor on the GPU
+  unit.
+
+  \begin{figure}[h]
+    \centering
+    \caption{Computational pipeline}
+    \includegraphics[height=55mm]{graphics/pipeline.png}
+    \label{fig:pipeline}
+  \end{figure}
+
+  \subsection{Depth Map Conversion} % (fold)
+  \label{sub:Depth Map Conversion}
+    It is possible to imagine that each observation \emph{i} that we have
+    represent the state of the scene at some time $i * m$ where m is the time
+    between two consecutive observations. If we denote the depth map as
+    $D_i(u)$, where $u = (x, y)$ is a pixel obtained by the infrared camera and
+    the calibration matrix of the Kinect infrared camera as K, we can compute
+    the depth measurements as a 3D vertex in the camera's coordinate space as
+    follows: $v_i(u) = D_i(u) K ^ {-1}[u, 1]$. This can be computed in parallel
+    on the GPU. After that normal vectors for each vertex can be computed, again
+    in parallel by the GPU, using the neighboring vertexes (see
+    \cite{kinectfusion} for details).
+    Given that the 6DOF are presented, i.e. a matrix $T_i = [R_i|t_i]$ that
+    contains 3x3 rotation matrix($R_i$) and 3D translation vector ($t_i$), it is
+    possible to convert the vertexes and the normals from the coordinate space
+    of the camera to some global coordinate space.
+  % subsection Depth Map Conversion (end)
+
+  \subsection{Camera Tracking} % (fold)
+  \label{sub:Camera Tracking}
+    In order to track the camera pose for each new depth frame, the authors have
+    decided to use the well studied and very popular ICP algorithm (see
+    \cite{icp} and \cite{efficient-icp} for more details). Typically this
+    algorithm is used for alignment of 3D shapes, but in this case it is used to
+    find 6DOF transformation that most closely aligns the current oriented
+    points with those of the previous frame. The authors use \emph{projective
+    data association} to do this. Those transformations can be incrementally
+    applied to give the single global camera position $T_i$.
+
+    While doing this, the algorithm also detects potential outliers by
+    calculating distances and angles in the global coordinate system and
+    checking that they are within some expected thresholds. 
+
+    The output of the application of each ICP iteration is a single
+    transformation matrix \textbf{T} that minimizes the point-to-plane error
+    metric, defined as as the sum of squared distances between each point in the
+    the frame and the tangent plane at its corresponding point in the previous
+    frame:
+    \begin{equation}
+      arg\text{ }min \sum\limits_{u \atop D_i(u) > 0} ||Tv_i(u) - v_{i -
+      1}^{g}(u).n_{i - 1}{g}(u)||^{2}
+    \end{equation}
+
+    A linear approximation is created that solves this system only for the case
+    where an incremental transformation occurred (for more details, see
+    \cite{kinectfusion}). 
+
+    Using this, implemented for the GPU, it is possible to perform ICP on all
+    the measurement provided in each 640x480 depth map and to segment the
+    foreground from the background. The last think is one of the big
+    contributions of the article.
+  % subsection Camera Tracking (end)
+
+  \subsection{Volumetric Representation} % (fold)
+  \label{sub:Volumetric Representation}
+    By obtaining the position of the camera, the depth measurements can be
+    converted to global coordinates and integrated in the representation of the
+    geometry of the scene. For that representation the authors have used
+    volumetric surface representation, based on
+    \cite{representaion-and-rendering-of-implicit-surfaces}.
+
+    Unlike it is proposed in the article
+    \cite{representaion-and-rendering-of-implicit-surfaces}, however, the
+    authors of \cite{kinectfusion} have decided not to implements octree, but
+    instead to use a uniformly subdivided space into voxels (voxels are
+    volume elements in regular grid in 3D, something similar to pixels in
+    pictures; for more information, see \cite{voxel}). The global 3D vertices
+    that are part of the scene are integrated into voxels using a varian of
+    Singed Distance Functions (SDFs), that specify the signed distance between a
+    point and the surface. The values of those functions are positive for points
+    in front of the surface, negative for points behind the surface, and the
+    surface is depicted as the place where the values change sign. 
+
+    As it is practically impossible to store all the values, it is widely used
+    to keep just a truncated region around the actual surface. The so described
+    functions are refered to as Truncated Signed Distance Functions (TSDFs).
+    This representation makes integration of new data quite easy and efficient
+    and in the same time implicitly encodes the uncertainty in the range data.
+    This makes it more appropriate then meshes, for example.
+  % subsection Volumetric Representation (end)
+% section Implementation (end)
+
 \begin{thebibliography}{widest entry}
-  \bibitem{kinectfusion} KinectFusion: Real-time 3D Reconstruction and
-    Interaction Using a Moving Depth Camera, Shahram Izadi et al., 2011
-  \bibitem{representaion-and-rendering-of-implicit-surfaces} Representation and
-    Rendering of Implicit Surfaces, Christian Sigg, 2006
+  \bibitem{kinectfusion} Shahram Izadi et al., KinectFusion: Real-time 3D
+    Reconstruction and Interaction Using a Moving Depth Camera, 2011
+  \bibitem{representaion-and-rendering-of-implicit-surfaces} Christian Sigg, et
+    al., Representation and Rendering of Implicit Surfaces, 2006
   \bibitem{icp} P. J. Besl and N. D. McKay. A method for registration of 3D
     shapes. IEEE Trans. Pattern Anal. Mach. Intell., 14:239–256, February 1992. 
+  \bibitem{body-scanning} Jing Tong et al., Scanning 3D Full Human Bodies using
+    Kinects, 2012
+  \bibitem{efficient-icp} S. Rusinkiewicz and M. Levoy. Efficient variants of the
+    ICP algorithm. 3D Digital Imaging and Modeling, Int.
+    Conf. on, 0:145, 2001.
+  \bibitem{voxel} http://en.wikipedia.org/wiki/Voxel
 \end{thebibliography}
 
 \hfill\\
-\hfill\\
-\hfill\\
-\hfill\\
-\hfill\\
-\hfill\\
-\hfill\\
-
-The proposed simulation engine is entirely written in Python. It is tested with
-python version 3.3, however it should work with older version as well.
-
-The simulation engine can receive a number of parameters: 
-\begin{itemize*}
-  \item '-nc' $\rightarrow$ how many clients should be provided as input.
-  \item '-queue-sizes' $\rightarrow$ a comma-separated list of the sizes for
-    each of the queues. For the queues that are infinitely big, the user has to
-    enter a value equal or greater than the number of clients.
-  \item '-muis' $\rightarrow$ a comma-separated list of the speed for
-    processing the clients for each server.
-  \item '-lambdas' $ \rightarrow $ a comma-separated list of the speed at which
-    the clients arrive to the input servers. Please note that the code was
-    never tested with more than one input - server 1.
-  \item '-graph' $ \rightarrow $ The file that describes the graph topology.
-    That file contains the number of servers, input servers, output servers,
-    and connections between servers with the probability to follow some of 
-    those connection. For example is we have 0 2 0.5 this means that from 
-    server 1 we can go to server 3 and the probability to go there, and not to
-    some of the other servers that 0 is connected to, is 0.5.
-  \item '-output-file' $ \rightarrow $ A file to which to append a
-    comma-separated representation of the output (useful for processing with
-    excel). It is optional.  
-  \item '-repetitions' $ \rightarrow $ The number of execution of the simulation
-    from which the mean statistics are extracted. If it is not provided, 100 is
-    used.
-\end{itemize*}
-
-Those parameters are saved in an instance of the class \textbf{Configuration}
-that is passed to the methods that need it.
-
-For the purpose of this section when we say \textbf{event} we will refer to the
-event of client packet being received by some of the servers or departing from
-the servers.
-
-The main idea of the simulation engine is to have a set of events and process 
-them according to the time at which they occur. Each event has time when it
-arises, type - arrival at server or departure, server to or from which it moves
-and is modeled by a class \textbf{Event}.
-
-The events are saved in a priority queue realized using heap. This was
-considered one of the simplest implementations that is supposed to work good 
-even for big values for the number of clients.
-
-Other class that is used in the program is the class \textbf{RunStatistics}. It
-saves information about the wait times, losses and response times. 
-
-For the random values we use the standard python library \textbf{random}, which
-is capable of giving uniformly distributed random int values in some range,
-double value in the range [0, 1) or exponentually distributed values.
-
-\subsection*{Simulator execution} % (fold)
-\label{sub:Simulator execution}
-  The simulation consists of the following steps:
-  \begin{enumerate*}
-    \item Parse the parameters and the graph topology.
-    \item Execute '-repetitions' times the simulation that consists of:
-      \begin{enumerate*}
-        \item Generate random exponentually distributed times when the client 
-          arrivals should occur, create events for them and put them in the
-          queue.
-        \item Initialize the variables for the times up until which the servers
-          are busy with 0, initialize the number of clients in each queue to 0.
-        \item Process for each event in the queue with regard of the type of the
-          event, the server on which it is, the graph topology and its
-          probabilities, the number of clients in the server queue. If the 
-          event is of type 0 (arrival), then we determine the time at which it
-          will be processed, update the appropriate statistics, queue sizes and
-          time up until which the server is busy. If the type is 1 (departure),
-          then we determine the destination to which the packet would like to 
-          go and the time at which it will arrive. If the queue of the
-          destination is full, the event is dropped, otherwise if the
-          destination is the exit from the system, we just count the event and
-          again drop it. If, however, the destination is not the exit point, 
-          then we insert a new arrival event in the queue with the appropriate
-          information.
-      \end{enumerate*}
-    \item In the end of each repetition, update the global statistics (squared
-      and normal).
-    \item Print the confidence intervals and output the comma-separeted-values
-      (CSV) file if requested by the user.
-  \end{enumerate*}
-
-\newtheorem*{note1}{Note}
-\begin{note1}
-  From theoretical point of view, it is better to drop packages when they arrive
-  and the queue is full, however as the communication time is supposed to be
-  negligable and for that reason - ignored, the elements in the queue are not
-  expected between the departure and the arrival at the next server.
-\end{note1}
-% subsection Simulator execution (end)
 
 \end{document}
