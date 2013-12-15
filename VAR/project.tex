@@ -1,0 +1,394 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amscd}
+\usepackage{amssymb}
+\usepackage{graphics}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage{multicol}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{enumitem}
+
+\oddsidemargin 0mm
+\evensidemargin 0mm
+\topmargin 0mm
+\textheight 216mm
+\textwidth 165mm
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[CE,CO]{VAR paper evaluation by Ivaylo Petrov}
+\fancyfoot[CE,CO]{\thepage}
+
+\lstset{basicstyle=\ttfamily,
+  mathescape=true,
+  escapeinside=||,
+  emph={Task, Operation, for, each, if, else, endif, endfor, while, then, When,
+  do, repeat, until, endrepeat},
+  emphstyle={\color{gray}\bfseries\itshape}}
+
+\setlist[itemize]{noitemsep,nolistsep}
+\setlist[enumerate]{noitemsep,nolistsep}
+
+\def\CC {{\mathbb C}}        
+\def\RR {{\mathbb R}}       
+\def\ZZ {{\mathbb Z}}      
+\def\NN {{\mathbb N}}     
+\def\be  {\begin{eqnarray}} 
+\def\ee  {\end{eqnarray}}  
+\def\ben {\begin{eqnarray*}} 
+\def\een {\end{eqnarray*}}   
+\newcommand{\hr}{\rule{\linewidth}{0.1mm}}
+\newcommand{\bighs}{\hspace{15pt}}
+\newcommand{\hs}{\hspace{10pt}}
+\renewcommand{\tilde}{\overset{-}}
+
+\newenvironment{itemize*}{
+  \begin{itemize}
+    \setlength{\itemsep}{0pt}
+    \setlength{\parskip}{0pt}
+    \setlength{\parsep}{0pt}
+}{
+  \end{itemize}
+}
+
+\newenvironment{enumerate*}{
+  \begin{enumerate}
+    \setlength{\itemsep}{0pt}
+    \setlength{\parskip}{0pt}
+    \setlength{\parsep}{0pt}
+}{
+  \end{enumerate}
+}
+
+\newtheoremstyle{plain}{1pt}{0pt}{}{}{}{}{.5em}{\thmname{\textbf{#1}}:\thmnote{#3}}
+
+\theoremstyle{plain}
+
+\everymath{\displaystyle}
+
+\renewcommand{\labelenumii}{\arabic{enumi}.\arabic{enumii}}
+
+\begin{document}
+
+\bibliographystyle{plain}
+
+\section*{\centering
+  Paper evaluation of\\
+  \emph{"KinectFusion: Real-time 3D Reconstruction and Interaction Using a
+    Moving Depth Camera"}\\
+  by\\
+  Ivaylo Petrov
+}
+
+\hr
+
+The following article is going to provide information about \emph{Real-time 3D
+Reconstruction and Interaction Using a Moving Depth Camera}. The main focus 
+will be on the paper \emph{"KinectFusion: Real-time 3D Reconstruction and
+Interaction Using a Moving Depth Camera"} by Shahram Izadi, David Kim,
+Otmar Hilliges, David Molyneaux, Richard Newcombe, Pushmeet Kohli,
+Jamie Shotton, Steve Hodges, Dustin Freeman, Andrew Davison, Andrew Fitzgibbon.
+
+\section{Abstract} % (fold)
+\label{sec:Abstract}
+  Creation of an relatively accurate 3D map of some objects with a low-cost 
+  hand-held device has been a goal of a number of researches. Now with a Kinect
+  camera and appropriate software that is possible. Furthermore, with this 
+  camera now we are not only able to rapidly create a detailed 3D reconstruction
+  of a limited size scene (a room for example) in real time \cite{kinectfusion},
+  but we can also use this reconstruction to create geometry-aware augmented
+  reality with physical interactions within it. 
+
+  KinectFusion is a software that is capable of using a Kinect camera to do all
+  that without the need of additional widely used devices such as trackers. It
+  also provides us with the possibility to enable real-time multi-touch
+  interactions anywhere, allowing any planar or non-planar reconstructed
+  physical surface to be appropriated for touch.
+% section Abstract (end)
+
+\section{Introduction} % (fold)
+\label{sec:Introduction}
+  For quite some time people have been fascinated by the possibility with an 
+  affordable, hand-held device and in real time, to scan accurately 3D shapes,  
+  to create geometry-aware augmented reality, and to create physically based
+  interactions within it. So far, however, this has been impossible. With the
+  inventing of the Kinect camera the world is presented with the possibility to
+  create relatively accurate 3D maps for very low price. For that reason this
+  device rapidly gained popularity among researchers and enthusiasts alike.
+
+  While this device does not provide a conceptually new approach, structured
+  light technique to obtain depth map is not a new idea, its low-cost and
+  relative accuracy contribute greatly to its success. As the authors of the
+  article note, however, the noise that is caused by fluctuations and holes
+  where reads were not obtained need to be taken care of with some algorithms in
+  order to make the device really useful for the above scenarios. 
+
+  The already described applications of this device, with the appropriate
+  software, range from gaming and physics to CAD programs. For all those things,
+  however, an accurate model should be inferred from the noisy point-based data.
+  To do that the authors consider different approaches and finally decide to use 
+  \textbf{volumetric surface representation}. Although this approach has some 
+  drawbacks, i.e. hight memory consumption, which might potentially lead to high
+  computational cost (as noted in
+  \cite{representaion-and-rendering-of-implicit-surfaces}). There however is a
+  solution to this problem, that the authors suggest - the use of octree.
+  Although there is no additional information about this approach in the
+  original article, it will be explained in the appropriate part of this paper. 
+
+  As the system is designed in a way that allows moving of the Kinect camera and
+  interaction of users with the scene, the authors needed to solve a number of
+  difficulties that those two characteristics introduced. In order to track the
+  camera position, they have decided to track the \emph{6 degrees-of-freedom
+  (DOF)}. They divide the input in two parts - foreground and background and use
+  only the data from the background to calculate the 6DOF, because as algorithms
+  generally depend on the staticness of the scene, it is impossible to
+  accurately calculate the camera position if all the data is considered. This
+  allows complex user interactions with the camera that does not significantly
+  degrade the quality of the camera tracking. This division of foreground and
+  background objects makes possible the use of the system to detect multi-touch
+  interactions with physical surfaces of any type - planar or not.
+
+% section Introduction (end)
+
+\section{Related work} % (fold)
+\label{sec:Related work}
+  Although scene geometry reconstruction using various techniques such as active
+  sensors, passive cameras, online images or from unordered 3D points, is well
+  studied in the field of computer graphics and vision, the possibility of
+  interaction with the scene is what distinguishes \cite{kinectfusion} from all
+  proposed solutions until now. The area of Simultaneous Localization and
+  Mapping (SLAM) is also tightly connected with the proposed system, as it has
+  to determine its position on in real time as new observations are provided,
+  while at the same time create a precise 3D representation of the observed
+  objects and cope with user interactions. How this problem is solved in the
+  described article will be explained later.
+
+  Other differences between KinectFusion and previous works can be described as:
+  \begin{itemize}
+    \item \textbf{Interactive rates} In contrast with most of the already
+      existing solutions, KinectFusion wants to provide real-time computation of
+      both camera position tracking and world geometry reconstruction. This is
+      essential for some of the applications that are targeted by the authors
+      and most of all for games and augmented reality, where direct feedback and
+      user interactions are key to the usability of the system. By the time that
+      the article was published, there was no system, to the knowledge of the
+      authors, that provided interactive rates for those two things.
+    \item \textbf{No explicit feature detection} Unlike some of the previously
+      created techniques that use Structure from Motion (SfM) or RGB plus depth
+      (RGBD) detect sparse scene features, the proposed solution uses directly
+      in some way all the data acquired by the Kinect sensor. This also makes
+      the system independent of the light conditions in the observed scene.
+    \item \textbf{High-quality geometry reconstruction} The authors of the
+      system, unlike many other before them, do not want to sacrifice details in
+      the reconstructed model in order to obtain real time tracking. Often,
+      sparse maps are used for the localization, but they can not be used as a
+      mean to reconstruct the observed geometry. Instead of that, the authors
+      use volumetric surface representation, which enables them to directly
+      reconstruct surfaces that can also be used for rendering of the scene,
+      possibly with objects from augmented reality, in real time.
+    \item \textbf{User interaction assumed} In most of the previously provided
+      studies, the scene was expected to be completely static in order for the
+      systems to work. The authors of \cite{kinectfusion} created a system that
+      along with tracking the camera and reconstructing the scene, allow user
+      interaction. This requires the selection of an representation, that can
+      easily deal with this dynamicity, without compromising the real-time
+      nature of the computations.
+    \item \textbf{Mobility without additional infrastructure} The idea of the
+      project is to create mobile (at least to some degree) system that can be
+      used to reconstruct any indoor spaces. This distinguishes the proposed
+      solution from many earlier works that used fixed or large sensors, or
+      sensors that are fully embedded in the environment. Also in order the
+      application to easier to use, the authors wanted to avoid using
+      augmentation of the space and the interacting entities with some markers.
+    \item \textbf{Size scale} Additional requirement that distinguishes the
+      proposed approach is the support of bigger scenes - a whole room for
+      example. In the past most of the detailed reconstruction techniques that
+      were proposed would be usable only for relatively small geometries.
+    \item \textbf{Low-cost scanning} The combination of low-cost, real-time and
+      excellent geometry details has not been shown by any of the previous
+      works. Those things contribute to much better user experience, as the user
+      can instantly verify that the scanned object has the necessary properties
+      and proceed with the use of the created model. Furthermore, the system can
+      be used not only to scan static scenes, but also to scan objects that are
+      rotated by the user in front of the camera. For the latter, however, there
+      are a few requirements that should be satisfied in order this use to be
+      applicable. First of all, the object should occupy a sufficiently large
+      portion of the depth map in order ICP to be able to converge correctly.
+      The moving of the object should not be too quick, as this might cause
+      problems to the tracking algorithm as well.
+
+      It is still possible to scan smaller object, provided that first the
+      system is able to reconstruct sufficiently accurate representation of the
+      surrounding world and just after that the object is presented for
+      scanning.
+  \end{itemize}
+% section Related work (end)
+
+\section{KinectFusion} % (fold)
+\label{sec:KinectFusion}
+  Following the example of the example of the authors of \cite{kinectfusion}, we
+  will now present a number of applications of the KinectFusion system and after
+  that some of its parts will be described in more details and additional
+  information will be provided from
+  \cite{representaion-and-rendering-of-implicit-surfaces} and \cite{icp}.
+
+  The system tries to constantly keep track of the camera position in the space,
+  calculating constantly the 6DOF and adding new data as camera is moved or new
+  observations are added for places, where before that there were holes, i.e.
+  there was no information for that part of the scene. The camera potion does
+  not have to be too big in order new data to be acquired, this can happen, for
+  example, because of a slight camera shake. The authors point out that given
+  the real-time speed of the reconstruction, the level of details of the
+  reconstructed objects is more then good. Using the RGB camera that the Kinect
+  sensor has, it is also possible to map textures to the reconstructed objects
+  as shown in Figure~\ref{fig:model_with_texture}B.
+
+  \begin{figure}[h]
+    \centering
+    \caption{Model with texture mapped from Kinect RGB camera}
+    \includegraphics[height=40mm]{graphics/augented_reality.png}
+    \includegraphics[height=40mm]{graphics/model_with_texture.png}
+    \includegraphics[height=40mm]{graphics/augmented_reality_with_a_number_of_small_spheres.png}
+    \label{fig:model_with_texture}
+  \end{figure}
+
+  One of the possible application of the system is for \textbf{creation of
+  augmented reality}. It is possible to add some 3D objects in the model,
+  created by the system and then during the rendering to show them to the user
+  as viewed from the position of the kinect camera, reflecting or casting
+  shadows to neighboring objects. The requirement to view the scene from the
+  kinect camera position comes from the fact that for texture mapping, the
+  system uses the build-in Kinect RGB camera, which is at the same position as
+  the depth camera.  In Figure~\ref{fig:model_with_texture}A an additional metal
+  sphere can be seen, that is not presented in the physical scene, but that
+  looks exactly as if it was at that position during the taking of the picture.
+
+  Another application is \textbf{physical world dynamics simulation}. That means
+  that, due to some properties of the implementation that preserve some
+  information about the velocity of the objects in the scene, it is possible to
+  simulate rigid body collisions between real and virtual objects that are
+  physically precise and, of course, real-time. This can have great application
+  in areas such as gaming and robotics. The number of virtual objects is not
+  precisely limited, it is believed that as much as a few thousands of them can
+  be simultaneously introduced in the scene, without breaking the time bounds of
+  the execution. Such scene can be viewed in
+  Figure~\ref{fig:model_with_texture}C, where there is a big number of small
+  spheres that are added to the real scene.
+% section KinectFusion (end)
+
+\begin{thebibliography}{widest entry}
+  \bibitem{kinectfusion} KinectFusion: Real-time 3D Reconstruction and
+    Interaction Using a Moving Depth Camera, Shahram Izadi et al., 2011
+  \bibitem{representaion-and-rendering-of-implicit-surfaces} Representation and
+    Rendering of Implicit Surfaces, Christian Sigg, 2006
+  \bibitem{icp} P. J. Besl and N. D. McKay. A method for registration of 3D
+    shapes. IEEE Trans. Pattern Anal. Mach. Intell., 14:239–256, February 1992. 
+\end{thebibliography}
+
+\hfill\\
+\hfill\\
+\hfill\\
+\hfill\\
+\hfill\\
+\hfill\\
+\hfill\\
+
+The proposed simulation engine is entirely written in Python. It is tested with
+python version 3.3, however it should work with older version as well.
+
+The simulation engine can receive a number of parameters: 
+\begin{itemize*}
+  \item '-nc' $\rightarrow$ how many clients should be provided as input.
+  \item '-queue-sizes' $\rightarrow$ a comma-separated list of the sizes for
+    each of the queues. For the queues that are infinitely big, the user has to
+    enter a value equal or greater than the number of clients.
+  \item '-muis' $\rightarrow$ a comma-separated list of the speed for
+    processing the clients for each server.
+  \item '-lambdas' $ \rightarrow $ a comma-separated list of the speed at which
+    the clients arrive to the input servers. Please note that the code was
+    never tested with more than one input - server 1.
+  \item '-graph' $ \rightarrow $ The file that describes the graph topology.
+    That file contains the number of servers, input servers, output servers,
+    and connections between servers with the probability to follow some of 
+    those connection. For example is we have 0 2 0.5 this means that from 
+    server 1 we can go to server 3 and the probability to go there, and not to
+    some of the other servers that 0 is connected to, is 0.5.
+  \item '-output-file' $ \rightarrow $ A file to which to append a
+    comma-separated representation of the output (useful for processing with
+    excel). It is optional.  
+  \item '-repetitions' $ \rightarrow $ The number of execution of the simulation
+    from which the mean statistics are extracted. If it is not provided, 100 is
+    used.
+\end{itemize*}
+
+Those parameters are saved in an instance of the class \textbf{Configuration}
+that is passed to the methods that need it.
+
+For the purpose of this section when we say \textbf{event} we will refer to the
+event of client packet being received by some of the servers or departing from
+the servers.
+
+The main idea of the simulation engine is to have a set of events and process 
+them according to the time at which they occur. Each event has time when it
+arises, type - arrival at server or departure, server to or from which it moves
+and is modeled by a class \textbf{Event}.
+
+The events are saved in a priority queue realized using heap. This was
+considered one of the simplest implementations that is supposed to work good 
+even for big values for the number of clients.
+
+Other class that is used in the program is the class \textbf{RunStatistics}. It
+saves information about the wait times, losses and response times. 
+
+For the random values we use the standard python library \textbf{random}, which
+is capable of giving uniformly distributed random int values in some range,
+double value in the range [0, 1) or exponentually distributed values.
+
+\subsection*{Simulator execution} % (fold)
+\label{sub:Simulator execution}
+  The simulation consists of the following steps:
+  \begin{enumerate*}
+    \item Parse the parameters and the graph topology.
+    \item Execute '-repetitions' times the simulation that consists of:
+      \begin{enumerate*}
+        \item Generate random exponentually distributed times when the client 
+          arrivals should occur, create events for them and put them in the
+          queue.
+        \item Initialize the variables for the times up until which the servers
+          are busy with 0, initialize the number of clients in each queue to 0.
+        \item Process for each event in the queue with regard of the type of the
+          event, the server on which it is, the graph topology and its
+          probabilities, the number of clients in the server queue. If the 
+          event is of type 0 (arrival), then we determine the time at which it
+          will be processed, update the appropriate statistics, queue sizes and
+          time up until which the server is busy. If the type is 1 (departure),
+          then we determine the destination to which the packet would like to 
+          go and the time at which it will arrive. If the queue of the
+          destination is full, the event is dropped, otherwise if the
+          destination is the exit from the system, we just count the event and
+          again drop it. If, however, the destination is not the exit point, 
+          then we insert a new arrival event in the queue with the appropriate
+          information.
+      \end{enumerate*}
+    \item In the end of each repetition, update the global statistics (squared
+      and normal).
+    \item Print the confidence intervals and output the comma-separeted-values
+      (CSV) file if requested by the user.
+  \end{enumerate*}
+
+\newtheorem*{note1}{Note}
+\begin{note1}
+  From theoretical point of view, it is better to drop packages when they arrive
+  and the queue is full, however as the communication time is supposed to be
+  negligable and for that reason - ignored, the elements in the queue are not
+  expected between the departure and the arrival at the next server.
+\end{note1}
+% subsection Simulator execution (end)
+
+\end{document}
