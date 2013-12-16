@@ -426,7 +426,69 @@ Jamie Shotton, Steve Hodges, Dustin Freeman, Andrew Davison, Andrew Fitzgibbon.
     This representation makes integration of new data quite easy and efficient
     and in the same time implicitly encodes the uncertainty in the range data.
     This makes it more appropriate then meshes, for example.
+
+    The authors seem to consider the approach where the space is uniformly
+    divided into voxels as better both in terms of easiness of use and
+    computational efficiency then octree approach. There are no evidence to
+    support this, however. It is clear, though, that this approach does not
+    scale good with the increase of the size of the scene. It does not matter
+    what is in the scene, only its size. From one point of view this is normal,
+    as they want to scale just as much as to be able to scan a whole room.
+    Another reason why they would not care is that the Kinect infrared camera
+    starts to loose accuracy after some distance (after 2 or 3 meters the values
+    are significantly noisy). This was not mentioned by the authors as maybe
+    they have considered it irrelevant in the case that they considered. However
+    for the purposes of \cite{body-scanning} this is quite important. There it
+    is essential that great details, that can be obtained by Kinect infrared
+    camera only from small distance, are considered.
+
+    As for the computational performance, although true that this structure is
+    quite easy to run in parallel, it is possible that a great majority of the
+    voxels does not contain data and are processed for no reason. In such
+    situations maybe an octree would provide better results. It would be
+    interesting to take experimental results for both in different scenes and
+    see how they perform in them - how the number of surfaces will impact the
+    performance.
+
+    The authors admit that their approach with the uniformly divided space is
+    far from being memory efficient. The better representation (at least in some
+    sense) would not only reduce the memory footprint, but it will also make
+    possible extra details to be added to some part of the scene. With the
+    uniform representation it is not possible if we are specifically interested
+    in some part of the scene to get extra details for it. This is natural for
+    the octree representation. Maybe a reconsidering of the volumetric surface
+    representation can improve the provided by the authors of
+    \cite{kinectfusion} results.
+
+    The way that the TSDF is calculated is the following: a metric distance from
+    the camera center to each vertex can be calculated. This 3D vertex is
+    perspective projected back into the image coordinates to lookup the actual
+    depth measurement along the ray. The difference between the measured and the
+    calculated distances gives a new SDF value for the voxel. This value is
+    normalized and averaged with the previous stored value. 
   % subsection Volumetric Representation (end)
+
+  \subsection{Raycasting for Rendering and Tracking} % (fold)
+  \label{sub:Raycasting for Rendering and Tracking}
+    The authors use a GPU-based raycaster to generate views of the modeled scene
+    within the volume. Separate thread is walking a single ray and renders a
+    single pixel in the output image. With starting point and a direction, each
+    thread traverses voxels along the ray and search for a point of
+    zero-crossing. After that some interpolation is used to precisely determine
+    the point of the surface. Using the TSDF the normal is computed as a
+    derivative at the zero-crossing. This provides a single interpolated vertex
+    and normal, which are then used for lighting calculations.
+
+    It is not clear how exactly objects added by the augmented reality layer of
+    the system get accurate lighting calculations, as the sources of the light
+    are not implicit and as a consequence if the artificially added objects are
+    supposed to reflect some light from the neighbouring objects, it is not
+    possible with the single Kinect RGB camera to calculate the correct colors.
+    This slightly reduces the number of possible realistically appearing objects
+    that can be added to the scene, but this is generally not that important.
+    Furthermore, it might be possible to overcome this problem, however the
+    authors have not provided information as to how this can be accomplished.
+  % subsection Raycasting for Rendering and Tracking (end)
 % section Implementation (end)
 
 \begin{thebibliography}{widest entry}
