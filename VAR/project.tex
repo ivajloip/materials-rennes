@@ -489,7 +489,45 @@ Jamie Shotton, Steve Hodges, Dustin Freeman, Andrew Davison, Andrew Fitzgibbon.
     Furthermore, it might be possible to overcome this problem, however the
     authors have not provided information as to how this can be accomplished.
   % subsection Raycasting for Rendering and Tracking (end)
+
+  \subsection{Simulating Real-World Physics} % (fold)
+  \label{sub:Simulating Real-World Physics}
+    As it was already pointed out in the first part of this paper, the proposed
+    system KinectFusion can support simulations of physically realistic
+    collisions between virtual objects and the reconstructed scene. This part of
+    the system also uses the GPU and as a consequence real-time computations are
+    still possible even with a great number of virtual objects. Here is how it
+    is done: during the rendering of the scene, TSDF values within some adaptive
+    threshold are extracted. For each surface voxel, a static particle is
+    instantiated that contains a 3D vertex in global coordinates, a velocity
+    vector that represent the direction and the speed of the particle (always
+    empty for static particles) and an ID. Having this representation, it is
+    possible to observe the dynamicity of the system, but additional steps
+    should be taken in order to actually detect the collisions. The authors use
+    a uniform grid to identify neighbouring cells. They first assign each
+    particle to a grid cell. After that a separate thread is run for each
+    dynamic particle to detect if it collides with some of its neighbouring
+    objects. The interaction with each of them is taken into account and this
+    determines the new direction and speed of the particle (and consequently its
+    new position in the next frame. 
+
+    While this approach seem to work nice according to the authors of
+    \cite{kinectfusion}, the uniform subdivision of the space seem as not the
+    best possible solution. It is possible that the majority of the particles
+    are concentrated in some part of the space and thus are neighbours in the
+    neighbouring grid. This will lead to significant reduction of the speed of
+    he system, especially when the objects to be tested for collisions are not
+    spheres, because for a number of objects the test for collision between two
+    objects is much slower then for spheres. ADD MORE AS OF WHY! Maybe a better approach would be the use of a better space
+    dividing technique, for example k-d trees or octrees. With them it is
+    possible to take into account the locality of the elements, while at the
+    same time keeping the number of particles in each volume below some
+    threshold (see \cite{fast-collision-detection} and
+    \cite{collision-detection-based-on-partitioning} for more details).
+  % subsection Simulating Real-World Physics (end)
 % section Implementation (end)
+
+
 
 \begin{thebibliography}{widest entry}
   \bibitem{kinectfusion} Shahram Izadi et al., KinectFusion: Real-time 3D
@@ -504,6 +542,12 @@ Jamie Shotton, Steve Hodges, Dustin Freeman, Andrew Davison, Andrew Fitzgibbon.
     ICP algorithm. 3D Digital Imaging and Modeling, Int.
     Conf. on, 0:145, 2001.
   \bibitem{voxel} http://en.wikipedia.org/wiki/Voxel
+  \bibitem{fast-collision-detection} S. Bandi, D. Thalmann, "An adaptive spatial
+    subdivision of the object space for fast collision detection of animating
+    rigid bodies", Proc. of Eurographics, pp. 259-270, 1995
+  \bibitem{collision-detection-based-on-partitioning} Matthias Teschner, course
+    materials for "Image Processing and Computer Graphics", part "Collision
+    Detection based on Spatial Partitioning", University of Freiburg 
 \end{thebibliography}
 
 \hfill\\
