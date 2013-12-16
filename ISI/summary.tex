@@ -1,0 +1,100 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amscd}
+\usepackage{amssymb}
+\usepackage{graphics}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage{multicol}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{enumitem}
+
+\oddsidemargin 0mm
+\evensidemargin 0mm
+\topmargin 0mm
+\textheight 216mm
+\textwidth 165mm
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[CE,CO]{ISI paper evaluation by Ivaylo Petrov and Hristina Hristova}
+\fancyfoot[CE,CO]{\thepage}
+
+\lstset{basicstyle=\ttfamily,
+  mathescape=true,
+  escapeinside=||,
+  emph={Task, Operation, for, each, if, else, endif, endfor, while, then, When,
+  do, repeat, until, endrepeat},
+  emphstyle={\color{gray}\bfseries\itshape}}
+
+\setlist[itemize]{noitemsep,nolistsep}
+\setlist[enumerate]{noitemsep,nolistsep}
+
+\def\CC {{\mathbb C}}        
+\def\RR {{\mathbb R}}       
+\def\ZZ {{\mathbb Z}}      
+\def\NN {{\mathbb N}}     
+\def\be  {\begin{eqnarray}} 
+\def\ee  {\end{eqnarray}}  
+\def\ben {\begin{eqnarray*}} 
+\def\een {\end{eqnarray*}}   
+\newcommand{\hr}{\rule{\linewidth}{0.1mm}}
+\newcommand{\bighs}{\hspace{15pt}}
+\newcommand{\hs}{\hspace{10pt}}
+\renewcommand{\tilde}{\overset{-}}
+
+\newenvironment{itemize*}{
+  \begin{itemize}
+    \setlength{\itemsep}{0pt}
+    \setlength{\parskip}{0pt}
+    \setlength{\parsep}{0pt}
+}{
+  \end{itemize}
+}
+
+\newenvironment{enumerate*}{
+  \begin{enumerate}
+    \setlength{\itemsep}{0pt}
+    \setlength{\parskip}{0pt}
+    \setlength{\parsep}{0pt}
+}{
+  \end{enumerate}
+}
+
+\newtheoremstyle{plain}{1pt}{0pt}{}{}{}{}{.5em}{\thmname{\textbf{#1}}:\thmnote{#3}}
+
+\theoremstyle{plain}
+
+\everymath{\displaystyle}
+
+\renewcommand{\labelenumii}{\arabic{enumi}.\arabic{enumii}}
+
+\begin{document}
+
+\bibliographystyle{plain}
+
+\section*{\centering
+  Paper evaluation of\\
+  \emph{CHANGE ME}\\
+  by\\
+  Ivaylo Petrov and Hristina Hristova
+}
+
+\hr
+
+\cite{kinectfusion}
+
+
+\begin{thebibliography}{widest entry}
+  \bibitem{kinectfusion} Shahram Izadi et al., KinectFusion: Real-time 3D
+    Reconstruction and Interaction Using a Moving Depth Camera, 2011
+\end{thebibliography}
+
+\hfill\\
+
+\end{document}
