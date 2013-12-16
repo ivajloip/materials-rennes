@@ -1,4 +1,4 @@
-\documentclass[12pt, a4paper]{article}
+\documentclass[9pt, a4paper]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
 \usepackage{amsfonts}
@@ -12,7 +12,7 @@
 \usepackage{multicol}
 \usepackage{listings}
 \usepackage{xcolor}
-\usepackage{enumitem}
+%\usepackage{enumitem}
 
 \oddsidemargin 0mm
 \evensidemargin 0mm
@@ -32,8 +32,8 @@
   do, repeat, until, endrepeat},
   emphstyle={\color{gray}\bfseries\itshape}}
 
-\setlist[itemize]{noitemsep,nolistsep}
-\setlist[enumerate]{noitemsep,nolistsep}
+%\setlist[itemize]{noitemsep,nolistsep}
+%\setlist[enumerate]{noitemsep,nolistsep}
 
 \def\CC {{\mathbb C}}        
 \def\RR {{\mathbb R}}       
@@ -80,12 +80,114 @@
 
 \section*{\centering
   Paper evaluation of\\
-  \emph{CHANGE ME}\\
+  \emph{Strategies for green data-processing frameworks}\\
   by\\
   Ivaylo Petrov and Hristina Hristova
 }
 
 \hr
+
+In the recent years many MapReduce workflows and {something for a first sentance}.
+In this report we are going to present two different strategies for achieving
+energy efficiency. The first approach concerns MapReduce with Interactive Analysis
+work flows (MIA) which include interactive services, traditional batch processing, and
+latency-sensitive processing. The authors of [1] have presented
+BEEMR (Berkley Energy Efficient MapReduce) method inspired by the empirical analysis
+of real-life MIA traces. {here it is your part of the introduction}.
+
+The researches of [1] have chosen to use Facebook work flows as a case study. Analysis
+on the traces of the system's primary Hadoop cluster have been made. After performing
+clustering techniques on the different types of jobs in the workload, the following
+results have been yielded: while most of the jobs are interactive and small (ad-hoc
+queries) there are jobs with much longer duration which take a lot of time to complete.
+Moreover, the accessed data sets are small in most of the cases, periods of peaks of the work flow
+are observed along with periods of low activity which nevertheless run at near-to-peak
+power.
+
+The built BEEMR method is a design approach aiming to reduce the number of
+machines which serve the interactive jobs while running the other less-time demanding
+in a batch fashion. What is done is actually the splitting of the cluster into
+two zones: interactive zone which is fully powered and is made up of small percentage
+of the cluster resources, and batch zone which is formed from the rest of cluster
+and is powered low between the batches. There are also three kinds of jobs. When
+a job is classified by BEEMR as interactive, it has to be serviced with low latency.
+This type of jobs are the ones which input data is below some threshold. The jobs
+which are too long are classified as interruptible. The rest of the jobs are batch jobs.
+The interactive zone executes every interactive task that has accessed. This is
+not the case with the interruptible jobs and the batch ones. Their tasks are put in a waiting queue.
+At particular times, the batch zone is fully powered and runs the tasks that are in
+the queue. In a new task arrives in the waiting queue during the execution of the
+batch, it has to wait for the next batch. Once all batch tasks finish, the interruptible
+ones are returned to the waiting queue and the batch zone is turned to low power again.
+It is possible for some batch task not to complete - in this case the cluster remains fully
+powered for the next batch periods. A bit of a challenge is that such batch tasks that
+do not finish until the end of a batch may cause its incompletion.
+
+The optimization process involves several parameters: the total number of map/reduce
+task slots, the map slots to reduce slots ratio, the percentage of the cluster for the
+interactive zone, the thresholds for classifying a job as interactive and as interruptible,
+the length of the batch interval and the algorithm for determining the number of
+map/reduce tasks to assign to a job. The following algorithms are considered - Default which
+is the default setting in Hadoop, Actual which is based on settings at Facebook
+and Latency-bound which assigns the jobs in a way that no task will run more than 1 hour.
+
+A simulator was created for evaluation of the methodology. How does it work? Firstly,
+it queues and classifies the newly arrived jobs after which it checks for available slots
+and assigns them to those tasks which can be run immediately. Later the simulator
+returns to the queue the jobs whose tasks have not finished. Finally, if a job has finished,
+it is marked as complete.
+
+In the following section we are going to expose the results obtained by the simulator.
+The cluster size is selected so that long queues to be avoided and at the
+same time the energy consumption not to be high. The results from 45-days trace
+show that at least 72000 slots in total (map and reduce) are needed. The batching interval is also an
+issue - one very natural solution would be to be changed dynamically. The
+experiments point out that map slot occupancy in comparison to the reduce slot one
+reaches full capacity for a little time during the batching period, with no further
+tasks after that. The low reduce slot capacity causes sometimes the batch zone to be fully powered
+during the whole batching period. One of the ways for fixing this is the improving of assigning
+the number of task slots per job. The first two of the considered algorithms (Default and Actual)
+do not manage to deal with the described problem. The latency-bound policy,
+however, results in higher utilization of the cluster during the batch and that
+way allows it to complete and to be turned to low-power. Furthermore, by changing the map-to-reduce
+ratio, the map slots can be increased and the reduce ones decreased which does not
+affect the completion times for the reduce slots only allows the map ones to finish
+faster. Here again, the results show that the Latency-bound algorithm achieves
+the best energy efficiency level when that approach is used, when compared to the other two algorithms. There is, of course,
+a development which can be performed like dynamically adjusting the map-to-reduce
+ratio. So far, the threshold for classifying a job as interruptible has been set to
+24 hours. The lower its level, the faster the job executions in the batch zone and in the interactive
+zone but the higher the latency. The authors have tried to change the threshold to
+12 hours and to 6 hours. Of course, that value does not have to be decreased too much -
+this would result in infinite queue. For the data from the traces of Facebook an ideal case
+for energy saving is estimated and the experiments show that setting the level of the
+interruptible threshold to 6 hours recovers to 92\% of the energy from the ideal case.
+
+As far as the latency is concerned, the results are different for the different
+kind of jobs. The interactive jobs' latency is unchanged and even a little bit
+improved (because of the dedicated resources). The results show that during peaks
+of the workload it is required for the capacity of the interactive zone to be increased.
+The latency ratio for the batch jobs varies which can be explained by the fact that
+if a job arrives after the batch has started its execution, the job will be delayed
+and vise versa, if it arrives just before the start of the execution, it has almost no delay.
+The first case leads to a latency, the second one - does not. Surprisingly, the interruptible
+jobs' latency ratio varies less than that of the batch jobs. The conclusion is
+that the interruptible jobs are really long running jobs. The energy savings result in this delayed
+execution of batch and interruptible jobs.
+
+The simulator is tested whether it actually fits the reality through using an Amazon EC2
+cluster. Both the results from the simulator and from the experiments run on the
+cluster are compared. There are some errors observed. The first one comes from the
+observation that the simulated job duration does not completely match the one from
+the measurement on the real cluster. This is because the simulator underestimates
+the run times for small sizes and overestimates the ones for large sizes. The way
+the data from the real cluster is summarized also has its effect. The second error
+concerns the predicted versus actually energy savings. After adjustments, the
+error between the two kinds of energy savings becomes 13\%. This is due to the fact that
+the simulator assumes that the times of the tasks are the same when a task arrives
+and when it is executed on a batch. The results taken from the real data reveal
+that this is not a correct assumption. Still, the conclusion that can is drawn is
+that BEEMR saves energy up to 40-50\% of the ideal-case.
 
 \cite{kinectfusion}
 
