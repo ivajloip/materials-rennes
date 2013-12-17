@@ -1,4 +1,4 @@
-\documentclass[12pt]{article}
+\documentclass[12pt, a4paper]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
 \usepackage{amsfonts}
@@ -263,10 +263,10 @@ Jamie Shotton, Steve Hodges, Dustin Freeman, Andrew Davison, Andrew Fitzgibbon.
 
   \begin{figure}[h]
     \centering
-    \caption{Model with texture mapped from Kinect RGB camera}
     \includegraphics[height=40mm]{graphics/augented_reality.png}
     \includegraphics[height=40mm]{graphics/model_with_texture.png}
     \includegraphics[height=40mm]{graphics/augmented_reality_with_a_number_of_small_spheres.png}
+    \caption{Model with texture mapped from Kinect RGB camera}
     \label{fig:model_with_texture}
   \end{figure}
 
@@ -314,9 +314,9 @@ Jamie Shotton, Steve Hodges, Dustin Freeman, Andrew Davison, Andrew Fitzgibbon.
 
   \begin{figure}[h]
     \centering
-    \caption{Interactions between user and environment}
     \includegraphics[height=40mm]{graphics/interaction_actual.png}
     \includegraphics[height=40mm]{graphics/virtual_interactoin.png}
+    \caption{Interactions between user and environment}
     \label{fig:interactions}
   \end{figure}
 % section KinectFusion (end)
@@ -342,8 +342,8 @@ Jamie Shotton, Steve Hodges, Dustin Freeman, Andrew Davison, Andrew Fitzgibbon.
 
   \begin{figure}[h]
     \centering
-    \caption{Computational pipeline}
     \includegraphics[height=55mm]{graphics/pipeline.png}
+    \caption{Computational pipeline}
     \label{fig:pipeline}
   \end{figure}
 
@@ -525,7 +525,121 @@ Jamie Shotton, Steve Hodges, Dustin Freeman, Andrew Davison, Andrew Fitzgibbon.
     threshold (see \cite{fast-collision-detection} and
     \cite{collision-detection-based-on-partitioning} for more details).
   % subsection Simulating Real-World Physics (end)
+
+  \subsection{User Interaction} % (fold)
+  \label{sub:User Interaction}
+    As previously was stated, one of the goals of the project is to allow user
+    interaction with the scenes. This creates two main problem with the so far
+    described approach. First of all, the camera tracking algorithm relies on
+    the fact that between two frames there has been only one rigid
+    transformation. With user interacting independently of the camera motion
+    this assumption is no longer true. As already stated, sufficiently big
+    change in the scene may cause the ICP algorithm to fail to converge.
+
+    The other major problem is that so far every observation was integrated in
+    the TSDF function with some weight that shows how readily the new value
+    should be accepted as correct. Smaller value will cause slower update of the
+    surface, whereas big value might integrate too much of the noise in the
+    surface. As a consequence of the user interaction, however, regardless of
+    the weight value, some of data from the moving user will be integrated in
+    the scene model, which is not desirable. This could also make impossible
+    correct camera tracking.
+  % subsection User Interaction (end)
+
+  \subsection{ICP Outliers for Segmentation} % (fold)
+  \label{sub:ICP Outliers for Segmentation}
+    Maybe one of the greatest contributions of this article is the proposition
+    of a way to segment foreground moving items from background ones. The idea
+    is that if initially the sensor can obtain some approximate representation
+    of the scene, after that when the user comes and starts to interact, it is
+    possible to detect the points that are significantly different from the
+    expected values. Those points are marked as outliers. Later, this is
+    the important thing, they assume that any interacting body will represent a
+    significant surface. This is to say that there will be a number of
+    neighbouring outliers. As a consequence, it can be concluded that those
+    measurements are not error of the sensor, but instead are moving objects.
+    Having isolated them, we can substitute their values with values from
+    the model in the observation, so that those new depth measurements does not distort the model.
+    The foreground objects on the other hand can be separately handled. For them
+    however we know the precise global position of the camera, and so it is
+    possible to regard them as the case when an object is presented in from of
+    the static camera for scanning, i.e. to run a separate ICP for them. And
+    integrate the new data in separate model. It turns out that even if some
+    small part of the foreground model is moving non-rigidly, the ICP algorithm
+    still manages to converge on the other, rigidly moving parts. That way the
+    foreground objects can safely be extracted from the outliers from the depth
+    map and integrated in a second model. After the geometries of the two are
+    determined, we can render them separately and then combine the two results.
+
+    According to the authors of \cite{kinectfusion} this technique gave very
+    good results for all their tests. It is not clear however if the initial
+    scene is at sufficient distance from the Kinect infrared camera how precise
+    will be representation and if this can cause failure to detect background
+    object from foreground ones (interacting users). For example the foot of the
+    user is expected to take just a small portion of space and maybe at
+    appropriate distance (3-4 meters) it would be impossible to distinguish it
+    from the background. This of course is some limitation of the camera, but
+    maybe it is worth noticing.
+
+    As for the physical simulation, the authors of \cite{kinectfusion} have
+    decided to represent the entire foreground reconstruction as static
+    particles. This way they can do the same as for the background part. It
+    would be more interesting if they would try to determine the dynamicity of
+    the foreground object as this way it would be possible to interact more
+    precisely with virtual objects - for example hit a virtual bow with your
+    hand and observe it moving with velocity dependent on the velocity of the
+    hand.
+  % subsection ICP Outliers for Segmentation (end)
+
+  \subsection{Touch detectoin} % (fold)
+  \label{sub:Touch detectoin}
+    When the two surfaces are represented in the virtual space, it is possible
+    to try to find some positions where they are very near to one another and
+    declare them as touch points. This is done by extending slightly the
+    raycasting of the background (for more details see \cite{kinectfusion}).
+  % subsection Touch detectoin (end)
 % section Implementation (end)
+
+\section{Comparison between KinectFusion and a technique for Full human body
+scanning} % (fold)
+\label{sec:Comparison between KinectFusion and a technique for Full human body
+scanning}
+  Although the results from \cite{kinectfusion} are really good, the system
+  could not be used to create a sufficiently detailed human body model (see
+  \cite{body-scanning}). One of the difficulties with the scan of the whole
+  human body is that either the camera should be at sufficiently big distance
+  from the person that is to be scanned, which leads to results similar to those
+  of Figure~\ref{fig:human-body}(a), or it should be moved along the body from
+  smaller distance. The problem that still remains with the second approach is
+  that the human body is non-rigid and special techniques should be used to
+  overcome this complication. Two major problems are registration of non-rigid
+  objects and global aliment of non-rigid objects, i.e. the loop closure
+  problem. Solutions for both are provided by \cite{body-scanning}.
+
+  \begin{figure}[h]
+    \centering
+    \includegraphics[height=80mm]{graphics/human_body.png}
+    \caption{(a) The raw data of capturing a full human body with one single
+      Kinect has much low quality as the Kinect has to be put far from the
+      body. (b) The raw data captured using the system, which is proposed by the
+      authors of \cite{body-scanning} has higher quality as multiple Kinects are
+      used to capture different parts of the body at a closer distance. (c) The
+      reconstructed human model created using their system.}
+    \label{fig:human-body}
+  \end{figure}
+
+  Let us just note that the fact that KinectFusion can not provide good results
+  in this situation is to be expected. The authors specifically say that it has
+  problems with non-rigid bodies. Still, it is good to see how git are the
+  problems in some situations and that there are other more specific solutions
+  for those other situations.
+% section Comparison between KinectFusion and a technique for Full human body
+% scanning (end)
+
+\section{Conclution} % (fold)
+\label{sec:Conclution}
+  
+% section Conclution (end)
 
 
 
@@ -550,6 +664,5 @@ Jamie Shotton, Steve Hodges, Dustin Freeman, Andrew Davison, Andrew Fitzgibbon.
     Detection based on Spatial Partitioning", University of Freiburg 
 \end{thebibliography}
 
-\hfill\\
-
+%\hfill\\
 \end{document}
