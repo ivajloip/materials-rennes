@@ -1,4 +1,4 @@
-\documentclass[12pt, a4paper]{article}
+\documentclass[11pt, a4paper]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
 \usepackage{amsfonts}
@@ -17,8 +17,8 @@
 \oddsidemargin 0mm
 \evensidemargin 0mm
 \topmargin 0mm
-\textheight 216mm
-\textwidth 165mm
+\textheight 210mm
+\textwidth 160mm
 
 \pagestyle{fancy}
 \fancyhf{}
@@ -101,9 +101,9 @@ Jamie Shotton, Steve Hodges, Dustin Freeman, Andrew Davison, Andrew Fitzgibbon.
   hand-held device has been a goal of a number of researches. Now with a Kinect
   camera and appropriate software that is possible. Furthermore, with this 
   camera now we are not only able to rapidly create a detailed 3D reconstruction
-  of a limited size scene (a room for example) in real time \cite{kinectfusion},
-  but we can also use this reconstruction to create geometry-aware augmented
-  reality with physical interactions within it. 
+  of a limited size rigid scene (a room for example) in real time
+  \cite{kinectfusion}, but we can also use this reconstruction to create
+  geometry-aware augmented reality with physical interactions within it. 
 
   KinectFusion is a software that is capable of using a Kinect camera to do all
   that without the need of additional widely used devices such as trackers. It
@@ -115,7 +115,7 @@ Jamie Shotton, Steve Hodges, Dustin Freeman, Andrew Davison, Andrew Fitzgibbon.
 \section{Introduction} % (fold)
 \label{sec:Introduction}
   For quite some time people have been fascinated by the possibility with an 
-  affordable, hand-held device and in real time, to scan accurately 3D shapes,  
+  affordable, hand-held device, to scan accurately 3D shapes in real time,  
   to create geometry-aware augmented reality, and to create physically based
   interactions within it. So far, however, this has been impossible. With the
   inventing of the Kinect camera the world is presented with the possibility to
@@ -136,10 +136,10 @@ Jamie Shotton, Steve Hodges, Dustin Freeman, Andrew Davison, Andrew Fitzgibbon.
   \textbf{volumetric surface representation}. Although this approach has some 
   drawbacks, i.e. hight memory consumption, which might potentially lead to high
   computational cost (as noted in
-  \cite{representaion-and-rendering-of-implicit-surfaces}). There however is a
+  \cite{representaion-and-rendering-of-implicit-surfaces}). There is a
   solution to this problem, that the authors suggest - the use of octree.
   Although there is no additional information about this approach in the
-  original article, it will be explained in the appropriate part of this paper. 
+  original article, such will be provided with some additional details. 
 
   As the system is designed in a way that allows moving of the Kinect camera and
   interaction of users with the scene, the authors needed to solve a number of
@@ -215,7 +215,7 @@ Jamie Shotton, Steve Hodges, Dustin Freeman, Andrew Davison, Andrew Fitzgibbon.
       used to reconstruct any indoor spaces. This distinguishes the proposed
       solution from many earlier works that used fixed or large sensors, or
       sensors that are fully embedded in the environment. Also in order the
-      application to easier to use, the authors wanted to avoid using
+      application to be easier to use, the authors wanted to avoid using
       augmentation of the space and the interacting entities with some markers.
     \item \textbf{Size scale} Additional requirement that distinguishes the
       proposed approach is the support of bigger scenes - a whole room for
@@ -243,11 +243,11 @@ Jamie Shotton, Steve Hodges, Dustin Freeman, Andrew Davison, Andrew Fitzgibbon.
 
 \section{KinectFusion} % (fold)
 \label{sec:KinectFusion}
-  Following the example of the example of the authors of \cite{kinectfusion}, we
-  will now present a number of applications of the KinectFusion system and after
-  that some of its parts will be described in more details and additional
-  information will be provided from
-  \cite{representaion-and-rendering-of-implicit-surfaces} and \cite{icp}.
+  Following the example of the authors of \cite{kinectfusion}, we will now
+  present a number of applications of the KinectFusion system and after that
+  some of its parts will be described in more details and additional information
+  will be provided from \cite{representaion-and-rendering-of-implicit-surfaces}
+  and \cite{icp}.
 
   The system tries to constantly keep track of the camera position in the space,
   calculating constantly the 6DOF and adding new data as camera is moved or new
@@ -256,12 +256,12 @@ Jamie Shotton, Steve Hodges, Dustin Freeman, Andrew Davison, Andrew Fitzgibbon.
   not have to be too big in order new data to be acquired, this can happen, for
   example, because of a slight camera shake. The authors point out that given
   the real-time speed of the reconstruction, the level of details of the
-  reconstructed objects is more then good. More details on that will be provided
-  later in this paper. Using the RGB camera that the Kinect sensor has, it is
-  also possible to map textures to the reconstructed objects as shown in
+  reconstructed objects is more than satisfactory. More details on that will be
+  provided later in this paper. Using the RGB camera that the Kinect sensor has,
+  it is also possible to map textures to the reconstructed objects as shown in
   Figure~\ref{fig:model_with_texture}B.
 
-  \begin{figure}[h]
+  \begin{figure}
     \centering
     \includegraphics[height=40mm]{graphics/augented_reality.png}
     \includegraphics[height=40mm]{graphics/model_with_texture.png}
@@ -282,24 +282,23 @@ Jamie Shotton, Steve Hodges, Dustin Freeman, Andrew Davison, Andrew Fitzgibbon.
   looks exactly as if it was at that position during the taking of the picture.
 
   Another application is \textbf{physical world dynamics simulation}. That means
-  that, due to some properties of the implementation that preserve some
-  information about the velocity of the objects in the scene, it is possible to
-  simulate rigid body collisions between real and virtual objects that are
-  physically precise and, of course, real-time. This can have great application
-  in areas such as gaming and robotics. The number of virtual objects is not
-  precisely limited, it is believed that as much as a few thousands of them can
-  be simultaneously introduced in the scene, without breaking the time bounds of
-  the execution. Such scene can be viewed in
+  that thanks to a special module of the system, it is possible to create
+  virtual objects that are dynamic, meaning that they change their place and
+  also to simulate rigid body collisions between real and virtual objects that
+  are physically precise and, of course, real-time. This can have great
+  application in areas such as gaming and robotics. The number of virtual
+  objects is not precisely limited, it is believed that as much as a few
+  thousands of them can be simultaneously introduced in the scene, without
+  breaking the time bounds of the execution. Such scene can be viewed in
   Figure~\ref{fig:model_with_texture}C, where there is a big number of small
   spheres that are added to the real scene.
 
-  In order to obtain the velocity information that was previously mentioned, the
-  authors of the article divide the space in two parts - foreground and
-  background. In the foreground is the interacting and moving user and in the
-  background is the static scene. This segmentation is achieved through
-  declaration of the pixels where the scene has changed too much as outliers
-  that are after that processed and separately rendered and added in the final
-  visualization. 
+  As the authors of the article explain, it proves to be very useful to divide
+  the scene in two parts - foreground and background. In the foreground is the
+  interacting and moving user and in the background is the static scene. This
+  segmentation is achieved through declaration of the pixels where the scene has
+  changed too much as outliers that are after that processed and separately
+  rendered and added in the final visualization. 
 
   It is this segmentation that allows relatively rapidly moving foreground
   objects to interact and collide with rigid virtual ones. 
@@ -312,7 +311,7 @@ Jamie Shotton, Steve Hodges, Dustin Freeman, Andrew Davison, Andrew Fitzgibbon.
   allow direct multi-touch interactions (see Figure~\ref{fig:interactions}A and
   B).
 
-  \begin{figure}[h]
+  \begin{figure}
     \centering
     \includegraphics[height=40mm]{graphics/interaction_actual.png}
     \includegraphics[height=40mm]{graphics/virtual_interactoin.png}
@@ -325,9 +324,9 @@ Jamie Shotton, Steve Hodges, Dustin Freeman, Andrew Davison, Andrew Fitzgibbon.
 \label{sec:Implementation}
   The implementation of the system has to rely on significant computational
   power for a great number of relatively simple tasks. For that purpose the
-  authors decided to use GPUs for the computations as they are specifically
-  designed for such applications and as there are possibilities to use them not
-  only to do graphical computations, but also to do a wide range of concurrent
+  authors decided to use GPUs as they are specifically designed for such
+  applications and as there are possibilities to use them not only to do
+  graphical computations, but also to do a wide range of concurrent
   computations, that are relatively independent as is the currently depicted
   case. For the implementation the authors of the article use CUDA (a parallel
   computing platform and programming model created by NVIDIA and implemented by
@@ -340,7 +339,7 @@ Jamie Shotton, Steve Hodges, Dustin Freeman, Andrew Davison, Andrew Fitzgibbon.
   Each of them is executed for each new data provided by the sensor on the GPU
   unit.
 
-  \begin{figure}[h]
+  \begin{figure}
     \centering
     \includegraphics[height=55mm]{graphics/pipeline.png}
     \caption{Computational pipeline}
@@ -408,7 +407,7 @@ Jamie Shotton, Steve Hodges, Dustin Freeman, Andrew Davison, Andrew Fitzgibbon.
     volumetric surface representation, based on
     \cite{representaion-and-rendering-of-implicit-surfaces}.
 
-    Unlike it is proposed in the article
+    Unlike the original proposition in article
     \cite{representaion-and-rendering-of-implicit-surfaces}, however, the
     authors of \cite{kinectfusion} have decided not to implements octree, but
     instead to use a uniformly subdivided space into voxels (voxels are
@@ -432,23 +431,27 @@ Jamie Shotton, Steve Hodges, Dustin Freeman, Andrew Davison, Andrew Fitzgibbon.
     computational efficiency then octree approach. There are no evidence to
     support this, however. It is clear, though, that this approach does not
     scale good with the increase of the size of the scene. It does not matter
-    what is in the scene, only its size. From one point of view this is normal,
-    as they want to scale just as much as to be able to scan a whole room.
-    Another reason why they would not care is that the Kinect infrared camera
-    starts to loose accuracy after some distance (after 2 or 3 meters the values
-    are significantly noisy). This was not mentioned by the authors as maybe
-    they have considered it irrelevant in the case that they considered. However
-    for the purposes of \cite{body-scanning} this is quite important. There it
-    is essential that great details, that can be obtained by Kinect infrared
-    camera only from small distance, are considered.
+    what is in the scene, only its size. This is not true for the representation
+    using octrees that essentially tries to store as little information as
+    possible in order to ensure preservation of the details.
 
-    As for the computational performance, although true that this structure is
-    quite easy to run in parallel, it is possible that a great majority of the
-    voxels does not contain data and are processed for no reason. In such
-    situations maybe an octree would provide better results. It would be
-    interesting to take experimental results for both in different scenes and
-    see how they perform in them - how the number of surfaces will impact the
-    performance.
+    From one point of view it is normal that the uniform space division was
+    chosen by the authors as they want to scale just as much as to be able to
+    scan a whole room.  Another reason why they would not care about that is
+    that the Kinect infrared camera starts to loose accuracy after some distance
+    (after 2 or 3 meters the values are significantly noisy). This was not
+    mentioned by the authors as maybe they have considered it irrelevant in the
+    case that they considered. However for the purposes of \cite{body-scanning}
+    this is quite important. For their purpose it is essential that great
+    details can be obtained by Kinect infrared camera only from small distance.
+
+    As for the computational performance, although true that the uniform space
+    division structure is quite easy to run in parallel, it is possible that a
+    great majority of the voxels does not contain data and are processed for no
+    reason. In such situations maybe an octree would provide better results. It
+    would be interesting to take experimental results for both in different
+    scenes and see how they perform in them - how the number of surfaces will
+    impact the performance.
 
     The authors admit that their approach with the uniformly divided space is
     far from being memory efficient. The better representation (at least in some
@@ -456,7 +459,7 @@ Jamie Shotton, Steve Hodges, Dustin Freeman, Andrew Davison, Andrew Fitzgibbon.
     possible extra details to be added to some part of the scene. With the
     uniform representation it is not possible if we are specifically interested
     in some part of the scene to get extra details for it. This is natural for
-    the octree representation. Maybe a reconsidering of the volumetric surface
+    the octree representation. Maybe a reconsideration of the volumetric surface
     representation can improve the provided by the authors of
     \cite{kinectfusion} results.
 
@@ -465,7 +468,7 @@ Jamie Shotton, Steve Hodges, Dustin Freeman, Andrew Davison, Andrew Fitzgibbon.
     perspective projected back into the image coordinates to lookup the actual
     depth measurement along the ray. The difference between the measured and the
     calculated distances gives a new SDF value for the voxel. This value is
-    normalized and averaged with the previous stored value. 
+    normalized and averaged with some weight with the previously stored value. 
   % subsection Volumetric Representation (end)
 
   \subsection{Raycasting for Rendering and Tracking} % (fold)
@@ -499,7 +502,7 @@ Jamie Shotton, Steve Hodges, Dustin Freeman, Andrew Davison, Andrew Fitzgibbon.
     still possible even with a great number of virtual objects. Here is how it
     is done: during the rendering of the scene, TSDF values within some adaptive
     threshold are extracted. For each surface voxel, a static particle is
-    instantiated that contains a 3D vertex in global coordinates, a velocity
+    instantiated that contains: a 3D vertex in global coordinates, a velocity
     vector that represent the direction and the speed of the particle (always
     empty for static particles) and an ID. Having this representation, it is
     possible to observe the dynamicity of the system, but additional steps
@@ -509,7 +512,7 @@ Jamie Shotton, Steve Hodges, Dustin Freeman, Andrew Davison, Andrew Fitzgibbon.
     dynamic particle to detect if it collides with some of its neighbouring
     objects. The interaction with each of them is taken into account and this
     determines the new direction and speed of the particle (and consequently its
-    new position in the next frame. 
+    new position in the next frame). 
 
     While this approach seem to work nice according to the authors of
     \cite{kinectfusion}, the uniform subdivision of the space seem as not the
@@ -518,12 +521,14 @@ Jamie Shotton, Steve Hodges, Dustin Freeman, Andrew Davison, Andrew Fitzgibbon.
     neighbouring grid. This will lead to significant reduction of the speed of
     he system, especially when the objects to be tested for collisions are not
     spheres, because for a number of objects the test for collision between two
-    objects is much slower then for spheres. ADD MORE AS OF WHY! Maybe a better approach would be the use of a better space
-    dividing technique, for example k-d trees or octrees. With them it is
-    possible to take into account the locality of the elements, while at the
-    same time keeping the number of particles in each volume below some
-    threshold (see \cite{fast-collision-detection} and
-    \cite{collision-detection-based-on-partitioning} for more details).
+    objects is much slower then for spheres. Maybe a better approach would be
+    the use of a better space dividing technique, for example k-d trees or
+    octrees. With them it is possible to take into account the locality of the
+    elements, while at the same time keeping the number of particles in each
+    volume below some threshold (see \cite{fast-collision-detection} and
+    \cite{collision-detection-based-on-partitioning} for more details). Note,
+    however that there is always a trade-off between easiness of collision
+    detection and easiness of maintenance of the data structure.
   % subsection Simulating Real-World Physics (end)
 
   \subsection{User Interaction} % (fold)
@@ -541,8 +546,8 @@ Jamie Shotton, Steve Hodges, Dustin Freeman, Andrew Davison, Andrew Fitzgibbon.
     should be accepted as correct. Smaller value will cause slower update of the
     surface, whereas big value might integrate too much of the noise in the
     surface. As a consequence of the user interaction, however, regardless of
-    the weight value, some of data from the moving user will be integrated in
-    the scene model, which is not desirable. This could also make impossible
+    the weight value, some of the data from the moving user will be integrated
+    in the scene model, which is not desirable. This could also make impossible
     correct camera tracking.
   % subsection User Interaction (end)
 
@@ -551,32 +556,33 @@ Jamie Shotton, Steve Hodges, Dustin Freeman, Andrew Davison, Andrew Fitzgibbon.
     Maybe one of the greatest contributions of this article is the proposition
     of a way to segment foreground moving items from background ones. The idea
     is that if initially the sensor can obtain some approximate representation
-    of the scene, after that when the user comes and starts to interact, it is
-    possible to detect the points that are significantly different from the
-    expected values. Those points are marked as outliers. Later, this is
-    the important thing, they assume that any interacting body will represent a
+    of the scene and after that when the user comes and starts to interact, it
+    is possible to detect the points that are significantly different from the
+    expected values. Those points are marked as outliers. Later, this is the
+    important thing, they assume that any interacting body will represent a
     significant surface. This is to say that there will be a number of
     neighbouring outliers. As a consequence, it can be concluded that those
-    measurements are not error of the sensor, but instead are moving objects.
-    Having isolated them, we can substitute their values with values from
-    the model in the observation, so that those new depth measurements does not distort the model.
-    The foreground objects on the other hand can be separately handled. For them
-    however we know the precise global position of the camera, and so it is
-    possible to regard them as the case when an object is presented in from of
-    the static camera for scanning, i.e. to run a separate ICP for them. And
-    integrate the new data in separate model. It turns out that even if some
-    small part of the foreground model is moving non-rigidly, the ICP algorithm
-    still manages to converge on the other, rigidly moving parts. That way the
-    foreground objects can safely be extracted from the outliers from the depth
-    map and integrated in a second model. After the geometries of the two are
-    determined, we can render them separately and then combine the two results.
+    measurements are not errors of the sensor, but instead are moving objects.
+    Having isolated them, we can substitute their values with values from the
+    model in the observation, so that those new depth measurements does not
+    distort the model.  The foreground objects on the other hand can be handled
+    separately. For them, however, we know the precise global position of
+    the camera, and so it is possible to regard them as the case when an object
+    is presented in from of the static camera for scanning, i.e. to run a
+    separate ICP for them and integrate the new data in a separate model. It
+    turns out that even if some small part of the foreground model is moving
+    non-rigidly, the ICP algorithm still manages to converge on the other,
+    rigidly moving parts. That way the foreground objects can safely be
+    extracted from the outliers from the depth map and integrated into a second
+    model. After the geometries of the two are determined, we can render them
+    separately and then combine the two results.
 
     According to the authors of \cite{kinectfusion} this technique gave very
-    good results for all their tests. It is not clear however if the initial
+    good results for all their tests. It is not clear, however, if the initial
     scene is at sufficient distance from the Kinect infrared camera how precise
     will be representation and if this can cause failure to detect background
-    object from foreground ones (interacting users). For example the foot of the
-    user is expected to take just a small portion of space and maybe at
+    object from foreground ones (interacting users). For example, the foot of
+    the user is expected to take just a small portion of space and maybe at
     appropriate distance (3-4 meters) it would be impossible to distinguish it
     from the background. This of course is some limitation of the camera, but
     maybe it is worth noticing.
@@ -630,7 +636,7 @@ scanning}
 
   Let us just note that the fact that KinectFusion can not provide good results
   in this situation is to be expected. The authors specifically say that it has
-  problems with non-rigid bodies. Still, it is good to see how git are the
+  problems with non-rigid bodies. Still, it is good to see how big are the
   problems in some situations and that there are other more specific solutions
   for those other situations.
 % section Comparison between KinectFusion and a technique for Full human body
@@ -638,10 +644,21 @@ scanning}
 
 \section{Conclution} % (fold)
 \label{sec:Conclution}
-  
+  As a conclusion, it can be said that the main article that was depicted, i.e.
+  \cite{kinectfusion} is a very good one. It provides information for a system
+  that can be used in a number of real life applications, ranging from creation
+  of 3D models with low-cost equipment, to playing video games and interacting
+  with augmented reality. There are of course things that can explained in more
+  details or things that can be tested to see if they will work better. Maybe
+  the uniform division of space will not be the best solution for the surfaces
+  and for the collision detection. There are not sufficient details maybe for
+  the Kinect infrared camera, but most likely the authors have considered it
+  popular enough so that they do not have to provide many technical
+  characteristics. 
+  Apart from all those details, the article can be said to have provided a
+  number of new ideas to the field and thanks to that, I think that it is a
+  really good one.
 % section Conclution (end)
-
-
 
 \begin{thebibliography}{widest entry}
   \bibitem{kinectfusion} Shahram Izadi et al., KinectFusion: Real-time 3D
