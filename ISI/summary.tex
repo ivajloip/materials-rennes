@@ -274,14 +274,48 @@ that BEEMR saves energy up to 40-50\% of the ideal-case.
   state. We can start a Down server also if some data that is presented only on
   it is needed.
 
+  For the testing of the proposed approach two different workloads are chosen -
+  "Facebook-Derived" and "Nutch Indexing". Details for the testing environment
+  can be found in \cite{greenhadoop}. One of the important things there is that
+  the experiments are not in real time, but a 2-day experiments are run in 2
+  hours. Although there is some information why this is necessary and how does
+  it affect the executions of the experiments, additional details could be
+  useful to understand how the real values are supposed to differ from the
+  obtained ones.
+
+  In the experiments that the authors of \cite{greenhadoop} performed, no time
+  bounds were violated except for the case when the maximum delay was less or
+  equal to 12 hours. In the case of 12 hours the delay was about 3\% and most of
+  them exceeded the time bounds with only a small amount. There are a number of
+  other experiments that study how the amount of "green" energy, data center
+  utilization, fraction of high-priority jobs, workloads and energy estimation.
+  The results show that the gain from this technique increases with the decrease
+  of data center utilization and number of high priority tasks. The improvement
+  in green energy utilization is between 20 and 30 percent in most cases and the
+  price for brown energy is decreased by 22\% in some cases and up to more then
+  60\% in others. On average the authors state that they manage to decrease the
+  electricity cost by 39\% and to increase the green energy utilization by 31\%.
+
+  There are a few interesting things that are omitted in this article, however.
+  The first of them is if there is some impact of failing nodes to the
+  performance of the system. It seems that during their experiments there were
+  no failing jobs, no failing servers. This, however, can happen. 
+
+  Also it would be interesting to provide some additional information about
+  longer runs, as it is not clear if runs that represent only two days can catch
+  all the characteristics of the system when it is run for a year for example.
 
 % section GreenHadoop (end)
 
-\begin{itemize}
-  \item No information about node failure - how does it change the time 
-  \item Longer runs to see how the system behaves after the initial
-    stabilization
-\end{itemize}
+\section{Conclution} % (fold)
+\label{sec:Conclution}
+  To sum up, those techniques can be used to significantly decrease the
+  electricity cost for data centers. The authors of \cite{greenhadoop} have
+  calculated that if a data center creates its own solar power plant in some
+  places of the world, in 10-11 years they will have their money back and the
+  rest of the time that the power plant is expected to work (10-20 years), they
+  will be saving additional money.
+% section Conclution (end)
 
 \begin{thebibliography}{widest entry}
   \bibitem{hrisi} \textcolor{red}{Hrisi to fill here her article and change [1]
