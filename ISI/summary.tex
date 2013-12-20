@@ -87,13 +87,17 @@
 
 \hr
 
-In the recent years many MapReduce workflows and {something for a first sentance}.
-In this report we are going to present two different strategies for achieving
-energy efficiency. The first approach concerns MapReduce with Interactive Analysis
-work flows (MIA) which include interactive services, traditional batch processing, and
-latency-sensitive processing. The authors of [1] have presented
-BEEMR (Berkley Energy Efficient MapReduce) method inspired by the empirical analysis
-of real-life MIA traces. {here it is your part of the introduction}.
+In the recent years MapReduce is de-facto the standard for computations on
+big amounts of data. Because of that in this report we are going to present two
+different strategies for achieving energy efficiency for data centers that run
+MapReduce tasks. The first approach concerns MapReduce with Interactive Analysis
+work flows (MIA) which include interactive services, traditional batch
+processing, and latency-sensitive processing. The authors of [1] have presented
+BEEMR (Berkley Energy Efficient MapReduce) method inspired by the empirical
+analysis of real-life MIA traces. The second one we describe how to manage a
+data center to use maximum amount of "green" energy and if we have to use
+"brown" energy, how to optimize the amount of money we have to pay for it. All
+that is implemented in GreenHadoop \cite{greenhadoop}
 
 The researches of [1] have chosen to use Facebook work flows as a case study. Analysis
 on the traces of the system's primary Hadoop cluster have been made. After performing
@@ -189,11 +193,101 @@ and when it is executed on a batch. The results taken from the real data reveal
 that this is not a correct assumption. Still, the conclusion that can is drawn is
 that BEEMR saves energy up to 40-50\% of the ideal-case.
 
-\cite{kinectfusion}
+\section{GreenHadoop} % (fold)
+\label{sec:GreenHadoop}
+  In this part GreenHadoop will be presented. The target application is to
+  optimize both the amount of renewable or green energy that is used by small or
+  medium size data centers and to optimize the price that has to be paid for
+  energy drawn from the electrical grid. Big data centers are owned by big
+  companies that has the opportunity to optimize the cost efficiency of their
+  data centers. It is the smaller ones that are still not very optimal and for
+  which a great amount of work should be done.
+
+  In this paper the authors has assumed that the data center that is to optimize
+  its green energy utilization has its own solar power plant and it can not use
+  the energy produced in any other way except for computations. The reasons for
+  those assumptions are well described in the paper (see \cite{greenhadoop}). 
+
+  In order to be able to provide some real improvement, the authors has also
+  assumed that some of the jobs can be delayed with up to some finite amount of
+  time (generally one day for the simulations) and that the data center is under
+  utilized. If it is fully utilized all the time, there is no easy way to
+  improve its energy efficiency. By adding the possibility to delay some of the
+  task, it is possible to both use green energy if it is expected that it will
+  be sufficient for the computations (a prediction of the amount of green energy
+  supply is created based on some meteorological information) or use the
+  cheapest energy. As energy is cheapest at some night hours when it is much
+  less used and there are other factors that contribute to the amount of money
+  to be paid for the "brown" energy, it is possible to take also all those
+  things into account when deciding when to schedule the tasks that should be
+  executed.
+
+  The way the proposed system, GreenHadoop, differs from Hadoop is that it does
+  not try to obtain results as soon as possible, using all the available
+  servers. That way it is nearly impossible to reduce the amount of power that
+  the data center will consume. GreenHadoop, on the other hand, tries to
+  determine how to schedule the tasks so that it can use as much green energy as
+  possible and also cheap energy, when the "green" one will not be enough. The
+  goal is to maximize the number of servers that are turn off, especially when
+  the energy has high prices, without endangering the deadlines for each task.
+  GreenHadoop has five possible priorities: very high, high, normal, low, and
+  very low, that are the same as those in Hadoop. The difference is that in
+  GreenHadoop it is possible to postpone a job with priority below high for a
+  fixed amount of time.
+
+  During the course of the execution of different tasks, each server in the data
+  center can be in one of the following three states: Active, Decommissioned or
+  Down. In the Down state it is stopped in a way that consumes only a very small
+  amount of energy, but that allows a fast start of that server. Decommissioned
+  is a server that is used either to only store some data blocks or server that
+  should be put in Down state, on which there are some tasks that still have not
+  completed their execution. No new tasks or data blocks are added to
+  Decommissioned servers. Active servers are servers that are running tasks on
+  full speed.
+
+  The execution can be explained as follows: when a new tasks is received it
+  either goes to the waiting queue in FIFO order if its priority is below high,
+  or goes to the Hadoop queue in FIFO order otherwise. The time is divided in
+  epochs and before the start of the next one, each task received in the
+  previous epoch is determined an epoch before which the job has to start
+  executing in order the result to be obtained on time. Here it is important to
+  note that for each job an estimation of the number of servers and time it will
+  take is made, that relies only on some statistics, not on data provided by the
+  submitter of the job.
+
+  In the beginning of each epoch the number of Active servers for that epoch is
+  also determined. It is computed by the expectation of the energy provided by
+  the renewable source of energy, the priorities and deadlines of the jobs. If
+  it is possible GreenHadoop will start as much jobs as possible from the
+  waiting queue when there is enough green energy. When selecting jobs to be
+  started, jobs with priority above normal are directly started and if more
+  green energy is available, it is used to run the jobs which are supposed to
+  run sooner from the waiting queue and for which all the data they need is
+  presented in Active or Decommissioned server. 
+
+  If the number of servers is greater then the needed ones, some of the servers
+  are put in Decommissioned state and are eventually put in Down state when
+  their data blocks are not needed or are copied to servers that will remain in
+  some up state. If, on the other hand, we need more computational power, we
+  first check if we can put some of the servers in Decommissioned state in
+  Active one and use them otherwise we put some of the Down servers in Active
+  state. We can start a Down server also if some data that is presented only on
+  it is needed.
+
+
+% section GreenHadoop (end)
+
+\begin{itemize}
+  \item No information about node failure - how does it change the time 
+  \item Longer runs to see how the system behaves after the initial
+    stabilization
+\end{itemize}
 
 \begin{thebibliography}{widest entry}
-  \bibitem{kinectfusion} Shahram Izadi et al., KinectFusion: Real-time 3D
-    Reconstruction and Interaction Using a Moving Depth Camera, 2011
+  \bibitem{hrisi} \textcolor{red}{Hrisi to fill here her article and change [1]
+    with cite\{something\}}
+  \bibitem{greenhadoop} I. Goiri, et al. GreenHadoop: Leveraging green energy in
+    data-processing frameworks. In Proc. of EuroSys’12, pages 57–70, 2012.
 \end{thebibliography}
 
 \hfill\\
