@@ -1,0 +1,934 @@
+\documentclass[11pt]{article}
+\usepackage{fullpage}
+\usepackage{graphicx}
+\usepackage{subfigure}
+\usepackage{color}
+\usepackage{hyperref}
+
+\definecolor{dark-gray}{gray}{0.20}
+
+\hypersetup{
+  colorlinks=true, % set true if you want colored links
+  citecolor=dark-gray, % chooses some color if you want the citations to stand out
+  filecolor=black, % chooses some color if you want files to stand out
+  linktoc=all, % set to all if you want both sections and subsections linked
+  linkcolor=black,  % choose some color if you want links to stand out
+  urlcolor=darkgray,% chooses some color if you want the urls to stand out
+}
+
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+
+%numeroter les pages
+\pagestyle{plain}
+
+
+\begin{document}
+
+\begin{titlepage}
+
+\begin{center}
+
+% Upper part of the page
+
+ 
+
+\includegraphics[width=0.8\textwidth]{./header}\\[1cm]
+\textsc{\Large Master research Internship}
+\vspace{1cm}
+
+\includegraphics[width=0.11\textwidth]{./logo_ENIB} 
+\includegraphics[width=0.11\textwidth]{./ens-cachan_bretagne}
+\includegraphics[width=0.11\textwidth]{./esir}
+\includegraphics[width=0.11\textwidth]{./enssat} 
+\includegraphics[width=0.11\textwidth]{./insa-rennes}
+\includegraphics[width=0.11\textwidth]{./rennes1}
+\includegraphics[width=0.11\textwidth]{./supelec}
+\includegraphics[width=0.11\textwidth]{./logoUbs}
+\includegraphics[width=0.11\textwidth]{./UBO}
+\includegraphics[width=0.11\textwidth]{./tel-br}
+
+
+  
+\vspace{1cm} 
+\textsc{\Large Bibliographic report }\\[0.5cm]
+
+
+% The title of your report
+\HRule \\[0.4cm]
+{ \Large \bfseries Combinatorial Optimization for Fast Scaffolding }\\[0.4cm]
+
+\HRule \\[1.5cm]
+
+% Author and supervisor(s)
+\begin{minipage}{0.4\textwidth}
+\begin{flushleft} \large
+\emph{Author:}\\
+Ivaylo  \textsc{Petrov}
+\end{flushleft}
+\end{minipage}
+\begin{minipage}{0.4\textwidth}
+\begin{flushright} \large
+\emph{Supervisor:} \\
+%
+% name(s) of your supervisor(s)
+Rumen \textsc{Andonov} \\
+Antonio \textsc{Mucherino} \\
+% Name of your team
+GenScale
+\end{flushright}
+\end{minipage}
+
+\vfill
+
+
+% INCLUDE HERE THE LOGO OF YOUR INSTITUTION
+%\textbf{INSERT ``\%'' IN FRONT OF ALL THE LOGO YOU DO NOT NEED - A SINGLE ONE SHOULD REMAIN AT THE BOTTOM OF THIS PAGE}
+%\begin{flushleft}
+%\includegraphics[width=0.15\textwidth]{./supelec}\\
+%\end{flushleft}
+%\begin{flushleft}
+%\includegraphics[width=0.15\textwidth]{./logoUbs}
+%\end{flushleft}
+%\begin{flushleft}
+%\includegraphics[width=0.15\textwidth]{./UBO}
+%\end{flushleft}
+%\begin{flushleft}
+%\includegraphics[width=0.15\textwidth]{./tel-br}
+%\end{flushleft}
+\begin{flushleft}
+\includegraphics[width=0.15\textwidth]{./rennes1}
+\end{flushleft}
+%\begin{flushleft}
+%\includegraphics[width=0.15\textwidth]{./insa-rennes}
+%\end{flushleft}
+%\begin{flushleft}
+%\includegraphics[width=0.15\textwidth]{./esir}
+%\end{flushleft}
+%\begin{flushleft}
+%\includegraphics[width=0.15\textwidth]{./enssat}
+%\end{flushleft}
+%\begin{flushleft}
+%\includegraphics[width=0.15\textwidth]{./ens-cachan_bretagne}
+%\end{flushleft}
+%\begin{flushleft}
+%\includegraphics[width=0.15\textwidth]{./logo_ENIB}
+%\end{flushleft}
+\end{center}
+\end{titlepage}
+
+
+
+%************************************************************%
+
+\begin{abstract}
+  \textcolor{red}{Here should appear your abstract - Should be fifteen lines
+  long }
+\end{abstract}
+
+% compile twice to get the table of contents
+\tableofcontents
+\newpage
+
+\setcounter{page}{1} 
+
+%*****************************************************************%
+\section{Introduction}
+\label{sec:Introduction}
+For a very long time some people have been fascinated with the diversity of
+living beings on the planet. They have spent their lives trying to understand
+the differences and similarities between species. They have observed various
+characteristics of each specie. With the advance of technology, more and more
+characteristics have been documented for every living organism, often each new
+one with a smaller size than the previous. Over time scientists have discovered
+that inside each living organism there is a large number of building units, that
+they called cells.  Inside each cell there is a molecule called DNA that can be
+depicted as a sequence of nucleotides. It turned out that this big molecule
+encodes the genetic instructions used in the development and the behavior of all
+known living organisms and many viruses. In order to better understand the
+development and behavior of every living being, scientist have to better
+understand this molecule - they how to decipher it. This, however, is not an
+easy task. There are a number of problems that need to be solved before the
+deciphering can be performed. 
+
+The first problem is that the structure of this molecule is different for all
+the individuals from all the species. This means that it is not the same for any
+two persons, for example, except if they are identical twins. This makes the
+process of determining the structure of this molecule very hard. Scientists want
+to study it, nevertheless, and for that reason the DNA of some individuals
+should be sequenced, meaning that the sequence of more basic building
+blocks\footnote{Those building blocks are called nucleotides} inside the DNA
+should be found. 
+
+Another problem is after the structure is obtained, how to understand what it
+actually means - how to decipher it.
+
+This is somewhat similar to a situation where a compiled version of some program
+in an unknown (lets say alien) programming language is obtained. In order to
+study it, scientist would greatly benefit from having the source code of the 
+program, even though it will not be understandable for them. They will be able
+to find similarities in the code that should lead to similarities in the program
+execution. 
+
+It is the same with the DNA structure. Scientists will be able to understand
+some of the functions of parts of the DNA molecule on the basis of similarities.
+
+As it was already noted, the obtaining of the structure of the DNA is not an
+easy task. The problem is that there is no known technology that can read the
+structure of the entire DNA molecule in one read. For that reason, a number of
+technologies that provide shorter reads have emerged. The difference between
+them is not only the size of the reads that they provide, but also the price for
+each DNA sequencing. For example, Sanger sequencing reads are of sizes between
+500 and 1000 bases, which is quite smaller than the size of the human genome which
+is around 3,234.83 mega bases, but it is still much bigger then that of the
+newer technologies that provide reads with sizes from 20 to 100 bases. The
+difference in the price and the throughput, however, make the newer technologies
+much more preferable than the old ones.
+
+This, nevertheless, puts a new challenge for scientists to overcome: how to put
+all those small pieces together. There are two ways to approach this problem.
+The first is, if there is already some reference sequence (it does not matter
+how it was obtained - it can be through some very pricey technology). In that
+case it is possible to try to put the pieces on the template, allowing some
+small differences. Although this approach is simple, it does not allow the scientists to
+obtain a genome that is very different from the reference one. Furthermore, the
+choice of the reference genome, in the case where there is more than one,
+affects the result, which means that this approach is not always very accurate.
+For those reasons, a second approach was proposed. It was to try to just
+assemble the pieces together based on some overlappings that they share or some
+other additional information about them. This approach is called de novo genome
+assembly.
+
+A naive way to approach the problem of whole-genome shotgun (WGS) de novo
+assembly\footnote{This is the so far described process of assembling small reads
+from different parts of the genome, usually with very high coverage that tries
+to compensate the randomness of the sequenced places} is by trying each piece
+with every other and see if they match well together. After that use some
+heuristics to determine which of the matching ones should be brought together.
+Even though this approach was not efficient, it was used for some time. After
+that \cite{pevzner-et-all-2001} proposed an approach that uses a structure
+called de Bruijn graph in order to make the process efficient. More information
+about this approach will be provided below.
+
+As the short reads were not sufficient to represent more complex parts of the
+genome, including some partial repetitions, some additional information was
+added to the output of the sequencing of the new technologies - pair reads. This
+is information about relative orientation and distance between two reads. With
+this new information the DNA structure can be represented more correctly,
+allowing the creation of better tools to assemble genomes.
+
+The process of assembling the small reads of DNA into bigger parts can be
+divided into at least two phases. The firs one creates contigs from the read,
+most commonly using some overlapping criteria. \textbf{Contigs} are gapless
+sequences of nucleotides. The second phase is the \textbf{scaffolding} or the
+phase where contigs are oriented and ordered linearly in such a way that
+minimizes the number of unsatisfied scaffolding constraints (as defined in
+\cite{grass}). Scaffolding constraints can be relative position and relative
+orientation of pairs of contigs that can be inferred from the mate-pairs, for
+example.
+
+The focus article will be on the scaffolding problem, however some details about
+process that are necessary for a successful scaffolder to operate will also be
+provided. In the next section an overview of the currently available scaffolding
+algorithms will be given with a substantial level of details. After that some
+additional steps that can greatly improve the results from the scaffolding will
+be shortly described. Next, a description on how the performance of a scaffolder
+can be measured will be provided. In the end the idea of the internship will be
+shortly presented. 
+
+% section Introduction (end)
+
+%*****************************************************************%
+\section{Related word} % (fold)
+\label{sec:Related word}
+
+\subsection{Classification of the available scaffolders} % (fold)
+\label{sub:Classification of the available scaffolders}
+Currently there are a number of systems that could put contigs into scaffolds.
+Some of them have been created more than 10 years ago, when the computers have
+had very restricted amount of random access memory, very slower processors than
+those of the computers today, and most of all, very few successful utilizations
+of parallel programming techniques. This is why most of the earliest efforts in
+solving this problem tried to come up with very fast, most of the time linear
+algorithms in the size of the graph that they analyzed. The speed, however, was
+at the expense of accuracy.
+
+Having said all that, the algorithms can be divided in two main groups: those
+that use some form of \emph{de Bruijn graph} (\cite{pevzner} and
+\cite{velvet-scaffolding}) and those that use some graph G(V, E), for which the
+nodes V are the contigs and the edges are some scaffolding constraints (there
+are different names for those graphs, including \emph{contig graph},
+\emph{scaffolding graph}, etc). 
+
+Another classification can be by the approach they have to the use of
+heuristics. Some systems directly use heuristics (\cite{greedy-path-merging},
+\cite{SOAPdenovo}, \cite{SSPACE}), using the graph structure very superficially,
+while others try to find some patterns or properties in the graph that will
+allow them to solve the problem exactly for some parts of the graph, while using
+heuristics to solve only the remaining, more complex parts (\cite{SOPRA},
+\cite{MIR}, \cite{Opera}, \cite{SCARPA} and \cite{grass}).
+
+Although there is no strict classification of the different systems, there are
+clear similarities between some of them, which will facilitate their
+understanding and for that reason will be used in the rest of the section.
+% subsection Classification of the available scaffolders (end)
+
+\subsection{Scaffolders that use de Bruijn graph} % (fold)
+\label{sub:Scaffolders that use de Bruijn graph}
+Those methods were created as an extension of the use of de Bruijn graphs for
+the contig assembly. Before \cite{pevzner} all the approaches for contig
+assembly used different heuristics that would lead to as much as 19\%
+misassembled contigs. Then the use of de Bruijn graphs was proposed with
+the problem being formulated as finding of eulerian path in that graph. Although
+the proposed system by \cite{pevzner} - EULER-SF uses pair reads for the genome
+assembly, it does not directly create scaffolds and thus it might not be
+considered as a scaffolder. In \cite{SOPRA} however, the authors point it as a
+scaffolder that uses pair read information to improve the walk in the de Bruijn
+graph. For that reason a short description of the algorithm will be provided.
+
+\subsubsection{EULER-DB} % (fold)
+\label{ssub:EULER-DB}
+This approach as described by \cite{pevzner} focus on creating scaffolds from
+long and reliable contigs, rather than from all the contigs. This greatly
+reduces the difficulty of the problem. The basic idea of the algorithm is to try
+to "explain" as many pair-reads as possible by adding them between a source node
+and a sink node in the de Bruijn graph. There are some techniques that are used
+in order to lower the impact of chimeric contigs or errors in the mate-pairs.
+For more details see \cite{pevzner}.
+
+% TODO: Try to explain a little bit better and in more details.
+% subsubsection EULER-DB (end)
+
+\subsubsection{Velvet} % (fold)
+\label{ssub:Velvet}
+The most famous of the de Bruijn graph based scaffolders is Velvet
+\cite{velvet-scaffolding}. The idea of this system is to try to connect all the
+unique nodes (the data from the contig assembler suggests that those contigs
+should be presented in the scaffolds only once). First, the unique nodes are
+determined using statistical approach that verifies the coverage of the contig.
+After that a primary and secondary scaffolds are formed in the following manner:
+for the primary scaffold a distance between each pair of nodes is estimated
+using the maximum likelihood estimator. The complete set of inter-node distances
+are called primary scaffold. For the secondary scaffold the system proceeds as
+follows: for a unique node A, the distances to all the neighbours of its primary
+neighbours (neighbours in the primary scaffold) are calculated. This is trivial
+as the sign of the distance signifies at which side of the other node the node
+is located and primary estimations are already available. It is nevertheless
+good to note that the secondary estimations might not be correct, as they
+involve contigs that are not unique.
+
+Unique nodes are after that connected using a heuristic depth-first search that
+takes into account the distance estimations and tries to reach the closes unique
+node from its starting one. This way unique nodes are connected through a number
+of iterations of the so far described approach. 
+
+It is important to note that on the general the heuristic depth-first search can
+go in an infinite loop. Velvet takes care so that this does not happen.
+
+Using the paths between the unique nodes, the scaffolds are formed.
+
+% TODO: Try to find a better description of the graph and present it.
+%\textcolor{red}{The graph is not well defined I think - it should be de Brujin
+%graph with read pair information}
+% subsubsection Velvet (end)
+
+% subsection Scaffolders that use de Bruijn graph (end)
+
+\subsection{Scaffolders that use scaffolding constraints graphs} % (fold)
+\label{sub:Scaffolders that use scaffolding constraints graphs}
+As it was previously noted, the typical characteristics of all the following
+systems for contig scaffolding is the fact that they use a graph where the nodes
+of the graphs are the contigs and the edges of the graph are constraints for the
+scaffolding. All of them try to resolve a similar problem, although for some of
+them it is less generic. The problem can be formulated as follows: given a set
+of possibly inconsistent scaffolding constraints, find the "smallest" subset of
+them that has to be removed in order the remaining constraints to be compatible.
+The quotation marks on smallest are placed as some of the constraints can depend
+on one another and a simple counting might not be optimal. For example the
+removal of links that point to a \textbf{chimeric contig} (a contig that has
+parts from two distinct parts of the genome in it) should not be considered as
+equivalently significant as removing a link from a normal contig, as otherwise
+the true nature of the problem will not be adequately modeled. 
+
+The above definition of the problem is taken from \cite{grass} as it was more
+precise than the other definitions that only take into account the constraints
+imposed directly by the mate-pairs. This allows the authors to use additional
+constraints such as similarity to a reference genome and others in addition to
+the mate-pair constraints.
+
+\subsubsection{Greedy Path-Merging} % (fold)
+\label{ssub:Greedy Path-Merging}
+The first algorithm that will be presented uses heuristic approach, without
+trying to solve any part of the problem exactly. It is described in more details
+in \cite{greedy-path-merging}. The algorithm operates on a graph that is
+described in the following way: all contigs are mapped to two nodes in the
+graph. Between those two nodes there is an edge, named contig-edge, with length,
+the length of the contig. One of the nodes is labeled with label \emph{s} and
+the other with label \emph{t}. 
+
+For each mate-pair that connects two distinct contigs we add an edge in the
+graph, given that this is the only edge that connects those two contigs (and that
+it does not repeat information that can be obtained from a number of other
+edges). Otherwise a statistical approach is used to bundle the mate-pairs that
+have similar length (for more information see \cite{greedy-path-merging}). Such
+edges are called mate-edges.
+
+The graph obtained in the already described way is called contig-mate-pair
+graph. For it we execute the following algorithm. First all contig-edges are
+said to be a part of the scaffolding (they are selected). This provides a number
+of very short paths of selected edges in the graph. For every mate-edge we try
+to combine the paths it connects. When no significant overlapping between the
+two pats it is possible to combine them. In that case we check if the number of
+edges that will be \emph{happy}, meaning that the contigs that they connect are
+oriented in accordance to the edge and that the distance between them is close
+to the expected one, will have increased more than the number of unhappy edges,
+those are the edges that are not happy. If this is also true, then we connect
+the two paths, setting the edges selections accordingly.
+
+After this is finished, there is one additional step which tries to fill any
+gaps in the scaffold using some of the unused contigs and mate-pairs.
+
+Although the presented algorithm uses some heuristics that can potentially lead
+to a solution that is not very similar to the optimal, one of its best
+characteristics is its complexity, which is $O(m n + m ^ 2)$, where n is the
+number of contigs and m is the number of mate-pairs. As this algorithm was
+proposed in 2002 and the computational power of the available computers was
+quite less than that of the computers today, it was essential to come up with
+algorithms that would run in an acceptable amount of time, even if they are not
+very precise, as biologists could, nevertheless, use the information provided by
+such programs.
+% subsubsection Greedy Path-Merging (end)
+
+\subsubsection{SOAPdenovo} % (fold)
+\label{ssub:SOAPdenovo}
+The next system to be presented \cite{SOAPdenovo} was created in 2009 and at
+that somewhat distant time it was aiming at assembling human genomes. This goal
+implied a very fast runtime, which in turn implied the use of sufficiently
+simple heuristics, that would be able to run in a reasonable amount of time. The
+proposed system behaves as follows: first it maps the mate-pairs to the contigs
+(note that originally we have the mate-pairs that connects two reads, not
+contigs). After that a contig linkage graph is build. In it nodes are contigs
+and edges are formed by mate-pairs. Edges are constructed by estimating the gaps
+between the contigs, assuming that those gaps lengths follow a Normal
+distribution, centered approximately at the targeted insert size. The weight of
+each edge is determined by the number of read pairs that connect the two
+contigs. Edge is not added if there are less than three mate-pairs that support
+it. 
+
+For that graph the following steps are performed: linearization, which is the
+replacement of compatible transitive lineages among a group of contigs with just
+one node for which internal gaps are carefully estimated and masking of
+nodes that can not be ordered due to conflicting suggestions by different edges.
+
+As it can be seen the approach of this system is very simple, however as it is
+uses multiple libraries, potentially with different insert sizes, it hopes that
+that vast amount of information that it will be able to process will compensate
+the lack of sophisticated use of that information. 
+
+One of the contributions of this article is that it shows that human genome
+assembly is possible even with the computers of that time, without the use of
+some complicated parallelization technique. Another one is that, at least to the
+best knowledge of the authors of the current article, it is the first system
+that tries to use information from multiple data sources in order to resolve the
+problem.
+
+An additional contribution of this article is the effort to use disregarded
+mate-pairs for filling some of the gaps that are created during the scaffolding
+process. Even though the proposed gap closing technique is very naive, it still
+improved to some extend the results obtained by the system.
+% subsubsection SOAPdenovo (end)
+
+\subsubsection{SOPRA} % (fold)
+\label{ssub:SOPRA}
+A article that really had a great influence on every following one, introducing
+a number of new ideas to the approach that human genomes are assembled, was
+\cite{SOPRA}. In this paper the SOPRA system was described, which would try, at
+least for some parts, to solve the contig orientation problem exactly. This means
+that if the contig graph has some nice properties, for some of its sub graphs
+the problem will be solved in a way that will ensure the discovery of the
+optimal solution, in the terms of the defined problem. Here are the details.
+
+First the contigs are produced using some of the already existing systems. After
+that the data is filtered. One of the filtering criteria is based on the
+coverage. The authors have decided that they do not want to allow contigs that
+are part of repeats in the scaffolding, as they would normally have mate-pairs
+that would suggest inconsistent orientation. There is a higher chance that such
+contigs are chimeric, which also suggest that they should be removed.
+
+Another criteria for mate-pair removal is the length that they suggest. The
+mean insert size can be estimated using contigs that are longer than it, where
+precise information can be obtained. Mate-pairs that have insert length that
+deviates with more than 20\% of the mean insert size, are considered incorrect
+and are thus filtered.
+
+After the data is filtered, a contig-mate-pair graph is build that uses contigs
+as nodes and mate-pairs as edges. After that, the system proceeds by orienting
+the contigs. Then, it orders them and in the end it detects and resolves
+overlapping that has been caused by the ordering. Here is how the ordering
+works: partition the graph into parts based on articulation
+vertices\footnote{Those are vertices that when removed, the graph is divided in
+two components}. As for most contigs there is a limited number of neighbours in
+the graph, this partitioning is possible, especially for less complex genomes.
+Contigs that are longer than the insert size, for example, are guaranteed to be
+articulation vertexes. We solve the problem for the two components separately as
+there are no edges between them, thus only the articulation vertex orientation
+can have impact on the ordering of the contigs. Note, however, that if the two
+components suggest different orientation of the articulation node, then one the
+orientation of every contig in one of the connected components can be inversed,
+which will lead to a correct solution.
+
+The process is continues for each of the two subgraphs until every subgraph is
+non-reducible. Then the orientation problem is solved using either a dynamic
+programming technique or Simulated Annealing method\footnote{A variant of Monte
+Carlo method}, depending on the component size. If the graph component has
+relatively small size, then the dynamic programming approach is used to solve
+its orientation exactly, minimizing the number of violated mate-pairs. If the
+component size is too large, however, the dynamic programming approach could not
+be used, and as a consequence the authors have decided to use a Simulated
+Annealing method. For more information about the those two approaches, see
+\cite{SOPRA}.
+
+The ordering of the contigs can be represented as minimizing the difference
+between the expected length of each mate-pair and its actual length in the
+ordering. For that step only mate-pairs that are consistent with the orientation
+are used, which simplifies the problem of ordering. If after solving this
+problem there are mate-pairs for which their length is significantly different
+from the expected one, the contigs that are attached to it are removed and the
+contig scaffolding is restarted on the remaining contigs. The reason why those
+contigs are removed is that there is higher change for contig misassembly for
+some of them and as the system tries to greatly improve the accuracy of the
+assembly, not so much the length of the result, it chooses the safer approach.
+
+This process is repeated until all the mate-pair lengths are close to the
+observed in the scaffolding. Then an overlapping detection step is executed. It
+tries to detect contig overlapping, based on a 'density profile', which is a
+quantity that represents how many contigs cover each region of a scaffold. Then
+contigs that cause the overlapping are removed. As it is not possible to detect
+exactly which contigs caused the problem, it their number is low, the authors
+propose all combinations to be verified and the one with the smallest number of
+deleted contigs to be chosen. If the number of contigs that could potentially
+cause the problem is too high, then random subsets of contigs are tested and a
+score is given to all of them. The score is determined by the density and the
+production of many small contigs as a result from the removal. The subset with
+the best score is chosen in the end to be removed.
+
+In the previous paragraph we mentioned that only the contigs that might cause
+the problem are checked, but we did not explained how they are detected. It is
+done using Simulated Annealing method and contig labeling. See \cite{SOPRA} for
+more details how this is done.
+
+As it was previously pointed out, this article presents a set of new ideas that
+are largely used in the articles after it. If we have to limit ourselves to
+pointing out just the major improvements, they are the division of the graph in
+partitions that are handled separately and the use of exact techniques for
+solving some parts of the scaffolding problem. It is no surprise that this
+system provided excellent quality scaffolds in terms of low error rates while in
+the same time keeping high the length of the scaffold.
+% subsubsection SOPRA (end)
+
+\subsubsection{MIR} % (fold)
+\label{ssub:MIR}
+Another system that tries to bring the idea of exact solving of even one step
+further, is MIR introduced in \cite{MIR}. The idea of this method is similar to
+some extend to the one presented in the previous section. One again we first
+filter the data and then build a graph with vertices that represent contigs,
+however in this case the edges are sets of mate-pairs that indicate the same
+orientation. Each edge has \emph{support} which is the number of mate-pairs that
+are bundled in this edge.  They also have lengths that are calculated from the
+lengths indicated by the mate-pairs. This reduction of the size of the graph, at
+least in terms of edges, is supposed to improve both the separation of the graph
+into components, which is again used, and also the runtime, as often the runtime
+depends on the number of edges in that graph.
+
+In order to exactly solve each subproblem, the authors have decided to limit the
+size of each subcomponent. This is achieved using a heuristic, which removes the
+edges with lower support, that would cause too big components. This is done by
+sorting the edges by their support and then adding each of them to the graph.
+Using the technique of \cite{westbrook-tarjan}, which enables the authors to
+keep track of the biconnected components dynamically as new edges are added to
+the graph, it is decided whether to add the edge, or not, based on the resulting
+graph structure.
+
+After that for each graph component an minimization problem is solved using
+mixed integer programming, that tries to minimize the sum of the support of the
+remove edges. See \cite{MIR} for more details on the optimization.
+
+The innovations of this article can mainly be summarized as the bundling of the
+edges together, the attempt to solve the scaffolding exactly, after some
+reduction of the constraints of the problem and the fact that it tries to both
+orient and order the contigs exactly in the scaffolding. Another noticeable
+characteristic that it has is that it is quite faster than SOPRA.
+
+The results of this technique are very good, although it does not accomplish the
+precision of SOPRA during the assembly, it still provides very close error
+rates, while providing very smaller number of scaffolds. It is not clear,
+nevertheless, whether longer scaffolds are more important than error rates and
+how to manage the two. Still, this provides biologists with a slightly different
+idea how the real genome looks like, which is expected to help them, especially
+considering the fast runtime that it has.
+
+Some of the errors that this approach has might be due to the way the edges are
+formed. Although it is good that some of the mate-pairs are bundled, it might
+lead to incorrectness, as differences in the length, that might be considered,
+have to be unified. It seems that a finer graining of the edges will still be
+useful, in order such errors to be avoided. The next approach that will be
+presented will try to resolve this issue.
+% subsubsection MIR (end)
+
+%\subsubsection{SSPACE} % (fold)
+%\label{ssub:SSPACE}
+%\textcolor{red}{FIX ME}
+
+%Another approach that again relies very much on heuristics is presented in
+%\cite{SSPACE}. The article is noticeable for a few reasons. It is one of the
+%first that propose data filtering before the start of the scaffolding.
+%Mate-pairs with size outside some predefined by the user constraints are
+%filtered, for example. 
+
+%Another reason for considering it is that it is the first one, at least to the
+%knowledge of the authors of the current article, that provided the possibility
+%for multiple input libraries to be used.
+
+%The algorithm otherwise is not very innovative. Starting with the largest
+%contig, we try to connect each contig with some of the contigs that are
+%connected to it by mate-pairs. If the connection does not violate some
+%conditions, it is used. Those conditions are not well described in the paper,
+%but it seems as a fast check for compatibility between the ordering so far and
+%that implied by the new mate-pair.
+%% subsubsection SSPACE (end)
+
+\subsubsection{Opera} % (fold)
+\label{ssub:Opera}
+As it was already pointed out, the system that is described here manages to
+improve the representation of the graph\footnote{Please note that as accuracy is
+improved, performance is lost, which makes it hard to tell if this is an
+improvement. The author of the current article, however, believe that it is an
+improvement.}. Although this system \cite{Opera} is presented approximately at
+the same time that \cite{MIR} was presented and it has some similarities, it
+also has some very important differences. 
+
+It can be inferred from the description so far that Opera uses again a graph
+representation. It again represent contigs as nodes and edges are sets of
+mate-pairs that are compatible (suggest the same orientation) and have similar
+length (this is the difference with the representation in MIR).
+
+The data is filtered using a different approach from the previous methods that
+have been described already. Instead of having a threshold for edge removal
+that is given as a parameter, the algorithm tries, using a heuristic approach,
+to find the optimal such threshold and trim the edges that have lower support.
+
+The problem definition of the system is very similar to the previous - maximize
+the number of edges, for which the contigs they connect are oriented as
+suggested by the edge. This problem definition might not be the best one, as it
+suggests that removal of edges are equivalent, which does not seem right,
+because it neglects the fact that those edges might have different support.
+
+This definition however allows the authors to propose an exact method, which
+does not use any heuristics. The observation which allows them to accomplish
+that is the fact that there is minimal contig size and a maximum mate-pair size.
+This allows them to define a property called \emph{width of the library}, which
+is the fraction of the two. It represents how many contigs can at maximum an
+edge span over. As this number is relatively small, they suggest to accept it is
+an constant. 
+
+After that a number of lemmas and theorems are proved that show that there is an
+algorithm that can find \emph{p} edges, which should be removed in order the
+resulting graph to be consistent, if this is possible, or return that it is
+impossible. The runtime of this algorithm is $O(|V|^w |E|^{p + 1})$. 
+
+The idea of this algorithm is to use a dynamic programming approach that
+exploits classes of equivalence of sub-scaffolds and tries to find an optimal
+scaffold, without verifying sub-scaffolds from the same class twice. Although
+the theoretical runtime seems high, for the practical cases that the authors
+have provided information, the runtime of the algorithm is very good. This might
+be thanks to additional optimization that the authors have suggested. It is
+again based on graph partitioning, however this time it is slightly different.
+See \cite{Opera} for details.
+
+The results from this technique for smaller organisms are very good. It
+outperforms its competitors with a significant amount, at least in some of the
+cases. Despite that, its good results might be possible only for small genomes,
+as the runtime of the algorithm will become infeasible for big genomes and the
+situation will become even worse when the more complex structures on those
+bigger genomes are also taken into account. 
+
+Having said this, however, the system presented a number of innovations that are
+useful even on their own. It also provides a very precise method for small
+genome assembly, which is also very good.
+% subsubsection Opera (end)
+
+Although the previous systems do have some nice properties, there is at least
+one thing that, despite being important, is never considered so far. This is the
+fact that contigs can be assembled with errors that might not be so easy to find
+using the filters. Those errors might be avoided in the scaffolding phase, but
+then the value of the function that is optimized is not the most precise one, as
+the removal of all the mate-pairs to an incorrect contig are much more valuable
+than removing a few mate-pairs from other contigs. This does not model the real
+world very precisely. It should be considered that contigs might be assembled
+with errors and the removal of such contigs should not imply very big punishment
+for the function that is optimized. Trying to deal with this problem is the
+system SCARPA presented in \cite{SCARPA}.
+
+\subsubsection{SCARPA} % (fold)
+\label{ssub:SCARPA}
+The SCARPA system has similar structure to the those described so far. It first
+filters the data. Then tries to orient the contigs. After that it order them and
+finally it calculates their final positions in the scaffolding. 
+
+The problem definition that is used for the orientation step not only states
+that it tries to minimize the number of mate-pairs that are removed (or are not
+satisfied), but also considers the removal of whole contigs. The approach for
+solving this problem is to first remove tries to remove any cycle that has an
+odd number of nodes in it. Then a consistent orientation can be assigned to each
+contig\footnote{It is not described why this is true}. A breadth-first search is
+performed on the graph to propagate orientation of nodes in the following
+manner. First we determine the orientation of some fixed node. Then for every
+edge that goes from its end, it should lead to a start of contig and vise versa.
+
+The removal of odd cycles is NP-hard in general, but there are efficient
+algorithms that can solve it for a small number of removed nodes. For this case
+its runtime is $O(3^k k n m )$, where \emph{k} is the number of nodes to be
+removed. The approach of the authors is to try for different values of k,
+starting from 0 and incrementing with 1 each time the algorithm fails to find a
+solution.
+
+The graph for which this odd cycle removal problem is solved is constructed as
+to each contig, two nodes are created, representing its start and end in some
+direction. The two are connected with an edge. Edges are also added for a set of
+mate-pairs that link some two contigs and that impose the same orientation. The
+appropriate nodes in the graph are connected with the edges that represent
+mate-pairs. 
+
+The ordering step of the algorithm should put the contigs in linear order, which
+can be achieved by removing any cycles left in the graph. An additional
+requirement is that the smallest number of edges have to be removed so that this
+goal is accomplished. Although this problem is also NP-hard on the general,
+there is a heuristic algorithm that solves it for sparse graphs, which
+guarantees an asymptotically optimal solution. 
+
+The actual positioning is solved as optimization on topological ordering,
+minimizing the difference between the expected distances between contigs and the
+actual ones, using linear programming technique, followed by a procedure which
+detects overlapping between the assigned positions of the contigs and tries to
+resolve it.
+
+In order to optimize the performance, the authors have decided to split the
+graph in parts that can be separately solved and then combined. To assure that
+the graph splitting will be possible, the most common reason for unsplittable
+graphs is removed - contigs with a very high number of mate-pairs. Those contigs
+are removed, so that the performance of the system do not suffer.
+
+To summarize, the system described in this section, despite looking very similar
+to some to some of the already presented systems, has some very big differences.
+It tries to solve the problem of too 'pricey' removal of incorrectly assembled
+contigs from the scaffold. It also provides a nice way for contig orientation,
+when there are no odd cycles. The results that it provides are also very nice,
+as, even though the accuracy of the assembly is not as high as that of some
+others, it consistently provides scaffolds with good quality and longer in size
+compared to most of its competitors.
+
+As a drawback again it can be pointed out that it is likely that for bigger data
+sets this approach will fail to provide results, as it will be possible, for
+example, to have to solve a big optimization problem, which may not feasible for
+any solver. 
+% subsubsection SCARPA (end)
+
+\subsubsection{GRASS} % (fold)
+\label{ssub:GRASS}
+The last system to be presented is described in \cite{grass} and is called
+GRASS (GeneRic ASsembly Scaffolder). As the name suggests, the idea of this
+system is to be more generic than those that have already been presented. The
+main difference is that for GRASS the problem is not as much how to use
+mate-pairs in order to solve the scaffolding problem, it is how to use a set of
+constraints optimally, so that it solves the scaffolding problem optimally. This
+means that it is designed to be able to use various data sources simultaneously.
+Whether they will be different libraries with insert sizes or some other
+information that can be represented as constraints between pairs of contigs, it
+is not that important for that system. Every data source can have different
+weight that determines represent how reliable the information from this data
+source really is.
+
+The graph on which the system operates is composed of nodes that represent
+contigs and edges that are sets of constraints, that suggest similar
+restrictions for the placements of the contigs that they connect. 
+
+The optimization criteria is a single quadratic object, which is somewhat
+different from what we have seen so far. There are different coefficients that
+represent to what extend some constraints are violated. Appropriate penalties
+are calculated for such cases.
+
+The optimization is implemented with the use of expectation-maximization (EM)
+technique, which iteratively tries to improve the optimized function. The
+maximization step supposes that the orientation is known and wants to decide
+which links to use. The expectation step tries to find the contig orientation
+that maximizes the objective function.
+
+The authors of \cite{grass} show some very interesting results for their system.
+Although the results seem impressive, it is peculiar that there is no clear
+information about the results of SOPRA. As this system is the most precise one
+that is currently available, it would be interesting to see how it will behave
+compared to GRASS.
+
+Apart from that little unclear explanation as of why there are no test result
+for SOPRA, \cite{grass} seems a nice article.
+% subsubsection GRASS (end)
+
+% subsection Scaffolders that use scaffolding constraints graphs (end)
+
+% section Related word (end)
+
+%*****************************************************************%
+\section{Additional steps} % (fold)
+\label{sec:Additional steps}
+Before and after the scaffolding can occur there are a number of additional
+steps that should be presented. Some of them should be clear enough by now,
+however, for some of them it might still not be absolutely clear why they are so
+important. Here we will try to give information for this.
+
+\subsection{Data filtering} % (fold)
+\label{sub:Data filtering}
+The filtering of the data before it is given to the contig assemblers is one of
+the critical steps that every good system should execute. There are a number of
+tools that can be used for the filtering purpose, including \cite{quake} and
+\cite{filtering-solid}. Those systems sometimes exploit information about the
+quality of the reads that was written along with the data. This information can
+be very useful to detect possibly incorrect reads. There are a number of
+additional steps that are taken by the data filtering system, which can improve
+significantly the quality of the data with the cost of decrease of the coverage.
+The decrease is well compensated for most cases by the ability of the contig
+assemblers to assemble correct contigs and the ability of the scaffolders to
+take correct decisions based on the correct data and the correct contigs. 
+
+As it can be seen from the system descriptions in the previous section, the
+problem is so complicated due to the large amount of errors that can be
+introduced in different phases of the genome sequencing. If it was not for those
+errors, the problem would have much nicer solutions.
+% subsection Data filtering (end)
+
+\subsection{The finishing process and gap closing} % (fold)
+\label{sub:The finishing process and gap closing}
+For a lot of time biologists have been provided with some computer model of the
+genome of some organisms and that model had to be verified and error and lacks
+of information - corrected. This process often is very slow and pricey. As a
+consequence the scientists have been wondering if it is possible somehow to
+improve the quality of the scaffolds that are produced. Such an effort is
+\cite{finIs}. It tries to use some of the information that was not used very
+much during the scaffold assembly in order to correct some of the errors that
+the scaffolder might have made and it also tries to fill any gaps that might
+exist in the scaffold. 
+
+The information that is most extensively used is the expected number of
+occurrences of a contig. A contig that is expected to have occurred multiple
+times in the genome is mapped to just one place of the genome (at least in
+general). This contig may fit well in some of the gaps between the contigs in
+the scaffold. This is the problem that FinIS tries to resolve.
+
+According to the authors, their approach can accomplish some very nice results,
+managing to close as much as 100\% of the gaps in some genomes.
+% subsection The finishing process and gap closing (end)
+
+% section Additional steps (end)
+
+%*****************************************************************%
+\section{Scaffolder performance evaluation} % (fold)
+\label{sec:Scaffolder performance evaluation}
+There are a number of criteria that are used to measure the performance of
+different scaffolders. One of the them is the size of the scaffolds that are
+produced. Naturally, the longer scaffolds, the better. Another criterion that is
+used to compare different systems is the number of scaffolds that have been
+produced. Naturally, if this number is closer to one, it is better. 
+
+Apart from those measurements about the size of the produced scaffolds, there
+are others that measure the quality. The most important ones are coverage and
+measurements for the errors - most commonly breakpoints. For those measurements
+it is essential that the scaffold is mapped to some referential genome, so that
+it can be verified that the scaffolding did not perform any error, did not swap
+the positions of two contigs, did not put quite different gap between two
+contigs than the actual one, etc. One of the most well-known systems for
+alignment of scaffolds to referential genome is described in \cite{MUMmer}. 
+% section Scaffolder performance evaluation (end)
+
+%*****************************************************************%
+\section{Conclusion} % (fold)
+\label{sec:Conclusion}
+Although all the presented approaches up until now have some very nice
+properties, they all were missing some important pieces of information that
+could improve the produced scaffolds and most of all, that could make the
+finishing step of the genome assembly easier to a great extend. It is the fact
+that there is information about the number of occurrences each contig is about
+to have in the scaffolds. As a consequence there are a number of gaps that are
+hard to fill after the scaffolding is completed. The resolution of the problem
+of the best way to use the expected contig occurrences is far from being
+trivial. This is the reason why it has so far been avoided. If you know, for
+example, that in some contig it is possible to come from a number of edges and
+it is possible to go to another number of edges, it is not clear how to make the
+problem equivalent to one of the already solved ones. Each pair of incoming and
+outgoing edge can be presented in the optimal scaffolding. Trying all of them is
+clearly not a solution.
+
+During the internship, we will try to find a model that would enable the
+integration of this information during the scaffolding. An additional
+requirement that will be imposed is that the data will not have error (at least
+not significant ones). The hope is that it will be possible, when the problem is
+solved for the error free case, to be solved for a case where a limited number
+of errors are presented, using the same model. Then it would be possible to try
+with different error counts, until one for which there is a solution is found
+(similarly to the approach in \cite{SCARPA} for odd cycle removal).
+
+Another characteristic that will be required by the system is the ability to
+show a number of optimal solutions, possibly all of them. We believe that this
+will be very useful for biologists as they will be able to verify the
+correctness of our results quite easily.
+% section Conclusion (end)
+
+%*****************************************************************%
+\begin{thebibliography}{widest entry}
+  \bibitem{pevzner-et-all-2001} Pevzner PA, Tang H, Waterman MS. 2001. An
+    Eulerian path approach to DNA fragment assembly. Proc Natl Acad Sci 98:
+    9748–9753.
+  \bibitem{grass} Gritsenko, A. A., Nijkamp, J. F., Reinders, M. J. T.,
+    and de Ridder, D. (2012). GRASS: a generic algorithm for scaffolding
+    next-generation sequencing assemblies.  Bioinformatics, 28(11), 1429–37.
+  \bibitem{pevzner} Pevzner Pevzner PA, Tang H: Fragment assembly with
+    double-barreled data. Bioinformatics 2001, 17(Suppl 1):S225-233.
+  \bibitem{velvet-scaffolding} D.R. Zerbino, G.K. McEwen, E.H. Margulies, E.
+    Birney, Pebble and rock band: heuristic resolution of repeats and
+    scaffolding in the velvet short-read de novo assembler, PLoS One 4 (2009)
+    e8407.
+  \bibitem{SOAPdenovo} R. Li, H. Zhu, J. Ruan, W. Qian, X. Fang, Z. Shi, Y. Li,
+    S. Li, G.  Shan, K. Kristiansen, H.  Yang, J. Wang, De novo assembly of
+    human genomes with massively parallel short read sequencing, Genome Res. 20
+    (2009) 265 - 272.
+  \bibitem{SOPRA} Dayarian, A., Michael, T.P. and Sengupta, A.M. (2011) SOPRA:
+    scaffolding algorithm for paired reads via statistical optimization, BMC
+    Bioinformatics, 11, doi:10.1186/1471-2105-11-345.
+  \bibitem{greedy-path-merging} Huson DH, Reinert K, Myers EW: The greedy
+    path-merging algorithm for Contig Scaffolding. Journal of the Acm 2002,
+    49(5):603-615.
+  \bibitem{SSPACE} Boetzer,M. et al. (2011) Scaffolding pre-assembled contigs
+    using SSPACE.  Bioinformatics, 27, 578–579.
+  \bibitem{MIR} Salmela, L., Mäkinen, V., Välimäki, N., Ylinen, J., Ukkonen,
+    E. (2011). Fast scaffolding with small independent mixed integer programs.
+    Bioinformatics, 27(23), 3259-3265.
+  \bibitem{SCARPA} Donmez, N., Brudno, M. (2013). SCARPA: scaffolding reads
+    with practical algorithms. Bioinformatics, 29(4), 428-434.
+  \bibitem{Opera} Gao,S. et al. (2011) Opera: reconstructing optimal genomic
+    scaffolds with high-throughput paired-end sequences. In: Bafna,V. and
+    Sahinalp,S. (eds) Research in Computational Molecular Biology. Vol. 6577 of
+    Lecture Notes in Computer Science. Springer, Berlin/Heidelberg, pp. 437–451.
+  \bibitem{westbrook-tarjan} Westbrook,J. and Tarjan,R.E. (1992) Maintaining
+    bridge-connected and biconnected components on-line. Algorithmica, 7,
+    433–464.
+  \bibitem{quake} Kelley, D. R., Schatz, M. C., Salzberg, S. L. (2010). Quake:
+    quality-aware detection and correction of sequencing errors. Genome Biol,
+    11(11), R116.
+  \bibitem{filtering-solid} Sasson, A., Michael, T. P. (2010). Filtering error
+    from SOLiD output. Bioinformatics, 26(6), 849-850.
+  \bibitem{finIs} Gao, S., Bertrand, D., Nagarajan, N. (2012). FinIS: improved
+    in silico finishing using an exact quadratic programming formulation. In
+    Algorithms in Bioinformatics (pp. 314-325). Springer Berlin Heidelberg.
+  \bibitem{MUMmer} Delcher, A.L., Phillippy, A., Carlton, J. and Salzberg, S.L.
+    (2002) Fast algorithms for large-scale genome alignment and comparison,
+    Nucleic Acids Research, 30, 2478– 2483, doi:10.1093/nar/30.11.2478
+\end{thebibliography}
+
+\end{document}
