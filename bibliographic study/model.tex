@@ -137,7 +137,7 @@ GenScale
 
 \subsection{Context}
 \label{sub:Contex}
-For a very long time some people have been fascinated with the diversity of
+Since long time some people have been fascinated with the diversity of
 living beings on the planet. They have spent their lives trying to understand
 the differences and similarities between species. They have observed various
 characteristics of each specie. With the advance of technology, more and more
@@ -149,9 +149,9 @@ depicted as a sequence of nucleotides. It turned out that this big molecule
 encodes the genetic instructions used in the development and the behavior of all
 known living organisms and many viruses. In order to better understand the
 development and behavior of every living being, scientist have to better
-understand this molecule - how to decipher it. This, however, is not an
+understand this molecule - how to decode it. This, however, is not an
 easy task. There are a number of problems that need to be solved before the
-deciphering can be performed.
+decoding can be performed.
 
 The first problem is that the structure of this molecule is specific for each
 individual. This means that it is not the same for any
@@ -163,7 +163,7 @@ blocks\footnote{Those building blocks are called nucleotides} inside the DNA
 should be found.
 
 Another problem is after the structure is obtained, how to understand what it
-actually means - how to decipher it.
+actually means - how to decode it.
 
 This is somewhat similar to a situation where a compiled version of some program
 in an unknown (lets say alien) programming language is obtained. In order to
@@ -178,15 +178,19 @@ with some of its other parts.
 
 As it was already noted, the obtaining of the structure of the DNA is not an
 easy task. The problem is that there is no known technology that can read the
-structure of the entire DNA molecule in one read. For that reason, a number of
+structure of the entire DNA molecule in one read. \emph{Read} in this context can be defined as 
+finding out what sequence of nucleotides is presented at some part of the DNA (possibly the entire). 
+Finding out that is the goal of DNA sequencing.
+
+As scientists are unable to read the structure of the entire DNA molecule at once, a number of
 technologies that provide shorter reads have emerged. The difference between
 them is not only the size of the reads that they provide, but also the price for
 each DNA sequencing and the way the reading positions are chosen. For newer technologies
-the reading positions are chosen at random, which leads to a need of high coverate\footnote{
+the reading positions are chosen at random, which leads to a need of high coverage\footnote{
 How many times the sum of the lengths of the reads is greater than the size of the 
 genome itself} in order all the parts of the genome to have good chances of being represented.
-As for the difference in the read sizes, Sanger sequencing reads are of sizes between
-500 and 1000 bases, which is quite smaller than the size of the human genome which
+As for the difference in the read sizes, Sanger sequencing reads have sizes ranging from
+500 to 1000 bases, which is quite smaller than the size of the human genome which
 is around 3,234.83 mega bases, but it is still much bigger then that of the
 newer technologies that provide reads with sizes from 20 to 100 bases. The
 difference in the price and the throughput, however, makes the newer technologies
@@ -244,8 +248,8 @@ example.
 \label{sub:Scaffolding}
 As the scaffolding is the last step in the genome assembly process, it is one of
 the most important ones. The problem, however, is very complicated and it is proven 
-to be NP-hard both when only the contig orientation is taken into account and  
-when the orientation is known and the ordering is to be determined. 
+to be NP-hard both when only the contig orientation is taken into account by Kececioglu and Myers (1995) \cite{NP-hard}
+and when the orientation is known and the ordering is to be determined. 
 % subsection Scaffolding (end)
 
 The focus article will be on the scaffolding problem, however some details about
@@ -275,19 +279,19 @@ algorithms in the size of the graph that they analyzed. The speed, however, was
 at the expense of accuracy.
 
 Having said all that, the algorithms can be divided in two main groups: those
-that use some form of \emph{de Bruijn graph} (\cite{pevzner} and
-\cite{velvet-scaffolding}) and those that use some graph G(V, E), for which the
+that use some form of \emph{de Bruijn graph} (\cite{pevzner, velvet-scaffolding})
+and those that use some graph G(V, E), for which the
 nodes V are the contigs and the edges are some scaffolding constraints (there
 are different names for those graphs, including \emph{contig graph},
 \emph{scaffolding graph}, etc).
 
 Another classification can be by the approach they have to the use of
-heuristics. Some systems directly use heuristics (\cite{greedy-path-merging},
-\cite{SOAPdenovo}, \cite{SSPACE}), using the graph structure very superficially,
+heuristics. Some systems directly use heuristics (\cite{greedy-path-merging, SOAPdenovo, SSPACE}),
+using the graph structure very superficially,
 while others try to find some patterns or properties in the graph that will
 allow them to solve the problem exactly for some parts of the graph, while using
-heuristics to solve only the remaining, more complex parts (\cite{SOPRA},
-\cite{MIR}, \cite{Opera}, \cite{SCARPA} and \cite{grass}).
+heuristics to solve only the remaining, more complex parts (\cite{SOPRA, MIR, Opera,
+SCARPA, grass}).
 
 Although there is no strict classification of the different systems, there are
 clear similarities between some of them, which will facilitate their
@@ -296,6 +300,22 @@ understanding and for that reason will be used in the rest of the section.
 
 \subsection{Scaffolders that use de Bruijn graph} % (fold)
 \label{sub:Scaffolders that use de Bruijn graph}
+
+\subsubsection{Definition of de Bruijn graph}
+\label{sub:Definition of de Bruijn graph}
+Before we can talk of the methods that use de Bruijn graph as an integral part of 
+their algorithms, it is necessary to provide a definition of what a de Bruijn graph
+is. In the general graph theory it is the following: let $S = \{s_1, s_2, \dots, s_m\}$ be
+an alphabet. A n-dimensional de Bruijn graph has vertexes $V = S^n = \{(s_1, \dots, s_1, s_1), 
+(s_1, \dots, s_1, s_2), \dots, (s_m, \dots, s_m, s_m)\}$ and edges that consists of
+edges $E = \{((v_1, v_2, \dots, v_n), (v_2, \dots, v_n, s_i)) : i = 1, \dots, m\}$ - 
+all words for which the n-1 suffix of the one is prefix of the other.
+
+For our purposes, it will not be necessary that all the words are present.
+
+\includegraphics[width=0.8\textwidth]{./de-Bruijn-graph1.png}
+%end subsubsection Definition of de Bruijn graph
+
 Those methods were created as an extension of the use of de Bruijn graphs for
 the contig assembly. Before \cite{pevzner} all the approaches for contig
 assembly used different heuristics that would lead to as much as 19\%
@@ -357,7 +377,7 @@ Using the paths between the unique nodes, the scaffolds are formed.
 
 \subsection{Scaffolders that use scaffolding constraints graphs} % (fold)
 \label{sub:Scaffolders that use scaffolding constraints graphs}
-As it was previously noted, the typical characteristics of all the following
+As it was previously noted, the typical features of all the following
 systems for contig scaffolding is the fact that they use a graph where the nodes
 of the graphs are the contigs and the edges of the graph are constraints for the
 scaffolding. All of them try to resolve a similar problem, although for some of
@@ -412,7 +432,7 @@ fill any gaps in the scaffold using some of the unused contigs and mate-pairs.
 
 Although the presented algorithm uses some heuristics that can potentially lead
 to a solution that is not very similar to the optimal, one of its best
-characteristics is its complexity, which is $O(m n + m ^ 2)$, where \emph{n} is
+features is its complexity, which is $O(m n + m ^ 2)$, where \emph{n} is
 the number of contigs and \emph{m} is the number of mate-pairs. As this
 algorithm was proposed in 2002 and the computational power of the available
 computers was quite less than that of the computers today, it was essential to
@@ -581,7 +601,7 @@ The innovations of this article can mainly be summarized as the bundling of the
 edges together, the attempt to solve the scaffolding exactly, after some
 reduction of the constraints of the problem and the fact that it tries to both
 orient and order the contigs exactly in the scaffolding. Another noticeable
-characteristic that it has is that it is quite faster than SOPRA.
+feature that it has is that it is quite faster than SOPRA.
 
 The results of this technique are very good, although it does not accomplish the
 precision of SOPRA during the assembly, it still provides very close error
@@ -903,7 +923,7 @@ of errors are presented, using the same model. Then it would be possible to try
 with different error counts, until one for which there is a solution is found
 (similarly to the approach in \cite{SCARPA} for odd cycle removal).
 
-Another characteristic that will be required by the system is the ability to
+Another feature that will be required by the system is the ability to
 show a number of optimal solutions, possibly all of them. We believe that this
 will be very useful for biologists as they will be able to verify the
 correctness of our results quite easily.
@@ -958,6 +978,8 @@ correctness of our results quite easily.
   \bibitem{MUMmer} Delcher, A.L., Phillippy, A., Carlton, J. and Salzberg, S.L.
     (2002) Fast algorithms for large-scale genome alignment and comparison,
     Nucleic Acids Research, 30, 2478– 2483, doi:10.1093/nar/30.11.2478
+  \bibitem{NP-hard} Kececioglu, J. D. and Myers, E. W. (1995). Combinatorial algorithms
+    for DNA sequence assembly. Algorithmica, 13, 7-51
 \end{thebibliography}
 
 \end{document}
