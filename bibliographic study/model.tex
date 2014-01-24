@@ -4,6 +4,7 @@
 \usepackage{subfigure}
 \usepackage{color}
 \usepackage{hyperref}
+\usepackage{amssymb}
 
 \definecolor{dark-gray}{gray}{0.20}
 
@@ -156,8 +157,9 @@ decoding can be performed.
 The first problem is that the structure of this molecule is specific for each
 individual. This means that it is not the same for any
 two persons, for example, except if they are identical twins. This makes the
-process of determining the structure of this molecule very hard. Scientists want
-to study it, nevertheless, and for that reason the DNA of some individuals
+process of determining the structure of this molecule very hard as it is not
+possible to use a template structure that is observed in all species. Scientists want
+to study the DNA, nevertheless, and for that reason the DNA of some individuals
 should be sequenced, meaning that the sequence of more basic building
 blocks\footnote{Those building blocks are called nucleotides} inside the DNA
 should be found.
@@ -224,10 +226,12 @@ about this approach will be provided below.
 As the short reads were not sufficient to represent more complex parts of the
 genome, including some partial repetitions, i.e. long enough parts that occure at
 multiple positions in the genome and that are longer than the read size, some additional information was
-added to the output of the sequencing of the new technologies - pair reads. This
-is information about relative orientation and distance between two reads. With
-this new information the DNA structure can be represented more correctly,
-allowing the creation of better tools to assemble genomes.
+added to the output of the sequencing of the new technologies -
+\textbf{mate-pairs}\footnote{Also called read pairs in some papers. They are two
+reads, for which, apart from the content of the reads, we have additioanl
+information about relative orientation and distance between them.}. With this
+new information the DNA structure can be represented more correctly, allowing
+the creation of better tools to assemble genomes.
 
 % subsection Context (end)
 
@@ -237,7 +241,9 @@ The process of assembling the small reads of DNA into bigger parts can be
 divided into at least two phases. The firs one creates contigs from the read,
 most commonly using some overlapping criteria. \textbf{Contigs} are gapless
 sequences of nucleotides. The second phase is the \textbf{scaffolding} or the
-phase where contigs are oriented and ordered linearly in such a way that
+process of producing the best possible scaffolds (according to some criteria and
+some information that is presented). \textbf{Scaffolds} are generally sequences of contigs and gaps,
+the sizes of the gaps are known. Often contigs are oriented into scaffolds and ordered linearly in such a way that
 minimizes the number of unsatisfied scaffolding constraints (as defined in
 \cite{grass}). Scaffolding constraints can be relative position and relative
 orientation of pairs of contigs that can be inferred from the mate-pairs, for
@@ -245,12 +251,45 @@ example.
 % subsection Assembling strategies (end)
 
 \subsection{Scaffolding}
-\label{sub:Scaffolding}
-As the scaffolding is the last step in the genome assembly process, it is one of
-the most important ones. The problem, however, is very complicated and it is proven 
-to be NP-hard both when only the contig orientation is taken into account by Kececioglu and Myers (1995) \cite{NP-hard}
-and when the orientation is known and the ordering is to be determined. 
+\label{sub:Scaffolding} A more formal definition of the problem would be: for
+contigs $C = \{c_1, c_2, \dots, c_n \}$ and read pairs, represented as pairs $R
+= \{(r_{i0}, r_{i1}) | i = 1..n\}$, orientations $\bar{o}: R \rightarrow \{+,
+-\}$ that for each pair gives $+$ if the orientations of the contigs according
+to that mate-pair is the same and $-$ otherwise and distances $\bar{d}: R
+\rightarrow \mathbb{N}$:
+
+The problem is to created an ordering $c_{i_1}, c_{i_2}, \dots, c_{i_n}$, such
+that $i_1, i_2, \dots, i_n$ is a permutation of the number from 1 to n, a
+function $d: C \times C \rightarrow \mathbb{N}$ that for each $c_{i_j}, c_{i_{j
++ 1}}$ gives the length of the gap between them in the scaffold and function
+$o:C \rightarrow \{+, -\}$ indicating how the contig is oriented. The triple of
+permutation $i_1, i_2, \dots, i_n$, function $d$ and function $o$ is said to be
+optimal if the count of violated conditions from the following is minimal:
+$o(c_{i_j}) * o(c_{i_{j + 1}}) = \bar{o}(c_{i_j}, c_{i_{j + 1}})$ for each $j =
+1,\dots, n - 1$; $\left| d(c_{i_j}, c_{i_{j + 1}}) - \bar{d}(c_{i_j}, c_{i_{j +
+1}})\right| < \delta$, where $\delta$ is some constant.
+
+The defined in that way scaffolding problem is the last step in the genome
+assembly process, it is therefore one of the most important ones. The problem,
+however, is very complicated and it is proofed to be NP-hard both when only the
+contig orientation is taken into account and when the orientation is known and
+the ordering is to be determined.  The proof of the first is done in Kececioglu
+and Myers (1995) \cite{NP-hard}.
+
+Some of the difficulty of the problem comes from the fact that the data that is
+obtained from the different sequencing machines and after that from the contig
+assembly systems, is inherently noisy. Because of that the scaffolding
+algorithms should have strategies for deciding what is a mistake and what is
+correct data.
+
 % subsection Scaffolding (end)
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.3\textwidth]{./assembly.jpg}
+  \caption{De novo genome assembly}
+  \label{fig:assembly_process}
+\end{figure}
 
 The focus article will be on the scaffolding problem, however some details about
 process that are necessary for a successful scaffolder to operate will also be
@@ -313,7 +352,12 @@ all words for which the n-1 suffix of the one is prefix of the other.
 
 For our purposes, it will not be necessary that all the words are present.
 
-\includegraphics[width=0.8\textwidth]{./de-Bruijn-graph1.png}
+\begin{figure}
+  \centering
+  \includegraphics[width=0.6\textwidth]{./de-Bruijn-graph1.png}
+  \caption{De Bruijn graph}
+  \label{fig:de-bruijn-graph}
+\end{figure}
 %end subsubsection Definition of de Bruijn graph
 
 Those methods were created as an extension of the use of de Bruijn graphs for
@@ -327,15 +371,20 @@ considered as a scaffolder. In \cite{SOPRA} however, the authors point it as a
 scaffolder that uses pair read information to improve the walk in the de Bruijn
 graph. For that reason a short description of the algorithm will be provided.
 
-\subsubsection{EULER-DB} % (fold)
-\label{ssub:EULER-DB}
+\subsubsection{EULER-SR} % (fold)
+\label{ssub:EULER-SR}
 This approach as described by \cite{pevzner} focus on creating scaffolds from
 long and reliable contigs, rather than from all the contigs. This greatly
 reduces the difficulty of the problem. The basic idea of the algorithm is to try
 to "explain" as many pair-reads as possible by adding them between a source node
 and a sink node in the de Bruijn graph. There are some techniques that are used
 in order to lower the impact of chimeric contigs or errors in the mate-pairs.
-For more details see \cite{pevzner}.
+
+Among the advantages of this approach is its simplicity and its improvement over
+the use of just contigs in the process of genome de novo assembling.
+Disadvantages are that it uses some very small portion of the information that
+it is provided with and the fact that errors in the input can greatly reduce the
+applicability of this method. For more details see \cite{pevzner}.
 
 % TODO: Try to explain a little bit better and in more details.
 % subsubsection EULER-DB (end)
@@ -367,6 +416,12 @@ It is important to note that on the general the heuristic depth-first search can
 go in an infinite loop. Velvet takes care so that this does not happen.
 
 Using the paths between the unique nodes, the scaffolds are formed.
+
+Among the advantages of this method is its good runtime and tests results that
+are very impressing for the time that the paper is presented. Some of the
+disadvantages are the facts that contigs can be used only ones no matter how many
+times they are supposed to be presented in the final result and that in the end
+the result might be significantly different from the optimal.
 
 % TODO: Try to find a better description of the graph and present it.
 %\textcolor{red}{The graph is not well defined I think - it should be de Brujin
