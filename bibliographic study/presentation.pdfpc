@@ -1,0 +1,64 @@
+[file]
+presentation.pdf
+[duration]
+15
+[end_user_slide]
+19
+[notes]
+### 1
+Hello everyone,
+My name is Ivaylo Petrov and today I will be talking about scaffolding.
+### 2
+The structure of this presesntation as well as the my progress through it can be monitored on the top of the slides.
+### 3
+So, let us begin... In this part of the presentattion I am going to talk about DNA, how to study it, and of course why is it important.
+### 4
+I think that eveybody knows what is the DNA molecule - it is a part of our cells that in a way controls the behaviour and the development of the cells.
+How can we study it? We need to first know the structure of the DNA for some individuals or group of organisms. By structure we refer to the sequence of nucleotides that are building the DNA. There are four types of nucleotides that build the DNA - adenine, cytosine, guanine and thymine.  
+Unfortunetly it is impossible to obtain the structure of the entire DNA molecule at once, this enforces the scientists to obtain the sequence of nucleotides with fixed length at some random positions.  And after that try to put them together.
+### 5
+This is how the final result will look, but much, much longer.
+### 6
+So here is how it all works... First we have a number of samples of the same DNA that are randomly cut into small pieces, some of which are then read, meaning that the sequence of nucleotides for those pieces is determined by the system. After that based on some partial matches those reads are combined into contigs, which are gapless sequences of nucleotides. 
+### 7
+*It seems, however, that this problem is not trivial. We need, as a consequence, to know why is it so important to obtain the structure of the DNA.
+-The knowledge of the DNA can give information about genetic deceases and ways to overcome them. The first child whose live was saved by genome sequencing is Nicholas Volker.
+-The study of the DNA can also help us in understanding the biological diversity and evolution.
+-Another application can be the altering or creation of new living organisms that are usefull for us.
+*Now that we know how useful it might be to know the structure of the DNA molecule, let us focus on how exactly we can obtain it in more details.
+### 8
+There are two main approaches for studying the DNA. The first one is using a reference genome to align the reads to it, allowing small mismatches. This is not a very good approach as we need to obtain the reference somehow first. Another even greater disadvantage of this approach is that the choice of reference genome might influences the final result.
+### 9
+The other possible approach is de novo genome assembly, which will be described in more details in this presentation.
+* The process can be divided in the following parts:
+- obtaining the reads
+- put the reads together into contigs (that are gapless sequences of nucleotides)
+- Use pair reads and possibly some other available information to put the contigs in some order and orientation that represents the most likely way they are found in the original genome.
+* Here we used the term pair read, but what does it mean?
+### 10
+Mate-pairs are also called pair reads. They gives information about two reads, namely their relative orientation, meaning that if the orientation of the one is known, the oreintation of the other is also known.  And infromation about the distance between the reads in the genome. Using this information the distance between the contigs that those reads are part of can be calculated.
+This information is obtained during the genome reading.
+### 11
+As there might be errors during each phase: the obtaining of the reads, their assembly in contigs, the information provided by the mate-pairs, the problem is even harder to solve. It has been proven to be NP-hard. It was even shown that if only the orientation of the contigs is to be determined, the problem is still NP-hard. This is of course on the general. In practice, some assumptions that are true in a large number of cases can make the problem trackable without the use of heuristics. Those assumptions, however, are often not true for more complex genomes with a large number of repetiting regions.
+### 12
+Some of the first methods that were presented used de Bruijn graphs. More informatio about them can be found in the paper and in its references.
+In newer methods, the graphs that are used have nodes that are either a entire contig or a contig end, meaning that each contig has a begining and end and there is a node for each of them. If there are two nodes for a contig, they are always connected. This can be seen in the figure. The edges can correspond to one of the following:
+- single mate-pair - leads to big graphs
+- a set of mate-pairs that suggests the same orientation and similar distance. A nice compromise between smaller graphs and good accuracy.
+- all the mate-pairs between two contigs that suggest the same orientation. The distance is statistically computed based on the distances that each mate-pair suggests. This can lead to poor accuracy.
+### 13
+### 14
+*Knowing that the problem is NP-hard, first heuristic appraoches were proposed for solving it. Their main idea is as follows: Start with an empty set of edges to be used. Determine the importance of each edge of the graph, sort them by their importance and start to add edges that are not contradictory with the configuration so far, starting from the most important ones and going to the least important ones.
+*Examples for methods that use only heuristics are SOAPdenovo and Greedy Path-merging.
+*The disadvantage of this method is that the solution that is found can be very different from the optimal one, especially for more complex genomes. The benefit of those algorithms is that they are very fast.
+### 15
+*Other methods try to use some of the properties of the graph, for example the fact that it is very sparce, which makes possible the creation of exact solution at least for some parts of the graph. One of the most exploited porperties of the graph is the possibility to partition it and solve the problem for each on the subgraphs.  After that the solutions for each of the parts can be combined in polynomial time to obtain the final solution. Although the partitioning is not always possible, if there is a sufficient number of big contigs, it is.
+*Methods that exploit that idea are SOPRA, MIR, Opera and GRASS. All of them however make some additional assumptions that might or might not be true. They also do not use the expected number of times a contig is supposed to be presented in the genome, which leads to the presence of a number of gaps in the scaffolds that are produced by those methods.
+### 16
+Here is how the graph partitioning can be done. Each contig that is articulation point is a point where the graph can be partitioned, as the ordering and orientation of the parts are independent. If the structure of the genome is complex there might be too few such points, but if there is a sufficient number of big enough contigs, the partitioning will be possible. The parititioning idea was liked so much that there is an entire method that focus only on the possibility to alter the graph so that the partitioning is possible and solve exactly the remaining parts. The name of the method is MIR. There have been other ideas for improving the extend to which the graph can be partitioned. The partitioning idea is used by all new methods, including SOPRA, MIR, Opera and GRASS.
+### 17
+As it can be seen from this figure, data filtering can greatly improve the work of contig assemblers and scaffolders. 
+### 18
+The improvement that we want to make is to incorporate information about the number of times a contig is encountered in the genome. This information is provided by the contig assemblers and is not necessarily accurate as it might depend on the random factors during the genome reads and the occurances of repeats. We also plan to provide a number of optimal solutions, if there is more than one, as we believe that this will be very useful for biologists who will after that try to determine if the model we have created is correct. The introduction of this improvements is supposed to remove the need of gap filling, as it will exploit the information that gap filllers use, but in a more efficient way.
+### 19
+Thank you very much for your attention. If you have any questions, I would like to answer you.
